@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
+import { useLocation } from "react-router-dom";
 import {
   Card,
   Table,
@@ -22,7 +23,6 @@ import {
   Badge,
 } from "antd";
 import {
-  
   CheckCircleOutlined,
   CloseCircleOutlined,
   ExclamationCircleOutlined,
@@ -71,8 +71,17 @@ interface ClassSession {
 }
 
 const TeacherAttendance: React.FC = () => {
-  const [selectedClass, setSelectedClass] = useState<string>("1");
-  const [selectedDate, setSelectedDate] = useState(dayjs());
+  const location = useLocation();
+  const query = useMemo(
+    () => new URLSearchParams(location.search),
+    [location.search]
+  );
+  const [selectedClass, setSelectedClass] = useState<string>(
+    query.get("classId") || "1"
+  );
+  const [selectedDate, setSelectedDate] = useState(
+    dayjs(query.get("date") || undefined)
+  );
   const [attendanceRecords, setAttendanceRecords] = useState<
     AttendanceRecord[]
   >([]);
@@ -206,6 +215,9 @@ const TeacherAttendance: React.FC = () => {
         return null;
     }
   };
+
+  const [reasonModalVisible, setReasonModalVisible] = useState(false);
+  const [reasonStudent, setReasonStudent] = useState<Student | null>(null);
 
   const updateAttendance = (studentId: string, status: string) => {
     setAttendanceRecords((prev) =>
@@ -356,7 +368,10 @@ const TeacherAttendance: React.FC = () => {
           <Tooltip title="Có phép">
             <Button
               icon={<ExclamationCircleOutlined />}
-              onClick={() => updateAttendance(student.id, "excused")}
+              onClick={() => {
+                setReasonStudent(student);
+                setReasonModalVisible(true);
+              }}
               size="small"
             />
           </Tooltip>
@@ -582,6 +597,45 @@ const TeacherAttendance: React.FC = () => {
               </Form.Item>
             </Form>
           </div>
+        )}
+      </Modal>
+
+      {/* Excused Reason Modal */}
+      <Modal
+        title="Lý do vắng mặt có phép"
+        open={reasonModalVisible}
+        onOk={() => {
+          form.validateFields().then((values) => {
+            setAttendanceRecords((prev) =>
+              prev.map((record) =>
+                record.studentId === reasonStudent?.id
+                  ? { ...record, status: "excused", note: values.excuseReason }
+                  : record
+              )
+            );
+            message.success("Đã lưu lý do vắng mặt có phép!");
+            setReasonModalVisible(false);
+            setReasonStudent(null);
+            form.resetFields(["excuseReason"]);
+          });
+        }}
+        onCancel={() => {
+          setReasonModalVisible(false);
+          setReasonStudent(null);
+          form.resetFields(["excuseReason"]);
+        }}
+        width={520}
+      >
+        {reasonStudent && (
+          <Form form={form} layout="vertical">
+            <Form.Item
+              name="excuseReason"
+              label={`Lý do cho ${reasonStudent.name}`}
+              rules={[{ required: true, message: "Vui lòng nhập lý do" }]}
+            >
+              <TextArea rows={4} placeholder="VD: Ốm, có giấy xác nhận, ..." />
+            </Form.Item>
+          </Form>
         )}
       </Modal>
     </div>

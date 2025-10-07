@@ -87,12 +87,7 @@ const SiderTeacher: React.FC<SiderProps> = ({ collapsed }) => {
       label: "Lớp học của tôi",
       "data-index": 2,
     },
-    {
-      key: "/teacher/attendance",
-      icon: <UserOutlined />,
-      label: "Điểm danh",
-      "data-index": 3,
-    },
+   
     {
       key: "/teacher/grading",
       icon: <EditOutlined />,

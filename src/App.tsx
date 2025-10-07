@@ -32,6 +32,7 @@ import TeacherSchedule from "./pages/teacher/schedule";
 import TeacherAttendance from "./pages/teacher/attendance";
 import TeacherGrading from "./pages/teacher/grading";
 import TeacherResults from "./pages/teacher/results";
+import TeacherClassStudentList from "./pages/teacher/classList";
 
 function App() {
   const router = createBrowserRouter([
@@ -199,6 +200,10 @@ function App() {
         {
           path: "/teacher/schedule",
           element: <TeacherSchedule />,
+        },
+        {
+          path: "/teacher/class-list/:courseCode",
+          element: <TeacherClassStudentList />,
         },
         {
           path: "/teacher/attendance",
