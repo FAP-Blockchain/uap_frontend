@@ -1,4 +1,6 @@
 import { createBrowserRouter, Outlet, RouterProvider } from "react-router-dom";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import AdminLayout from "./components/layoutAdmin";
 import TeacherLayout from "./components/layoutTeacher";
 import ManagerProduct from "./pages/admin/products";
@@ -33,20 +35,14 @@ import TeacherAttendance from "./pages/teacher/attendance";
 import TeacherGrading from "./pages/teacher/grading";
 import TeacherResults from "./pages/teacher/results";
 import TeacherClassStudentList from "./pages/teacher/classList";
+import Login from "./pages/hoang/Login";
 
 function App() {
   const router = createBrowserRouter([
-    // {
-    //   path: "/",
-    //   element: <Layout />,
-    //   children: [
-    //     {
-    //       path: "/",
-    //       element: <Home />,
-    //     },
-    //   ],
-    // },
-
+    {
+      path: "/",
+      element: <Login />,
+    },
     {
       path: "/student-portal",
       element: <StudentPortal />,
@@ -130,6 +126,10 @@ function App() {
           element: <AboutHelp />,
         },
       ],
+    },
+    {
+      path: "/login",
+      element: <Login />,
     },
     {
       path: "/admin",
@@ -220,7 +220,12 @@ function App() {
       ],
     },
   ]);
-  return <RouterProvider router={router} />;
+  return (
+    <>
+      <RouterProvider router={router} />
+      <ToastContainer position="top-right" autoClose={3000} />
+    </>
+  );
 }
 
 export default App;

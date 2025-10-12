@@ -1,9 +1,11 @@
+@use "../../../../styles/variables" as *;
+
 // Antd Dashboard Styles
 .antd-dashboard {
   // Welcome Card
   .welcome-card {
-    background: linear-gradient(135deg, #1890ff, #36cfc9);
-    color: white;
+    background: linear-gradient(135deg, #1a94fc, #0d73c9);
+    color: $white;
     border: none;
 
     .ant-typography {
@@ -26,12 +28,12 @@
       &:not(.ant-btn-primary) {
         background: rgba(255, 255, 255, 0.9);
         border-color: rgba(255, 255, 255, 0.9);
-        color: #1890ff;
+        color: $primary-color;
 
         &:hover {
           background: white;
           border-color: white;
-          color: #1890ff;
+          color: $primary-color;
           transform: translateY(-2px);
         }
       }
@@ -41,9 +43,9 @@
   // Credential List Items
   .credential-list-item {
     &:hover {
-      background: #f0f5ff !important;
+      background: $primary-color-light !important;
       transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(24, 144, 255, 0.1);
+      box-shadow: 0 4px 12px rgba(244, 131, 28, 0.1);
     }
   }
 
@@ -55,7 +57,7 @@
     &:hover {
       transform: translateY(-8px) scale(1.02);
       box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
-      border-color: #1890ff;
+      border-color: $primary-color;
     }
 
     .ant-avatar {
@@ -155,13 +157,20 @@
     transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 
     &.ant-btn-primary {
-      background: linear-gradient(135deg, #1890ff, #36cfc9);
+      background: linear-gradient(135deg, #1a94fc, #0d73c9);
       border: none;
+      color: white !important;
+
+      span {
+        color: white !important;
+      }
 
       &:hover {
-        background: linear-gradient(135deg, #40a9ff, #5cdbd3);
+        background: linear-gradient(135deg, #0d73c9, #0a5ca8);
         transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(24, 144, 255, 0.4);
+        box-shadow: 0 4px 12px rgba(26, 148, 252, 0.4);
+        opacity: 0.9;
+        color: white !important;
       }
     }
 
@@ -169,6 +178,51 @@
       padding: 8px 24px;
       height: 44px;
       font-size: 15px;
+    }
+
+    // Share Button Outline Style
+    &.share-btn-outline {
+      background: #e6f7ff;
+      color: #0d73c9 !important;
+      border: 2px solid #0d73c9;
+      font-weight: 500;
+
+      span {
+        color: #0d73c9 !important;
+      }
+
+      &:hover {
+        background: white;
+        border-color: #1a94fc;
+        color: #1a94fc !important;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(26, 148, 252, 0.2);
+
+        span {
+          color: #1a94fc !important;
+        }
+      }
+    }
+
+    // Generate QR Button Gradient Style
+    &.generate-btn-gradient {
+      background: linear-gradient(135deg, #1a94fc, #0d73c9);
+      border: none;
+      color: white !important;
+
+      span {
+        color: white !important;
+      }
+
+      &:hover {
+        background: linear-gradient(135deg, #0d73c9, #0a5ca8);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(26, 148, 252, 0.4);
+
+        span {
+          color: white !important;
+        }
+      }
     }
   }
 

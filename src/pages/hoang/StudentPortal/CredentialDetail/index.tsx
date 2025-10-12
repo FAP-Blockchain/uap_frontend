@@ -310,7 +310,7 @@ const CredentialDetail: React.FC = () => {
       <Row gutter={[24, 24]}>
         {/* Main Information */}
         <Col xs={24} lg={16}>
-          <Card title="📋 Basic Information" style={{ marginBottom: 24 }}>
+          <Card title=" Basic Information" style={{ marginBottom: 24 }}>
             <Descriptions column={2} bordered>
               <Descriptions.Item label="Credential Type">
                 <Tag
@@ -367,7 +367,7 @@ const CredentialDetail: React.FC = () => {
               credentialData.achievements.length > 0 && (
                 <>
                   <Divider />
-                  <Title level={5}>🏆 Achievements & Honors</Title>
+                  <Title level={5}> Achievements & Honors</Title>
                   <Timeline
                     items={credentialData.achievements.map((achievement) => ({
                       dot: <CheckCircleOutlined style={{ color: "#52c41a" }} />,
@@ -379,7 +379,7 @@ const CredentialDetail: React.FC = () => {
           </Card>
 
           {/* Issuer Information */}
-          <Card title="🏛️ Issuer Information">
+          <Card title=" Issuer Information">
             <Descriptions column={1} bordered>
               <Descriptions.Item label="Institution">
                 {credentialData.issuer.name}
@@ -413,7 +413,7 @@ const CredentialDetail: React.FC = () => {
               <Col span={12}>
                 <Statistic
                   title="Security"
-                  value="100%"
+                  value="100"
                   prefix={<SafetyCertificateOutlined />}
                   suffix="%"
                 />
@@ -422,7 +422,7 @@ const CredentialDetail: React.FC = () => {
           </Card>
 
           {/* Blockchain Information */}
-          <Card title="🔗 Blockchain Verification" style={{ marginBottom: 24 }}>
+          <Card title="Blockchain Verification" style={{ marginBottom: 24 }}>
             <Space direction="vertical" style={{ width: "100%" }}>
               <div>
                 <Text strong>Blockchain Hash:</Text>
@@ -473,7 +473,7 @@ const CredentialDetail: React.FC = () => {
           </Card>
 
           {/* Quick Actions */}
-          <Card title="⚡ Quick Actions">
+          <Card title="Quick Actions">
             <Space direction="vertical" style={{ width: "100%" }}>
               <Button block icon={<LinkOutlined />} onClick={handleCopyLink}>
                 Copy Verification Link

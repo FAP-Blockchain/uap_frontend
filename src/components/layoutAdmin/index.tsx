@@ -46,7 +46,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({
 
   // Render the layout with a stable structure for both server and client
   return (
-    <Layout style={{ minHeight: "95vh" }}>
+    <Layout style={{ height: "100vh", overflow: "hidden" }}>
       <HeaderComponent collapsed={collapsed} setCollapsed={setCollapsed} />
 
       <Layout>

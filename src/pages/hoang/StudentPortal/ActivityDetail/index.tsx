@@ -241,7 +241,7 @@ const ActivityDetail: React.FC = () => {
 
       <Row gutter={[24, 24]}>
         {/* Main Information */}
-        <Col xs={24} lg={16}>
+        <Col xs={24}>
           <Card className="main-info-card">
             <Descriptions title="Class Information" column={2} bordered>
               <Descriptions.Item label="Date" span={2}>
@@ -253,18 +253,16 @@ const ActivityDetail: React.FC = () => {
                 </Space>
               </Descriptions.Item>
 
-              <Descriptions.Item label="Slot">
+              <Descriptions.Item label="Slot" span={2}>
                 <Space>
                   <ClockCircleOutlined />
-                  <Text>{activityData.slot}</Text>
+                  <Text>
+                    {activityData.slot} ({activityData.slotTime})
+                  </Text>
                 </Space>
               </Descriptions.Item>
 
-              <Descriptions.Item label="Time">
-                <Text strong>{activityData.slotTime}</Text>
-              </Descriptions.Item>
-
-              <Descriptions.Item label="Student Group">
+              <Descriptions.Item label="Student Group" span={2}>
                 <Button
                   type="link"
                   style={{ padding: 0, color: "#1890ff" }}
@@ -274,29 +272,15 @@ const ActivityDetail: React.FC = () => {
                 </Button>
               </Descriptions.Item>
 
-              <Descriptions.Item label="Instructor">
-                <Space>
-                  <Button
-                    type="link"
-                    style={{ padding: 0, color: "#1890ff" }}
-                    onClick={handleInstructorClick}
-                  >
-                    {activityData.instructor.code} -{" "}
-                    {activityData.instructor.name}
-                  </Button>
-                  <Button
-                    size="small"
-                    style={{
-                      background: "#ffa940",
-                      color: "white",
-                      border: "none",
-                      borderRadius: "4px",
-                    }}
-                    onClick={handleMeetURL}
-                  >
-                    MeetURL
-                  </Button>
-                </Space>
+              <Descriptions.Item label="Instructor" span={2}>
+                <Button
+                  type="link"
+                  style={{ padding: 0, color: "#1890ff" }}
+                  onClick={handleInstructorClick}
+                >
+                  {activityData.instructor.code} -{" "}
+                  {activityData.instructor.name}
+                </Button>
               </Descriptions.Item>
 
               <Descriptions.Item label="Course" span={2}>
@@ -308,121 +292,21 @@ const ActivityDetail: React.FC = () => {
                 </Space>
               </Descriptions.Item>
 
-              <Descriptions.Item label="Course Session Number">
+              <Descriptions.Item label="Course Session Number" span={2}>
                 <Tag color="blue">{activityData.sessionNumber}</Tag>
               </Descriptions.Item>
 
-              <Descriptions.Item label="Course Session Type">
-                <Tag color="green">{activityData.sessionType}</Tag>
-              </Descriptions.Item>
-
-              <Descriptions.Item label="Course Session Description" span={2}>
-                <Text italic>{activityData.sessionDescription}</Text>
-              </Descriptions.Item>
-
-              <Descriptions.Item label="Campus/Programme">
-                <Space direction="vertical" size="small">
-                  <Text>{activityData.campus}</Text>
-                  <Text type="secondary">{activityData.programme}</Text>
-                </Space>
-              </Descriptions.Item>
-
-              <Descriptions.Item label="Location">
-                <Space>
-                  <EnvironmentOutlined />
-                  <Text>
-                    {activityData.room} - {activityData.building} Building
-                  </Text>
-                </Space>
-              </Descriptions.Item>
-
-              <Descriptions.Item label="Attendance">
+              <Descriptions.Item label="Attendance" span={2}>
                 {getAttendanceTag(activityData.attendance)}
               </Descriptions.Item>
 
-              <Descriptions.Item label="Record Time">
+              <Descriptions.Item label="Record Time" span={2}>
                 <Text>
                   {dayjs(activityData.recordTime).format("DD/MM/YYYY HH:mm:ss")}
                 </Text>
               </Descriptions.Item>
             </Descriptions>
           </Card>
-        </Col>
-
-        {/* Sidebar */}
-        <Col xs={24} lg={8}>
-          <Space direction="vertical" style={{ width: "100%" }} size="large">
-            {/* Quick Actions */}
-            <Card title="⚡ Quick Actions" className="sidebar-card">
-              <Space direction="vertical" style={{ width: "100%" }}>
-                <Button
-                  type="primary"
-                  icon={<LinkOutlined />}
-                  block
-                  onClick={handleMeetURL}
-                >
-                  Join Online Meeting
-                </Button>
-                <Button
-                  icon={<UserOutlined />}
-                  block
-                  onClick={handleInstructorClick}
-                >
-                  View Instructor Profile
-                </Button>
-                <Button
-                  icon={<TeamOutlined />}
-                  block
-                  onClick={handleStudentGroupClick}
-                >
-                  View Student List
-                </Button>
-                <Button
-                  icon={<BookOutlined />}
-                  block
-                  onClick={() => navigate("/student-portal/attendance-report")}
-                >
-                  View Attendance Report
-                </Button>
-                <Button
-                  icon={<BarChartOutlined />}
-                  block
-                  onClick={() => navigate("/student-portal/grade-report")}
-                >
-                  View Grade Report
-                </Button>
-              </Space>
-            </Card>
-
-            {/* Course Summary */}
-            <Card title="📚 Course Summary" className="sidebar-card">
-              <Space direction="vertical" style={{ width: "100%" }}>
-                <div className="summary-item">
-                  <Text strong>Course:</Text>
-                  <br />
-                  <Text>{activityData.course.code}</Text>
-                </div>
-                <Divider style={{ margin: "12px 0" }} />
-                <div className="summary-item">
-                  <Text strong>Session:</Text>
-                  <br />
-                  <Text>{activityData.sessionNumber} / 15</Text>
-                </div>
-                <Divider style={{ margin: "12px 0" }} />
-                <div className="summary-item">
-                  <Text strong>Type:</Text>
-                  <br />
-                  <Text>{activityData.sessionType}</Text>
-                </div>
-                <Divider style={{ margin: "12px 0" }} />
-                <div className="summary-item">
-                  <Text strong>Group:</Text>
-                  <br />
-                  <Text>{activityData.studentGroup}</Text>
-                </div>
-              </Space>
-            </Card>
-          </Space>
         </Col>
       </Row>
     </div>

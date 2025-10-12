@@ -1,10 +1,12 @@
+@use "../../../../styles/variables" as *;
+
 // Class Student List Styles
 .class-student-list {
   .list-header {
     margin-bottom: 24px;
 
     .ant-typography-title-2 {
-      color: #1890ff;
+      color: $primary-color;
     }
   }
 
@@ -28,11 +30,11 @@
   .student-list-table {
     .ant-table {
       .ant-table-thead > tr > th {
-        background: linear-gradient(135deg, #667eea, #764ba2);
+        background: linear-gradient(135deg, #1a94fc, #0d73c9);
         color: white;
         font-weight: 600;
         text-align: center;
-        border-bottom: 2px solid #5a6fd8;
+        border-bottom: 2px solid #0d73c9;
 
         &:first-child {
           border-radius: 8px 0 0 0;
@@ -63,15 +65,15 @@
         }
 
         td {
-          border-top: 2px solid #1890ff;
-          border-bottom: 2px solid #1890ff;
+          border-top: 2px solid $primary-color;
+          border-bottom: 2px solid $primary-color;
 
           &:first-child {
-            border-left: 2px solid #1890ff;
+            border-left: 2px solid $primary-color;
           }
 
           &:last-child {
-            border-right: 2px solid #1890ff;
+            border-right: 2px solid $primary-color;
           }
         }
       }
@@ -124,18 +126,18 @@
 
       &:focus,
       &:hover {
-        border-color: #1890ff;
+        border-color: $primary-color;
       }
     }
 
     .ant-input-search-button {
       border-radius: 0 8px 8px 0;
-      background: #1890ff;
-      border-color: #1890ff;
+      background: $primary-color;
+      border-color: $primary-color;
 
       &:hover {
-        background: #40a9ff;
-        border-color: #40a9ff;
+        background: $primary-color-hover;
+        border-color: $primary-color-hover;
       }
     }
   }
@@ -157,11 +159,11 @@
     font-weight: 500;
 
     &.ant-btn-primary {
-      background: linear-gradient(135deg, #1890ff, #36cfc9);
+      background: linear-gradient(135deg, $primary-color, #36cfc9);
       border: none;
 
       &:hover {
-        background: linear-gradient(135deg, #40a9ff, #5cdbd3);
+        background: linear-gradient(135deg, $primary-color-hover, #5cdbd3);
         transform: translateY(-1px);
       }
     }
@@ -179,15 +181,15 @@
   // Pagination
   .ant-pagination {
     .ant-pagination-item-active {
-      background: #1890ff;
-      border-color: #1890ff;
+      background: $primary-color;
+      border-color: $primary-color;
     }
 
     .ant-pagination-item:hover {
-      border-color: #1890ff;
+      border-color: $primary-color;
 
       a {
-        color: #1890ff;
+        color: $primary-color;
       }
     }
 
@@ -197,13 +199,13 @@
     .ant-pagination-jump-next
       .ant-pagination-item-container
       .ant-pagination-item-link-icon {
-      color: #1890ff;
+      color: $primary-color;
     }
 
     .ant-pagination-prev:hover .ant-pagination-item-link,
     .ant-pagination-next:hover .ant-pagination-item-link {
-      border-color: #1890ff;
-      color: #1890ff;
+      border-color: $primary-color;
+      color: $primary-color;
     }
   }
 

@@ -192,7 +192,7 @@ const Dashboard: React.FC = () => {
         <Row align="middle" justify="space-between">
           <Col>
             <Title level={2} style={{ margin: 0, color: "#1890ff" }}>
-              Welcome back! 👋
+              Welcome back!
             </Title>
             <Text type="secondary" style={{ fontSize: 16 }}>
               Here's what's happening with your credentials today.
@@ -201,17 +201,19 @@ const Dashboard: React.FC = () => {
           <Col>
             <Space>
               <Button
-                type="primary"
                 size="large"
                 icon={<ShareAltOutlined />}
                 onClick={() => navigate("/student-portal/share")}
+                className="share-btn-outline"
               >
                 Share Credentials
               </Button>
               <Button
+                type="primary"
                 size="large"
                 icon={<QrcodeOutlined />}
                 onClick={() => navigate("/student-portal/share")}
+                className="generate-btn-gradient"
               >
                 Generate QR
               </Button>
@@ -274,11 +276,6 @@ const Dashboard: React.FC = () => {
               title="Recent Verifications"
               value={dashboardStats.recentVerifications}
               prefix={<EyeOutlined style={{ color: "#722ed1" }} />}
-              suffix={
-                <Tooltip title="This week">
-                  <ArrowUpOutlined style={{ color: "#3f8600" }} />
-                </Tooltip>
-              }
             />
           </Card>
         </Col>

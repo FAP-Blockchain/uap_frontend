@@ -9,16 +9,11 @@ import {
   Avatar,
   Row,
   Col,
-  Divider,
 } from "antd";
 import {
   ArrowLeftOutlined,
   UserOutlined,
   MailOutlined,
-  BookOutlined,
-  TrophyOutlined,
-  PhoneOutlined,
-  EnvironmentOutlined,
 } from "@ant-design/icons";
 import "./InstructorDetail.scss";
 
@@ -136,14 +131,6 @@ const InstructorDetail: React.FC = () => {
     }
   };
 
-  const handleCourseAttendance = () => {
-    navigate("/student-portal/attendance-report");
-  };
-
-  const handleGrades = () => {
-    navigate("/student-portal/grade-report");
-  };
-
   return (
     <div className="instructor-detail">
       {/* Header */}
@@ -156,183 +143,60 @@ const InstructorDetail: React.FC = () => {
           {fromActivity ? "Back to Activity" : "Back to Timetable"}
         </Button>
 
-        <Title level={2} style={{ margin: 0, color: "#1890ff" }}>
+        <Title level={2} style={{ margin: 0, color: "#1a94fc" }}>
           User Detail
         </Title>
       </div>
 
       <Row gutter={[24, 24]}>
         {/* Main Information */}
-        <Col xs={24} lg={16}>
+        <Col xs={24}>
           <Card className="main-info-card">
-            <div className="instructor-header">
-              <Space size="large" align="start">
-                <div className="instructor-avatar">
+            <div className="instructor-profile-header">
+              <div className="profile-banner">
+                <div className="profile-content">
                   <Avatar
                     size={120}
                     icon={<UserOutlined />}
                     src={instructorData.image || undefined}
-                    style={{
-                      background: instructorData.image ? "none" : "#f0f0f0",
-                      border: "2px solid #d9d9d9",
-                    }}
+                    className="profile-avatar"
                   />
+                  <div className="profile-info">
+                    <Title level={3} className="profile-name">
+                      {instructorData.fullName}
+                    </Title>
+                    <Text className="profile-position">
+                      {instructorData.position || "Instructor"}
+                    </Text>
+                  </div>
                 </div>
-                <div className="instructor-info">
-                  <Title level={3} style={{ margin: "0 0 8px 0" }}>
-                    {instructorData.fullName}
-                  </Title>
-                  <Text
-                    type="secondary"
-                    style={{ display: "block", marginBottom: 8 }}
-                  >
-                    {instructorData.position} • {instructorData.department}
-                  </Text>
-                  <Space>
-                    <Button
-                      type="link"
-                      style={{ padding: 0, color: "#1890ff" }}
-                      onClick={handleCourseAttendance}
-                    >
-                      Course attendance
-                    </Button>
-                    <Text>|</Text>
-                    <Button
-                      type="link"
-                      style={{ padding: 0, color: "#1890ff" }}
-                      onClick={handleGrades}
-                    >
-                      Grade
-                    </Button>
-                  </Space>
-                </div>
-              </Space>
+              </div>
             </div>
 
-            <Divider />
+            <div className="instructor-details">
+              <Descriptions
+                column={1}
+                bordered
+                layout="horizontal"
+                labelStyle={{ width: "200px" }}
+              >
+                <Descriptions.Item label="Login">
+                  <Text strong>{instructorData.login}</Text>
+                </Descriptions.Item>
 
-            <Descriptions column={2} bordered>
-              <Descriptions.Item label="Login">
-                <Text strong>{instructorData.login}</Text>
-              </Descriptions.Item>
+                <Descriptions.Item label="Full Name">
+                  <Text strong>{instructorData.fullName}</Text>
+                </Descriptions.Item>
 
-              <Descriptions.Item label="Instructor Code">
-                <Text strong>{instructorData.code}</Text>
-              </Descriptions.Item>
-
-              <Descriptions.Item label="Full Name" span={2}>
-                <Text strong>{instructorData.fullName}</Text>
-              </Descriptions.Item>
-
-              <Descriptions.Item label="Email" span={2}>
-                <Space>
-                  <MailOutlined />
-                  <Text copyable>{instructorData.email}</Text>
-                </Space>
-              </Descriptions.Item>
-
-              {instructorData.phone && (
-                <Descriptions.Item label="Phone">
+                <Descriptions.Item label="Email">
                   <Space>
-                    <PhoneOutlined />
-                    <Text>{instructorData.phone}</Text>
+                    <MailOutlined style={{ color: "#1a94fc" }} />
+                    <Text copyable>{instructorData.email}</Text>
                   </Space>
                 </Descriptions.Item>
-              )}
-
-              <Descriptions.Item label="Experience">
-                <Space>
-                  <TrophyOutlined />
-                  <Text>{instructorData.experience}</Text>
-                </Space>
-              </Descriptions.Item>
-
-              <Descriptions.Item label="Department" span={2}>
-                <Space>
-                  <EnvironmentOutlined />
-                  <Text>{instructorData.department}</Text>
-                </Space>
-              </Descriptions.Item>
-
-              {instructorData.bio && (
-                <Descriptions.Item label="Biography" span={2}>
-                  <Text>{instructorData.bio}</Text>
-                </Descriptions.Item>
-              )}
-            </Descriptions>
+              </Descriptions>
+            </div>
           </Card>
-        </Col>
-
-        {/* Sidebar */}
-        <Col xs={24} lg={8}>
-          <Space direction="vertical" style={{ width: "100%" }} size="large">
-            {/* Quick Actions */}
-            <Card title="⚡ Quick Actions" className="sidebar-card">
-              <Space direction="vertical" style={{ width: "100%" }}>
-                <Button
-                  type="primary"
-                  icon={<MailOutlined />}
-                  block
-                  onClick={() => window.open(`mailto:${instructorData.email}`)}
-                >
-                  Send Email
-                </Button>
-                <Button
-                  icon={<BookOutlined />}
-                  block
-                  onClick={handleCourseAttendance}
-                >
-                  View Course Attendance
-                </Button>
-                <Button icon={<TrophyOutlined />} block onClick={handleGrades}>
-                  View Grades
-                </Button>
-              </Space>
-            </Card>
-
-            {/* Teaching Courses */}
-            {instructorData.courses && (
-              <Card title="📚 Teaching Courses" className="sidebar-card">
-                <Space direction="vertical" style={{ width: "100%" }}>
-                  {instructorData.courses.map((course, index) => (
-                    <div key={index} className="course-item">
-                      <Space>
-                        <BookOutlined style={{ color: "#1890ff" }} />
-                        <Text>{course}</Text>
-                      </Space>
-                    </div>
-                  ))}
-                </Space>
-              </Card>
-            )}
-
-            {/* Contact Information */}
-            <Card title="📞 Contact Information" className="sidebar-card">
-              <Space direction="vertical" style={{ width: "100%" }}>
-                <div className="contact-item">
-                  <Text strong>Email:</Text>
-                  <br />
-                  <Text copyable>{instructorData.email}</Text>
-                </div>
-                {instructorData.phone && (
-                  <>
-                    <Divider style={{ margin: "12px 0" }} />
-                    <div className="contact-item">
-                      <Text strong>Phone:</Text>
-                      <br />
-                      <Text>{instructorData.phone}</Text>
-                    </div>
-                  </>
-                )}
-                <Divider style={{ margin: "12px 0" }} />
-                <div className="contact-item">
-                  <Text strong>Department:</Text>
-                  <br />
-                  <Text>{instructorData.department}</Text>
-                </div>
-              </Space>
-            </Card>
-          </Space>
         </Col>
       </Row>
     </div>

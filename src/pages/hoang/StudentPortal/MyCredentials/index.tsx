@@ -1,14 +1,12 @@
 import {
   BookOutlined,
   CalendarOutlined,
-  DownloadOutlined,
   EyeOutlined,
   FileTextOutlined,
   FilterOutlined,
   LinkOutlined,
   SafetyCertificateOutlined,
   SearchOutlined,
-  ShareAltOutlined,
   TrophyOutlined,
 } from "@ant-design/icons";
 import type { TableColumnsType, TableProps } from "antd";
@@ -22,7 +20,6 @@ import {
   Row,
   Select,
   Space,
-  Statistic,
   Table,
   Tag,
   Tooltip,
@@ -33,7 +30,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./MyCredentials.scss";
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 const { Search } = Input;
 const { Option } = Select;
 
@@ -57,10 +54,6 @@ const MyCredentials: React.FC = () => {
   const [filteredInfo, setFilteredInfo] = useState<
     Record<string, string | null>
   >({});
-  const [sortedInfo, setSortedInfo] = useState<{
-    columnKey?: string;
-    order?: string;
-  }>({});
 
   // Mock data - Comprehensive credentials list
   const credentialsData: CredentialData[] = [
@@ -189,7 +182,6 @@ const MyCredentials: React.FC = () => {
     sorter
   ) => {
     setFilteredInfo(filters || {});
-    setSortedInfo(sorter as { columnKey?: string; order?: string });
   };
 
   const handleSearch = (value: string) => {
@@ -198,7 +190,6 @@ const MyCredentials: React.FC = () => {
 
   const handleReset = () => {
     setFilteredInfo({});
-    setSortedInfo({});
     setSearchText("");
   };
 
@@ -214,25 +205,11 @@ const MyCredentials: React.FC = () => {
       item.type.toLowerCase().includes(searchText.toLowerCase())
   );
 
-  // Statistics
-  const stats = {
-    total: credentialsData.length,
-    degrees: credentialsData.filter((c) => c.type === "degree").length,
-    certificates: credentialsData.filter((c) => c.type === "certificate")
-      .length,
-    transcripts: credentialsData.filter((c) => c.type === "transcript").length,
-    active: credentialsData.filter((c) => c.status === "active").length,
-    pending: credentialsData.filter((c) => c.status === "pending").length,
-  };
-
   const columns: TableColumnsType<CredentialData> = [
     {
       title: "Credential",
       dataIndex: "title",
       key: "title",
-      sorter: (a, b) => a.title.localeCompare(b.title),
-      sortOrder:
-        sortedInfo.columnKey === "title" ? (sortedInfo.order as any) : null,
       render: (text, record) => (
         <Space>
           <Avatar icon={getCredentialIcon(record.type)} />
@@ -280,10 +257,6 @@ const MyCredentials: React.FC = () => {
       title: "Issue Date",
       dataIndex: "issueDate",
       key: "issueDate",
-      sorter: (a, b) =>
-        new Date(a.issueDate).getTime() - new Date(b.issueDate).getTime(),
-      sortOrder:
-        sortedInfo.columnKey === "issueDate" ? (sortedInfo.order as any) : null,
       render: (date) => (
         <Space>
           <CalendarOutlined style={{ color: "#8c8c8c" }} />
@@ -328,85 +301,18 @@ const MyCredentials: React.FC = () => {
       title: "Actions",
       key: "actions",
       render: (_, record) => (
-        <Space>
-          <Button
-            type="text"
-            size="small"
-            icon={<EyeOutlined />}
-            onClick={() => handleViewDetail(record.id)}
-          >
-            View
-          </Button>
-          <Button
-            type="text"
-            size="small"
-            icon={<ShareAltOutlined />}
-            onClick={() => navigate("/student-portal/share")}
-          >
-            Share
-          </Button>
-          <Button type="text" size="small" icon={<DownloadOutlined />}>
-            Download
-          </Button>
-        </Space>
+        <Button
+          type="text"
+          size="small"
+          icon={<EyeOutlined />}
+          onClick={() => handleViewDetail(record.id)}
+        />
       ),
     },
   ];
 
   return (
     <div className="my-credentials">
-      {/* Page Header */}
-      <div className="page-header">
-        <Title level={2} style={{ margin: 0, color: "#1890ff" }}>
-          My Credentials
-        </Title>
-        <Text type="secondary" style={{ fontSize: 16 }}>
-          View and manage all your academic credentials
-        </Text>
-      </div>
-
-      {/* Statistics Cards */}
-      <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
-        <Col xs={12} sm={6}>
-          <Card>
-            <Statistic
-              title="Total"
-              value={stats.total}
-              prefix={<FileTextOutlined style={{ color: "#1890ff" }} />}
-            />
-          </Card>
-        </Col>
-        <Col xs={12} sm={6}>
-          <Card>
-            <Statistic
-              title="Degrees"
-              value={stats.degrees}
-              prefix={<TrophyOutlined style={{ color: "#52c41a" }} />}
-            />
-          </Card>
-        </Col>
-        <Col xs={12} sm={6}>
-          <Card>
-            <Statistic
-              title="Certificates"
-              value={stats.certificates}
-              prefix={
-                <SafetyCertificateOutlined style={{ color: "#1890ff" }} />
-              }
-            />
-          </Card>
-        </Col>
-        <Col xs={12} sm={6}>
-          <Card>
-            <Statistic
-              title="Transcripts"
-              value={stats.transcripts}
-              prefix={<BookOutlined style={{ color: "#722ed1" }} />}
-            />
-          </Card>
-        </Col>
-      </Row>
-
       {/* Filters and Search */}
       <Card style={{ marginBottom: 24 }}>
         <Row gutter={[16, 16]} align="middle">

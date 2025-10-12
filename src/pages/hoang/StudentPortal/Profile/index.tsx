@@ -56,7 +56,7 @@ const Profile: React.FC = () => {
 
   // Mock user data
   const userData = {
-    fullName: "Nguyễn Văn Hoàng",
+    fullName: "Nghiêm Văn Hoàng",
     studentId: "SE171234",
     email: "hoang.nguyen@student.fpt.edu.vn",
     phone: "+84 123 456 789",
@@ -182,7 +182,7 @@ const Profile: React.FC = () => {
       {/* Page Header */}
       <div className="page-header">
         <Title level={2} style={{ margin: 0, color: "white" }}>
-          👤 Profile Management
+          Profile Management
         </Title>
         <Text
           type="secondary"

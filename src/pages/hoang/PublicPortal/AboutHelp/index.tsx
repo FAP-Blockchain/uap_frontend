@@ -413,7 +413,7 @@ const AboutHelp: React.FC = () => {
             </Paragraph>
           </Card>
 
-          <Card title="📋 API Endpoints">
+          <Card title=" API Endpoints">
             <List
               itemLayout="vertical"
               dataSource={apiEndpoints}
@@ -566,8 +566,8 @@ const AboutHelp: React.FC = () => {
     <div className="about-help">
       {/* Page Header */}
       <div className="page-header">
-        <Title level={2} style={{ margin: 0, color: "#722ed1" }}>
-          ❓ Help & Support Center
+        <Title level={2} style={{ margin: 0, color: "#ffffff" }}>
+          Help & Support Center
         </Title>
         <Text type="secondary" style={{ fontSize: 16 }}>
           Everything you need to know about credential verification

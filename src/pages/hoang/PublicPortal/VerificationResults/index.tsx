@@ -86,7 +86,7 @@ const VerificationResults: React.FC = () => {
           title: "Bachelor of Software Engineering",
           type: "degree",
           institution: "FPT University",
-          studentName: "Nguyễn Văn Hoàng",
+          studentName: "Nghiêm Văn Hoàng",
           studentId: "SE171234",
           issueDate: "2024-06-15",
           gpa: "3.85",
@@ -312,7 +312,7 @@ const VerificationResults: React.FC = () => {
         <Row gutter={[24, 24]}>
           {/* Credential Details */}
           <Col xs={24} lg={16}>
-            <Card title="📋 Credential Information" className="detail-card">
+            <Card title=" Credential Information" className="detail-card">
               <Descriptions column={2} bordered>
                 <Descriptions.Item label="Credential Type" span={2}>
                   <Space>
@@ -374,7 +374,7 @@ const VerificationResults: React.FC = () => {
               <Divider />
 
               {/* Blockchain Details */}
-              <Title level={5}>🔗 Blockchain Verification Details</Title>
+              <Title level={5}>Blockchain Verification Details</Title>
               <Descriptions column={1} size="small">
                 <Descriptions.Item label="Blockchain Hash">
                   <Text code copyable>
@@ -449,7 +449,7 @@ const VerificationResults: React.FC = () => {
               </Card>
 
               {/* Quick Actions */}
-              <Card title="⚡ Quick Actions">
+              <Card title="Quick Actions">
                 <Space direction="vertical" style={{ width: "100%" }}>
                   <Button
                     block

@@ -75,7 +75,7 @@ const VerificationHistory: React.FC = () => {
       timestamp: "2024-09-12T14:30:00Z",
       result: "success",
       institutionName: "FPT University",
-      studentName: "Nguyễn Văn Hoàng",
+      studentName: "Nghiêm Văn Hoàng",
       verifierInfo: "HR Department - VNG Corporation",
     },
     {
@@ -352,8 +352,8 @@ const VerificationHistory: React.FC = () => {
     <div className="verification-history">
       {/* Page Header */}
       <div className="page-header">
-        <Title level={2} style={{ margin: 0, color: "#722ed1" }}>
-          📊 Verification History
+        <Title level={2} style={{ margin: 0, color: "#ffffff" }}>
+          Verification History
         </Title>
         <Text type="secondary" style={{ fontSize: 16 }}>
           Track and manage all credential verification activities

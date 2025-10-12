@@ -1,14 +1,17 @@
+@use "../../../../styles/variables" as *;
+
 // Verification Portal Styles
 .verification-portal {
   .page-header {
     text-align: center;
     margin-bottom: 32px;
     padding: 24px;
-    background: linear-gradient(135deg, #f9f0ff, #fff0f6);
+    background: $gradient-blue;
     border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(24, 144, 255, 0.3);
 
     .ant-typography-title-2 {
-      color: #722ed1;
+      color: white;
     }
   }
 
@@ -35,7 +38,7 @@
             background: white;
 
             .ant-tabs-tab-btn {
-              color: #722ed1;
+              color: #1890ff;
             }
           }
         }
@@ -67,14 +70,14 @@
 
       .scanning-state {
         padding: 40px;
-        background: linear-gradient(135deg, #f9f0ff, #fff0f6);
+        background: $gradient-blue;
         border-radius: 16px;
-        border: 2px dashed #722ed1;
+        border: 2px dashed #1890ff;
 
         .camera-preview {
           .ant-progress {
             .ant-progress-bg {
-              background: linear-gradient(90deg, #722ed1, #eb2f96);
+              background: linear-gradient(90deg, #1890ff, $primary-color);
             }
           }
         }
@@ -88,8 +91,8 @@
         transition: all 0.3s ease;
 
         &:hover {
-          border-color: #722ed1;
-          background: #f9f0ff;
+          border-color: #1890ff;
+          background: #e6f7ff;
         }
       }
     }
@@ -107,7 +110,7 @@
 
         &:focus,
         &:hover {
-          border-color: #722ed1;
+          border-color: #1890ff;
         }
       }
     }
@@ -150,10 +153,10 @@
         }
 
         &:hover {
-          border-color: #722ed1;
+          border-color: #1890ff;
 
           .ant-upload-drag-icon .anticon {
-            color: #722ed1;
+            color: #1890ff;
           }
         }
       }
@@ -193,15 +196,25 @@
 
   // Button Customizations
   .ant-btn-primary {
-    background: linear-gradient(135deg, #722ed1, #eb2f96);
+    background: #1990ff;
     border: none;
     border-radius: 8px;
     font-weight: 600;
+    color: white !important;
+
+    span {
+      color: white !important;
+    }
 
     &:hover:not(:disabled) {
-      background: linear-gradient(135deg, #9254de, #f759ab);
+      background: linear-gradient(135deg, #0d73c9, #0a5ca8);
       transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(114, 46, 209, 0.3);
+      box-shadow: 0 4px 12px rgba(26, 148, 252, 0.4);
+      color: white !important;
+
+      span {
+        color: white !important;
+      }
     }
 
     &:disabled {
@@ -219,7 +232,7 @@
       background: #e6f7ff;
 
       .ant-alert-icon {
-        color: #1890ff;
+        color: $primary-color;
       }
     }
 

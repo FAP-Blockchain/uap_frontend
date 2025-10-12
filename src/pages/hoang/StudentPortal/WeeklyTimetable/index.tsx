@@ -317,31 +317,6 @@ const WeeklyTimetable: React.FC = () => {
     <div className="weekly-timetable">
       {/* Page Header */}
       <div className="timetable-header">
-        <Row
-          align="middle"
-          justify="space-between"
-          style={{ marginBottom: 24 }}
-        >
-          <Col>
-            <Title level={2} style={{ margin: 0, color: "#1890ff" }}>
-              Weekly Timetable
-            </Title>
-            <Text type="secondary" style={{ fontSize: 16 }}>
-              View your weekly class schedule
-            </Text>
-          </Col>
-          <Col>
-            <Space>
-              <Button
-                icon={<ReloadOutlined />}
-                onClick={() => setSelectedWeek(dayjs())}
-              >
-                Current Week
-              </Button>
-            </Space>
-          </Col>
-        </Row>
-
         {/* Week Navigation */}
         <Card className="week-nav-card">
           <Row align="middle" justify="space-between">
@@ -362,12 +337,18 @@ const WeeklyTimetable: React.FC = () => {
                   {selectedWeek.add(6, "day").format("DD/MM/YYYY")}
                 </Title>
                 <Text type="secondary">
-                  Semester: Fall 2024 • Week {selectedWeek.week()}
+                  Semester: Fall 2025 • Week {selectedWeek.week()}
                 </Text>
               </div>
             </Col>
             <Col>
               <Space>
+                <Button
+                  icon={<ReloadOutlined />}
+                  onClick={() => setSelectedWeek(dayjs())}
+                >
+                  Current Week
+                </Button>
                 <Select defaultValue="2025" style={{ width: 100 }}>
                   <Option value="2024">2024</Option>
                   <Option value="2025">2025</Option>
@@ -383,8 +364,22 @@ const WeeklyTimetable: React.FC = () => {
         </Card>
       </div>
 
+      {/* Timetable */}
+      <Card className="timetable-card">
+        <Table
+          columns={columns}
+          dataSource={timetableData}
+          rowKey="slot"
+          pagination={false}
+          bordered
+          size="middle"
+          className="timetable-table"
+          scroll={{ x: 1200 }}
+        />
+      </Card>
+
       {/* Legend */}
-      <Card style={{ marginBottom: 24 }}>
+      <Card style={{ marginTop: 24 }}>
         <Row gutter={[16, 8]} align="middle">
           <Col>
             <Text strong>Legend:</Text>
@@ -400,30 +395,6 @@ const WeeklyTimetable: React.FC = () => {
             </Space>
           </Col>
         </Row>
-      </Card>
-
-      {/* Timetable */}
-      <Card className="timetable-card">
-        <Table
-          columns={columns}
-          dataSource={timetableData}
-          rowKey="slot"
-          pagination={false}
-          bordered
-          size="middle"
-          className="timetable-table"
-          scroll={{ x: 1200 }}
-        />
-      </Card>
-
-      {/* Note */}
-      <Card className="note-card">
-        <Title level={5}>📝 Note:</Title>
-        <Text type="secondary">
-          This timetable shows activities within the university and does not
-          include extra-curricular activities, such as club activities, personal
-          study sessions, or external courses.
-        </Text>
       </Card>
     </div>
   );

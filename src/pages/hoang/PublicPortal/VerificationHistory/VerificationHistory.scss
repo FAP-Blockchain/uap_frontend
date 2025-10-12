@@ -1,14 +1,17 @@
+@use "../../../../styles/variables" as *;
+
 // Verification History Styles
 .verification-history {
   .page-header {
     text-align: center;
     margin-bottom: 24px;
     padding: 24px;
-    background: linear-gradient(135deg, #f9f0ff, #fff0f6);
+    background: $gradient-blue;
     border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(24, 144, 255, 0.3);
 
     .ant-typography-title-2 {
-      color: #722ed1;
+      color: white;
     }
   }
 
@@ -43,7 +46,7 @@
     .ant-table-tbody {
       > tr {
         &:hover > td {
-          background: #f9f0ff;
+          background: #e6f7ff;
         }
 
         > td {
@@ -65,15 +68,15 @@
       margin: 24px 0 0;
 
       .ant-pagination-item-active {
-        background: #722ed1;
-        border-color: #722ed1;
+        background: #1890ff;
+        border-color: #1890ff;
       }
 
       .ant-pagination-item:hover {
-        border-color: #722ed1;
+        border-color: #1890ff;
 
         a {
-          color: #722ed1;
+          color: #1890ff;
         }
       }
     }
@@ -145,18 +148,18 @@
 
       &:focus,
       &:hover {
-        border-color: #722ed1;
+        border-color: #1890ff;
       }
     }
 
     .ant-input-search-button {
       border-radius: 0 8px 8px 0;
-      background: #722ed1;
-      border-color: #722ed1;
+      background: #1890ff;
+      border-color: #1890ff;
 
       &:hover {
-        background: #9254de;
-        border-color: #9254de;
+        background: #0050b3;
+        border-color: #0050b3;
       }
     }
   }
@@ -168,7 +171,7 @@
       &:hover,
       &:focus,
       &.ant-select-focused {
-        border-color: #722ed1;
+        border-color: #1890ff;
       }
     }
   }
@@ -179,7 +182,7 @@
     &:hover,
     &:focus,
     &.ant-picker-focused {
-      border-color: #722ed1;
+      border-color: #1890ff;
     }
   }
 
@@ -189,21 +192,21 @@
     font-weight: 500;
 
     &.ant-btn-primary {
-      background: linear-gradient(135deg, #722ed1, #eb2f96);
+      background: linear-gradient(135deg, #1890ff, $primary-color);
       border: none;
 
       &:hover {
-        background: linear-gradient(135deg, #9254de, #f759ab);
+        background: linear-gradient(135deg, #0050b3, $primary-color-hover);
         transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(114, 46, 209, 0.3);
+        box-shadow: 0 4px 12px rgba(244, 131, 28, 0.3);
       }
     }
 
     &.ant-btn-link {
-      color: #722ed1;
+      color: #1890ff;
 
       &:hover {
-        color: #9254de;
+        color: #0050b3;
       }
 
       &.ant-btn-dangerous {
@@ -265,7 +268,7 @@
   .ant-spin {
     .ant-spin-dot {
       .ant-spin-dot-item {
-        background-color: #722ed1;
+        background-color: #1890ff;
       }
     }
   }

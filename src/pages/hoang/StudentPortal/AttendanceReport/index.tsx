@@ -1,22 +1,27 @@
 import {
-  CalendarOutlined,
   CheckCircleOutlined,
   CloseCircleOutlined,
   ExclamationCircleOutlined,
 } from "@ant-design/icons";
-import { Card, Col, List, Row, Statistic, Table, Tag, Typography } from "antd";
+import { Card, Col, Collapse, Row, Table, Tag, Typography } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import dayjs from "dayjs";
 import React, { useState } from "react";
 import "./AttendanceReport.scss";
 
 const { Title, Text } = Typography;
+const { Panel } = Collapse;
 
-interface TermCourse {
-  term: string;
-  course: string;
-  fullCourseName: string;
+interface Course {
+  code: string;
+  name: string;
   isActive: boolean;
+}
+
+interface Semester {
+  id: string;
+  name: string;
+  courses: Course[];
 }
 
 interface AttendanceRecord {
@@ -32,59 +37,186 @@ interface AttendanceRecord {
 }
 
 const AttendanceReport: React.FC = () => {
-  const [selectedCourse, setSelectedCourse] = useState("HCM202");
+  const [selectedCourse, setSelectedCourse] = useState("MLN131");
 
-  // Mock terms and courses data
-  const termCourses: TermCourse[] = [
+  // Mock semester data
+  const semesters: Semester[] = [
     {
-      term: "Fall2017",
-      course: "HCM202",
-      fullCourseName:
-        "Ho Chi Minh Ideology(HCM202)(Half1_GD1705,start 09/09/2025)",
-      isActive: true,
+      id: "sem9",
+      name: "Fall 2025",
+      courses: [
+        { code: "MLN131", name: "Scientific Socialism", isActive: true },
+        {
+          code: "VNR202",
+          name: "History of Vietnam Communist Party",
+          isActive: false,
+        },
+        { code: "HCM202", name: "Ho Chi Minh Ideology", isActive: false },
+        { code: "SEP490", name: "SE Capstone Project", isActive: false },
+      ],
     },
     {
-      term: "Spring2018",
-      course: "MLN131",
-      fullCourseName:
-        "Scientific socialism(MLN131)(Half1_GD1702,start 09/09/2025)",
-      isActive: false,
+      id: "sem8",
+      name: "Summer 2025",
+      courses: [
+        { code: "WDP301", name: "Web Development Project", isActive: false },
+        {
+          code: "EXE201",
+          name: "Experiential Entrepreneurship 2",
+          isActive: false,
+        },
+        { code: "PRM392", name: "Mobile Programming", isActive: false },
+        {
+          code: "MLN122",
+          name: "Political Economics of Marxism – Leninism",
+          isActive: false,
+        },
+        { code: "WDU203c", name: "The UI/UX Design", isActive: false },
+        {
+          code: "MLN111",
+          name: "Philosophy of Marxism – Leninism",
+          isActive: false,
+        },
+      ],
     },
     {
-      term: "Summer2018",
-      course: "SEP490",
-      fullCourseName:
-        "SE Capstone Project(SEP490) (FA25SE210_GFA130,start 13/09/2025)",
-      isActive: false,
+      id: "sem7",
+      name: "Spring 2025",
+      courses: [
+        { code: "PMG201c", name: "Project Management", isActive: false },
+        {
+          code: "SWD392",
+          name: "Software Architecture and Design",
+          isActive: false,
+        },
+        {
+          code: "EXE101",
+          name: "Experiential Entrepreneurship 1",
+          isActive: false,
+        },
+        {
+          code: "SDN302",
+          name: "Server-Side Development with NodeJS, Express, and MongoDB",
+          isActive: false,
+        },
+        {
+          code: "MMA301",
+          name: "Multiplatform Mobile App Development",
+          isActive: false,
+        },
+      ],
     },
     {
-      term: "Fall2018",
-      course: "VNR202",
-      fullCourseName:
-        "History of Vietnam Communist Party(VNR202) (Half2_GD1705,start 14/10/2025)",
-      isActive: false,
+      id: "sem6",
+      name: "Fall 2024",
+      courses: [
+        { code: "ENW492c", name: "Writing Research Papers", isActive: false },
+        { code: "OJT202", name: "On the Job Training", isActive: false },
+      ],
     },
-    { term: "Spring2019", course: "", fullCourseName: "", isActive: false },
-    { term: "Summer2019", course: "", fullCourseName: "", isActive: false },
-    { term: "Fall2019", course: "", fullCourseName: "", isActive: false },
-    { term: "Spring2020", course: "", fullCourseName: "", isActive: false },
-    { term: "Summer2020", course: "", fullCourseName: "", isActive: false },
-    { term: "Fall2020", course: "", fullCourseName: "", isActive: false },
-    { term: "Spring2021", course: "", fullCourseName: "", isActive: false },
-    { term: "Summer2021", course: "", fullCourseName: "", isActive: false },
-    { term: "Fall2021", course: "", fullCourseName: "", isActive: false },
-    { term: "Spring2022", course: "", fullCourseName: "", isActive: false },
-    { term: "Summer2022", course: "", fullCourseName: "", isActive: false },
-    { term: "Fall2022", course: "", fullCourseName: "", isActive: false },
-    { term: "Spring2023", course: "", fullCourseName: "", isActive: false },
-    { term: "Summer2023", course: "", fullCourseName: "", isActive: false },
-    { term: "Fall2023", course: "", fullCourseName: "", isActive: false },
-    { term: "Spring2024", course: "", fullCourseName: "", isActive: false },
-    { term: "Summer2024", course: "", fullCourseName: "", isActive: false },
-    { term: "Fall2024", course: "", fullCourseName: "", isActive: false },
-    { term: "Spring2025", course: "", fullCourseName: "", isActive: false },
-    { term: "Summer2025", course: "", fullCourseName: "", isActive: false },
-    { term: "Fall2025", course: "", fullCourseName: "", isActive: false },
+    {
+      id: "sem5",
+      name: "Summer 2024",
+      courses: [
+        {
+          code: "SWP391",
+          name: "Software Development Project",
+          isActive: false,
+        },
+        { code: "ITE302c", name: "Ethics in IT", isActive: false },
+        { code: "SWR302", name: "Software Requirements", isActive: false },
+        { code: "SWT301", name: "Software Testing", isActive: false },
+        {
+          code: "FER202",
+          name: "Front-End Web Development with React",
+          isActive: false,
+        },
+      ],
+    },
+    {
+      id: "sem4",
+      name: "Spring 2024",
+      courses: [
+        { code: "MAS291", name: "Statistics & Probability", isActive: false },
+        {
+          code: "SWE201c",
+          name: "Introduction to Software Engineering",
+          isActive: false,
+        },
+        {
+          code: "JPD123",
+          name: "Elementary Japanese 1 - A1.2",
+          isActive: false,
+        },
+        { code: "IOT102", name: "Internet of Things", isActive: false },
+        {
+          code: "PRJ301",
+          name: "Java Web Application Development",
+          isActive: false,
+        },
+      ],
+    },
+    {
+      id: "sem3",
+      name: "Fall 2023",
+      courses: [
+        {
+          code: "JPD113",
+          name: "Elementary Japanese 1 - A1.1",
+          isActive: false,
+        },
+        { code: "WED201c", name: "Web Design", isActive: false },
+        {
+          code: "CSD201",
+          name: "Data Structures and Algorithms",
+          isActive: false,
+        },
+        { code: "DBI202", name: "Database Systems", isActive: false },
+        { code: "LAB211", name: "OOP with Java Lab", isActive: false },
+      ],
+    },
+    {
+      id: "sem2",
+      name: "Summer 2023",
+      courses: [
+        {
+          code: "PRO192",
+          name: "Object-Oriented Programming",
+          isActive: false,
+        },
+        { code: "MAD101", name: "Discrete Mathematics", isActive: false },
+        { code: "OSG202", name: "Operating Systems", isActive: false },
+        { code: "NWC203c", name: "Computer Networking", isActive: false },
+        {
+          code: "SSG104",
+          name: "Communication and In-Group Working Skills",
+          isActive: false,
+        },
+      ],
+    },
+    {
+      id: "sem1",
+      name: "Spring 2023",
+      courses: [
+        { code: "CSI104", name: "Introduction to Computing", isActive: false },
+        {
+          code: "SSL101c",
+          name: "Academic Skills for University Success",
+          isActive: false,
+        },
+        { code: "PRF192", name: "Programming Fundamentals", isActive: false },
+        {
+          code: "MAE101",
+          name: "Mathematics for Engineering",
+          isActive: false,
+        },
+        {
+          code: "CEA201",
+          name: "Computer Organization and Architecture",
+          isActive: false,
+        },
+      ],
+    },
   ];
 
   // Mock attendance data
@@ -332,39 +464,35 @@ const AttendanceReport: React.FC = () => {
     <div className="attendance-report">
       <div className="page-header">
         <Title level={2} style={{ margin: 0, color: "#FFFFFF" }}>
-          View Attendance for Nghiệm Văn Hoàng (SE170117)
+          View Attendance for Nghiêm Văn Hoàng (SE170117)
         </Title>
       </div>
 
       <Row gutter={[24, 24]}>
-        {/* Sidebar - Term and Course Selection */}
+        {/* Sidebar - Semester and Course Selection */}
         <Col xs={24} lg={6}>
-          <Card title="Select a term, course ..." className="sidebar-card">
-            <div className="term-list">
-              <List
-                dataSource={termCourses}
-                renderItem={(item) => (
-                  <List.Item
-                    className={`term-item ${item.isActive ? "active" : ""} ${
-                      !item.course ? "empty" : ""
-                    }`}
-                    onClick={() =>
-                      item.course && handleCourseClick(item.course)
-                    }
-                  >
-                    <div className="term-info">
-                      <Text strong className="term-name">
-                        {item.term}
-                      </Text>
-                      {item.course && (
-                        <Text className="course-name">
-                          {item.fullCourseName}
+          <Card className="sidebar-card">
+            <div className="semester-list">
+              <Collapse defaultActiveKey={["sem9"]} ghost>
+                {semesters.map((semester) => (
+                  <Panel header={semester.name} key={semester.id}>
+                    {semester.courses.map((course) => (
+                      <div
+                        key={course.code}
+                        className={`course-item ${
+                          course.isActive ? "active" : ""
+                        }`}
+                        onClick={() => handleCourseClick(course.code)}
+                      >
+                        <Text strong className="course-code">
+                          {course.code}
                         </Text>
-                      )}
-                    </div>
-                  </List.Item>
-                )}
-              />
+                        <Text className="course-name">{course.name}</Text>
+                      </div>
+                    ))}
+                  </Panel>
+                ))}
+              </Collapse>
             </div>
           </Card>
         </Col>
@@ -372,59 +500,6 @@ const AttendanceReport: React.FC = () => {
         {/* Main Content - Attendance Table */}
         <Col xs={24} lg={18}>
           <div className="report-section">
-            <div className="section-header">
-              <Title level={4} style={{ margin: 0 }}>
-                ... then see report
-              </Title>
-            </div>
-
-            {/* Statistics */}
-            <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
-              <Col xs={12} sm={6}>
-                <Card>
-                  <Statistic
-                    title="Total Sessions"
-                    value={totalSessions}
-                    prefix={<CalendarOutlined style={{ color: "#1890ff" }} />}
-                  />
-                </Card>
-              </Col>
-              <Col xs={12} sm={6}>
-                <Card>
-                  <Statistic
-                    title="Present"
-                    value={presentSessions}
-                    prefix={
-                      <CheckCircleOutlined style={{ color: "#52c41a" }} />
-                    }
-                  />
-                </Card>
-              </Col>
-              <Col xs={12} sm={6}>
-                <Card>
-                  <Statistic
-                    title="Absent"
-                    value={absentSessions}
-                    prefix={
-                      <CloseCircleOutlined style={{ color: "#ff4d4f" }} />
-                    }
-                  />
-                </Card>
-              </Col>
-              <Col xs={12} sm={6}>
-                <Card>
-                  <Statistic
-                    title="Absent Rate"
-                    value={absentPercentage}
-                    suffix="%"
-                    prefix={
-                      <ExclamationCircleOutlined style={{ color: "#fa541c" }} />
-                    }
-                  />
-                </Card>
-              </Col>
-            </Row>
-
             {/* Attendance Table */}
             <Card className="attendance-table-card">
               <Table
