@@ -1,10 +1,12 @@
+@use "../../../../styles/variables" as *;
+
 // Activity Detail Styles
 .activity-detail {
   .detail-header {
     margin-bottom: 24px;
 
     .ant-typography-title-2 {
-      color: #1890ff;
+      color: $primary-color;
     }
   }
 
@@ -22,8 +24,8 @@
 
       .ant-descriptions-item-label {
         font-weight: 600;
-        color: #595959;
-        background: #fafafa;
+        color: white !important;
+        background: linear-gradient(135deg, #1a94fc, #0d73c9);
       }
 
       .ant-descriptions-item-content {
@@ -59,20 +61,20 @@
     font-weight: 500;
 
     &.ant-btn-primary {
-      background: linear-gradient(135deg, #1890ff, #36cfc9);
+      background: linear-gradient(135deg, $primary-color, #36cfc9);
       border: none;
 
       &:hover {
-        background: linear-gradient(135deg, #40a9ff, #5cdbd3);
+        background: linear-gradient(135deg, $primary-color-hover, #5cdbd3);
         transform: translateY(-1px);
       }
     }
 
     &.ant-btn-link {
-      color: #1890ff;
+      color: $primary-color;
 
       &:hover {
-        color: #40a9ff;
+        color: $primary-color-hover;
       }
     }
 

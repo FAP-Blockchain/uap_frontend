@@ -1,29 +1,11 @@
-import React, { useState } from "react";
+import React from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
-import {
-  Card,
-  Table,
-  Button,
-  Typography,
-  Avatar,
-  Space,
-  Input,
-  Row,
-  Col,
-  Statistic,
-} from "antd";
-import {
-  ArrowLeftOutlined,
-  UserOutlined,
-  SearchOutlined,
-  TeamOutlined,
-  BookOutlined,
-} from "@ant-design/icons";
+import { Card, Table, Button, Typography, Avatar, Row, Col } from "antd";
+import { ArrowLeftOutlined, UserOutlined } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 import "./ClassStudentList.scss";
 
 const { Title, Text } = Typography;
-const { Search } = Input;
 
 interface StudentData {
   index: number;
@@ -36,13 +18,9 @@ interface StudentData {
 }
 
 const ClassStudentList: React.FC = () => {
-  const { courseCode } = useParams<{ courseCode: string }>();
   const navigate = useNavigate();
   const location = useLocation();
-  const [searchText, setSearchText] = useState("");
 
-  const courseData = location.state?.courseData;
-  const studentGroup = location.state?.studentGroup;
   const fromActivity = location.state?.fromActivity || false;
 
   // Mock student data (based on the image provided)
@@ -51,7 +29,7 @@ const ClassStudentList: React.FC = () => {
       index: 1,
       image: "", // Empty like in original
       member: "HE173025",
-      code: "Nguyễn",
+      code: "Nghiêm",
       surname: "Ngọc",
       middleName: "Nhật",
       givenName: "",
@@ -60,7 +38,7 @@ const ClassStudentList: React.FC = () => {
       index: 2,
       image: "/api/placeholder/150/200", // Mock student photo
       member: "SE161310",
-      code: "Nguyễn",
+      code: "Nghiêm",
       surname: "Đức",
       middleName: "Hưng",
       givenName: "",
@@ -69,7 +47,7 @@ const ClassStudentList: React.FC = () => {
       index: 3,
       image: "/api/placeholder/150/200", // Mock student photo
       member: "SE162108",
-      code: "Nguyễn",
+      code: "Nghiêm",
       surname: "Như",
       middleName: "Tân",
       givenName: "",
@@ -78,7 +56,7 @@ const ClassStudentList: React.FC = () => {
       index: 4,
       image: "/api/placeholder/150/200", // Mock student photo (current user)
       member: "SE170117",
-      code: "Nghiệm",
+      code: "Nghiêm",
       surname: "Văn",
       middleName: "Hoàng",
       givenName: "",
@@ -257,13 +235,7 @@ const ClassStudentList: React.FC = () => {
     }
   };
 
-  const filteredStudents = studentsData.filter(
-    (student) =>
-      student.member.toLowerCase().includes(searchText.toLowerCase()) ||
-      student.surname.toLowerCase().includes(searchText.toLowerCase()) ||
-      student.middleName.toLowerCase().includes(searchText.toLowerCase()) ||
-      student.code.toLowerCase().includes(searchText.toLowerCase())
-  );
+  const filteredStudents = studentsData;
 
   const columns: ColumnsType<StudentData> = [
     {
@@ -347,64 +319,12 @@ const ClassStudentList: React.FC = () => {
             <Title level={2} style={{ margin: 0, color: "#1890ff" }}>
               Student List
             </Title>
-            <Text type="secondary" style={{ fontSize: 16 }}>
-              {courseData?.name || `Course ${courseCode}`} •{" "}
-              {studentGroup || "Class Group"}
-            </Text>
-          </Col>
-          <Col>
-            <Space>
-              <Search
-                placeholder="Search students..."
-                value={searchText}
-                onChange={(e) => setSearchText(e.target.value)}
-                style={{ width: 250 }}
-                allowClear
-              />
-            </Space>
           </Col>
         </Row>
       </div>
 
-      {/* Statistics */}
-      <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
-        <Col xs={12} sm={8}>
-          <Card>
-            <Statistic
-              title="Total Students"
-              value={studentsData.length}
-              prefix={<TeamOutlined style={{ color: "#1890ff" }} />}
-            />
-          </Card>
-        </Col>
-        <Col xs={12} sm={8}>
-          <Card>
-            <Statistic
-              title="Course"
-              value={courseCode}
-              prefix={<BookOutlined style={{ color: "#52c41a" }} />}
-            />
-          </Card>
-        </Col>
-        <Col xs={24} sm={8}>
-          <Card>
-            <Statistic
-              title="Class Group"
-              value={studentGroup || "GD1705"}
-              prefix={<UserOutlined style={{ color: "#722ed1" }} />}
-            />
-          </Card>
-        </Col>
-      </Row>
-
       {/* Student List Table */}
       <Card className="student-table-card">
-        <div className="table-header">
-          <Title level={4} style={{ margin: 0 }}>
-            ... then see student list
-          </Title>
-        </div>
-
         <Table
           columns={columns}
           dataSource={filteredStudents}

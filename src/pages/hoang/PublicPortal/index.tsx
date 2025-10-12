@@ -21,7 +21,7 @@ function PublicPortal() {
   const navigate = useNavigate();
   const location = useLocation();
   const {
-    token: { colorBgContainer, borderRadiusLG },
+    token: { borderRadiusLG },
   } = theme.useToken();
 
   // Menu items cho Public Portal
@@ -82,7 +82,7 @@ function PublicPortal() {
 
   return (
     <div className="public-portal-layout">
-      <Layout style={{ minHeight: "100vh" }}>
+      <Layout style={{ height: "100vh" }}>
         <Sider
           trigger={null}
           collapsible
@@ -91,13 +91,15 @@ function PublicPortal() {
           theme="light"
           width={280}
           style={{
-            background: colorBgContainer,
+            background: "#ffffff",
             borderRight: "1px solid #f0f0f0",
           }}
         >
           <div className="logo-container">
             <div className="logo">
-              <span className="logo-icon">🏢</span>
+              <span className="logo-icon">
+                <SafetyCertificateOutlined />
+              </span>
               {!collapsed && (
                 <Title level={4} className="logo-text">
                   Credential Verifier
@@ -128,7 +130,7 @@ function PublicPortal() {
                   Trusted by 500+ Organizations
                 </Text>
                 <div className="trust-logos">
-                  <span style={{ opacity: 0.6 }}>🏛️ FPT</span>
+                  <span style={{ opacity: 0.6 }}> FPT</span>
                   <span style={{ opacity: 0.6 }}>🏢 VNG</span>
                   <span style={{ opacity: 0.6 }}>🌐 Grab</span>
                 </div>
@@ -142,7 +144,7 @@ function PublicPortal() {
             className="public-header"
             style={{
               padding: "0 24px",
-              background: colorBgContainer,
+              background: "#ffffff",
               borderBottom: "1px solid #f0f0f0",
             }}
           >
@@ -154,7 +156,7 @@ function PublicPortal() {
                 className="trigger"
               />
               <div className="header-brand">
-                <Title level={3} style={{ margin: 0, color: "#722ed1" }}>
+                <Title level={3} className="brand-title">
                   Blockchain Credential Verification
                 </Title>
                 <Text type="secondary">Instant, Secure, Trusted</Text>
@@ -187,7 +189,7 @@ function PublicPortal() {
             style={{
               margin: "24px",
               padding: "24px",
-              background: colorBgContainer,
+              background: "#ffffff",
               borderRadius: borderRadiusLG,
               overflow: "auto",
             }}

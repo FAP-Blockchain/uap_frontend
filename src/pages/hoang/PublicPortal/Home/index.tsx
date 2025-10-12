@@ -53,7 +53,7 @@ const PublicHome: React.FC = () => {
     {
       title: "Get Results",
       description: "Instant verification with detailed report",
-      icon: <CheckCircleOutlined style={{ color: "#722ed1" }} />,
+      icon: <CheckCircleOutlined style={{ color: "#1890ff" }} />,
     },
   ];
 
@@ -73,22 +73,22 @@ const PublicHome: React.FC = () => {
       color: "#f6ffed",
     },
     {
-      icon: <GlobalOutlined style={{ fontSize: 48, color: "#722ed1" }} />,
+      icon: <GlobalOutlined style={{ fontSize: 48, color: "#1890ff" }} />,
       title: "Global Recognition",
       description: "Verified by 500+ organizations worldwide",
-      color: "#f9f0ff",
+      color: "#e6f7ff",
     },
     {
-      icon: <FileProtectOutlined style={{ fontSize: 48, color: "#fa541c" }} />,
+      icon: <FileProtectOutlined style={{ fontSize: 48, color: "#36cfc9" }} />,
       title: "Zero Fraud",
       description: "Eliminate fake credentials with blockchain proof",
-      color: "#fff7e6",
+      color: "#e6fffb",
     },
   ];
 
   const trustedInstitutions = [
     { name: "FPT University", icon: "🎓", students: "50K+" },
-    { name: "VNU", icon: "🏛️", students: "30K+" },
+    { name: "VNU", icon: "", students: "30K+" },
     { name: "RMIT Vietnam", icon: "🌏", students: "25K+" },
     { name: "UEH", icon: "📊", students: "40K+" },
   ];
@@ -134,7 +134,7 @@ const PublicHome: React.FC = () => {
               <div className="hero-stats">
                 <Space size="large" wrap>
                   <div className="stat-item">
-                    <Text strong style={{ fontSize: 24, color: "#722ed1" }}>
+                    <Text strong style={{ fontSize: 24, color: "#1890ff" }}>
                       {stats.totalVerifications.toLocaleString()}+
                     </Text>
                     <Text type="secondary" style={{ display: "block" }}>
@@ -142,7 +142,7 @@ const PublicHome: React.FC = () => {
                     </Text>
                   </div>
                   <div className="stat-item">
-                    <Text strong style={{ fontSize: 24, color: "#722ed1" }}>
+                    <Text strong style={{ fontSize: 24, color: "#1890ff" }}>
                       {stats.verificationTime}s
                     </Text>
                     <Text type="secondary" style={{ display: "block" }}>
@@ -150,7 +150,7 @@ const PublicHome: React.FC = () => {
                     </Text>
                   </div>
                   <div className="stat-item">
-                    <Text strong style={{ fontSize: 24, color: "#722ed1" }}>
+                    <Text strong style={{ fontSize: 24, color: "#1890ff" }}>
                       100%
                     </Text>
                     <Text type="secondary" style={{ display: "block" }}>
@@ -167,7 +167,7 @@ const PublicHome: React.FC = () => {
               <Avatar
                 size={200}
                 style={{
-                  background: "linear-gradient(135deg, #722ed1, #eb2f96)",
+                  background: "linear-gradient(135deg, #1890ff, #36cfc9)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -183,7 +183,7 @@ const PublicHome: React.FC = () => {
                   style={{ backgroundColor: "#52c41a" }}
                 />
                 <Badge count="SECURE" style={{ backgroundColor: "#1890ff" }} />
-                <Badge count="INSTANT" style={{ backgroundColor: "#722ed1" }} />
+                <Badge count="INSTANT" style={{ backgroundColor: "#1890ff" }} />
               </div>
             </div>
           </Col>
@@ -216,7 +216,7 @@ const PublicHome: React.FC = () => {
             <Statistic
               title="Trusted Employers"
               value={stats.trustedEmployers}
-              prefix={<TeamOutlined style={{ color: "#722ed1" }} />}
+              prefix={<TeamOutlined style={{ color: "#1890ff" }} />}
             />
           </Card>
         </Col>
@@ -225,7 +225,7 @@ const PublicHome: React.FC = () => {
             <Statistic
               title="Avg. Response Time"
               value={stats.verificationTime}
-              prefix={<ClockCircleOutlined style={{ color: "#fa541c" }} />}
+              prefix={<ClockCircleOutlined style={{ color: "#36cfc9" }} />}
               suffix="s"
             />
           </Card>

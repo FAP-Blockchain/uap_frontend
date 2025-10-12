@@ -1,10 +1,12 @@
+@use "../../../../styles/variables" as *;
+
 // Weekly Timetable Styles
 .weekly-timetable {
   .timetable-header {
     margin-bottom: 24px;
 
     .week-nav-card {
-      background: linear-gradient(135deg, #e6f7ff, #f0f5ff);
+      background: linear-gradient(135deg, #e6f7ff, #d6f0ff);
       border: none;
       border-radius: 12px;
 
@@ -16,7 +18,7 @@
         text-align: center;
 
         .ant-typography-title-4 {
-          color: #1890ff;
+          color: #1a94fc;
           margin: 0;
         }
       }
@@ -38,12 +40,12 @@
   .timetable-table {
     .ant-table {
       .ant-table-thead > tr > th {
-        background: linear-gradient(135deg, #1890ff, #36cfc9);
+        background: linear-gradient(135deg, #1a94fc, #0d73c9);
         color: white;
         font-weight: 600;
         text-align: center;
         padding: 12px 8px;
-        border-bottom: 2px solid #0050b3;
+        border-bottom: 2px solid #0d73c9;
 
         .day-header {
           display: flex;
@@ -68,7 +70,7 @@
         }
 
         &:first-child {
-          background: linear-gradient(135deg, #722ed1, #eb2f96);
+          background: linear-gradient(135deg, #1a94fc, #0d73c9);
 
           .time-slot-header {
             .slot-number {
@@ -94,7 +96,7 @@
           background: #fafafa;
           text-align: center;
           font-weight: 600;
-          color: #722ed1;
+          color: #1a94fc;
         }
 
         .empty-slot {
@@ -109,14 +111,14 @@
           padding: 8px;
           background: #f9f9f9;
           border-radius: 8px;
-          border-left: 4px solid #1890ff;
+          border-left: 4px solid #1a94fc;
           transition: all 0.3s ease;
           cursor: pointer;
 
           &:hover {
             background: #e6f7ff;
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(24, 144, 255, 0.2);
+            box-shadow: 0 4px 12px rgba(26, 148, 252, 0.2);
           }
 
           .course-code {
@@ -126,7 +128,7 @@
             margin-bottom: 8px;
 
             .ant-typography {
-              color: #1890ff;
+              color: #1a94fc;
               font-size: 14px;
             }
 
@@ -134,13 +136,13 @@
               padding: 0 4px;
               height: auto;
               font-size: 10px;
-              background: #ffa940;
+              background: #1a94fc;
               color: white;
               border: none;
               border-radius: 4px;
 
               &:hover {
-                background: #ff7a00;
+                background: #0d73c9;
               }
             }
           }
@@ -212,19 +214,19 @@
     border-radius: 6px;
 
     &.ant-btn-primary {
-      background: linear-gradient(135deg, #1890ff, #36cfc9);
+      background: linear-gradient(135deg, #1a94fc, #0d73c9);
       border: none;
 
       &:hover {
-        background: linear-gradient(135deg, #40a9ff, #5cdbd3);
+        background: linear-gradient(135deg, #0d73c9, #0a5ca8);
         transform: translateY(-1px);
       }
     }
 
     &.ant-btn-default {
       &:hover {
-        border-color: #1890ff;
-        color: #1890ff;
+        border-color: #1a94fc;
+        color: #1a94fc;
       }
     }
   }
@@ -236,7 +238,7 @@
 
     &:hover,
     &:focus {
-      border-color: #1890ff;
+      border-color: #1a94fc;
     }
   }
 

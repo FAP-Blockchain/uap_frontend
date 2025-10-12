@@ -1,14 +1,17 @@
+@use "../../../../styles/variables" as *;
+
 // About Help Page Styles
 .about-help {
   .page-header {
     text-align: center;
     margin-bottom: 24px;
     padding: 24px;
-    background: linear-gradient(135deg, #f9f0ff, #fff0f6);
+    background: $gradient-blue;
     border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(24, 144, 255, 0.3);
 
     .ant-typography-title-2 {
-      color: #722ed1;
+      color: white;
     }
   }
 
@@ -35,7 +38,7 @@
             background: white;
 
             .ant-tabs-tab-btn {
-              color: #722ed1;
+              color: #1890ff;
             }
           }
         }
@@ -71,7 +74,7 @@
           padding: 16px 24px;
 
           .ant-collapse-arrow {
-            color: #722ed1;
+            color: #1890ff;
           }
         }
 
@@ -87,9 +90,9 @@
 
         &.ant-collapse-item-active {
           .ant-collapse-header {
-            background: #f9f0ff;
-            border-color: #d3adf7;
-            color: #722ed1;
+            background: #e6f7ff;
+            border-color: #91d5ff;
+            color: #1890ff;
           }
         }
       }
@@ -133,7 +136,7 @@
         border-color: #91d5ff;
 
         .ant-alert-icon {
-          color: #1890ff;
+          color: $primary-color;
         }
       }
 
@@ -168,9 +171,9 @@
       }
 
       .ant-avatar {
-        background: #f0f5ff;
+        background: #e6f7ff;
         border: 2px solid white;
-        box-shadow: 0 4px 12px rgba(114, 46, 209, 0.2);
+        box-shadow: 0 4px 12px rgba(24, 144, 255, 0.2);
       }
 
       .ant-typography-title-5 {
@@ -280,12 +283,12 @@
       }
 
       &.ant-typography-title-4 {
-        color: #722ed1;
+        color: #1890ff;
         margin: 24px 0 16px;
       }
 
       &.ant-typography-title-5 {
-        color: #722ed1;
+        color: #1890ff;
         margin: 16px 0 8px;
       }
     }
@@ -327,13 +330,13 @@
     font-weight: 500;
 
     &.ant-btn-primary {
-      background: linear-gradient(135deg, #722ed1, #eb2f96);
+      background: linear-gradient(135deg, #1890ff, $primary-color);
       border: none;
 
       &:hover {
-        background: linear-gradient(135deg, #9254de, #f759ab);
+        background: linear-gradient(135deg, #0050b3, $primary-color-hover);
         transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(114, 46, 209, 0.3);
+        box-shadow: 0 4px 12px rgba(244, 131, 28, 0.3);
       }
     }
   }
@@ -342,7 +345,7 @@
   .ant-typography code {
     background: #f6f8ff;
     border: 1px solid #d9e5ff;
-    color: #722ed1;
+    color: #1890ff;
     font-family: "Monaco", "Menlo", monospace;
     font-size: 13px;
     padding: 2px 6px;

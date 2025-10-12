@@ -1,3 +1,5 @@
+@use "../../../../styles/variables" as *;
+
 // Verification Results Styles
 .verification-results {
   .result-header {
@@ -43,7 +45,7 @@
     }
 
     .ant-typography-title-5 {
-      color: #722ed1;
+      color: #1890ff;
       margin: 24px 0 16px;
     }
   }
@@ -132,7 +134,7 @@
   code.ant-typography {
     background: #f6f8ff;
     border: 1px solid #d9e5ff;
-    color: #722ed1;
+    color: #1890ff;
     font-family: "Monaco", "Menlo", monospace;
     font-size: 11px;
     padding: 4px 8px;
@@ -146,13 +148,13 @@
     font-weight: 500;
 
     &.ant-btn-primary {
-      background: linear-gradient(135deg, #722ed1, #eb2f96);
+      background: linear-gradient(135deg, #1890ff, $primary-color);
       border: none;
 
       &:hover {
-        background: linear-gradient(135deg, #9254de, #f759ab);
+        background: linear-gradient(135deg, #0050b3, $primary-color-hover);
         transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(114, 46, 209, 0.3);
+        box-shadow: 0 4px 12px rgba(244, 131, 28, 0.3);
       }
     }
 

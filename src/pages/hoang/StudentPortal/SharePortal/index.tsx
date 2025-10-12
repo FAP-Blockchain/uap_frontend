@@ -15,8 +15,8 @@ const SharePortal: React.FC = () => {
     <div className="share-portal">
       {/* Page Header */}
       <div className="page-header">
-        <Title level={2} style={{ margin: 0, color: "#1890ff" }}>
-          🔄 Share Portal
+        <Title level={2} style={{ margin: 0, color: "white" }}>
+          Share Portal
         </Title>
         <Text
           type="secondary"

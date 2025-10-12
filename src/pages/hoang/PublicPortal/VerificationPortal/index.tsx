@@ -193,6 +193,10 @@ const VerificationPortal: React.FC = () => {
                   icon={<CameraOutlined />}
                   onClick={handleQRScan}
                   loading={isVerifying}
+                  style={{
+                    background: "linear-gradient(135deg, #1a94fc, #0d73c9)",
+                    border: "none",
+                  }}
                 >
                   Start Camera Scan
                 </Button>
@@ -264,7 +268,7 @@ const VerificationPortal: React.FC = () => {
           <Divider />
 
           <div className="examples-section">
-            <Title level={5} style={{ color: "#722ed1" }}>
+            <Title level={5} style={{ color: "#1990FF" }}>
               Example Formats:
             </Title>
             <Space direction="vertical" style={{ width: "100%" }}>
@@ -309,7 +313,7 @@ const VerificationPortal: React.FC = () => {
           >
             <Upload.Dragger {...uploadProps} className="credential-uploader">
               <p className="ant-upload-drag-icon">
-                <UploadOutlined style={{ color: "#722ed1" }} />
+                <UploadOutlined style={{ color: "#1990FF" }} />
               </p>
               <p className="ant-upload-text">
                 Click or drag credential file to this area to upload
@@ -364,8 +368,8 @@ const VerificationPortal: React.FC = () => {
     <div className="verification-portal">
       {/* Page Header */}
       <div className="page-header">
-        <Title level={2} style={{ margin: 0, color: "#722ed1" }}>
-          🔍 Credential Verification Portal
+        <Title level={2} style={{ margin: 0, color: "#ffffff" }}>
+          Credential Verification Portal
         </Title>
         <Text type="secondary" style={{ fontSize: 16 }}>
           Choose your preferred method to verify academic credentials instantly

@@ -1,12 +1,13 @@
+@use "../../../../styles/variables" as *;
+
 // Share Portal Page Styles
 .share-portal {
   .page-header {
     margin-bottom: 24px;
     text-align: center;
     padding: 24px;
-    background: linear-gradient(135deg, #1890ff, #36cfc9);
+    background: $gradient-blue;
     border-radius: 16px;
-    margin-bottom: 24px;
     box-shadow: 0 8px 24px rgba(24, 144, 255, 0.3);
   }
 
@@ -49,14 +50,14 @@
 
   // Avatar
   .ant-avatar {
-    background: linear-gradient(135deg, #f0f5ff, #bae0ff);
+    background: linear-gradient(135deg, #e6f7ff, #bae0ff);
     border: 3px solid white;
-    box-shadow: 0 8px 24px rgba(24, 144, 255, 0.2);
+    box-shadow: 0 8px 24px rgba(26, 148, 252, 0.2);
   }
 
   // Button
   .ant-btn-primary {
-    background: linear-gradient(135deg, #1890ff, #36cfc9);
+    background: linear-gradient(135deg, #1a94fc, #0d73c9);
     border: none;
     border-radius: 8px;
     font-size: 16px;
@@ -64,9 +65,9 @@
     padding: 0 32px;
 
     &:hover:not(:disabled) {
-      background: linear-gradient(135deg, #40a9ff, #5cdbd3);
+      background: linear-gradient(135deg, #0d73c9, #0a5ca8);
       transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(24, 144, 255, 0.4);
+      box-shadow: 0 6px 20px rgba(26, 148, 252, 0.4);
     }
 
     &:disabled {
@@ -79,7 +80,7 @@
   .ant-typography {
     &.ant-typography-title {
       &.ant-typography-title-2 {
-        color: #1890ff;
+        color: #1a94fc;
       }
     }
   }

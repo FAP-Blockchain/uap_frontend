@@ -1,44 +1,50 @@
-// Use our theme variables instead of importing them
-@use "./theme-variables" as theme;
-// Theme colors
-$primary-color: #1890ff; // Primary blue
-$primary-color-light: #40a9ff; // Light blue
-$primary-color-dark: #096dd9; // Dark blue
+// Brand Colors
+$primary-color: #f4831c; // Orange - Main brand color
+$secondary-color-1: #016fbb; // Blue - Secondary brand color
+$secondary-color-2: #73bf44; // Green - Secondary brand color
+$white: #ffffff;
 
-$text-color: #262626; // Main text color
-$text-color-secondary: #595959; // Secondary text color
-$heading-color: #262626; // Heading text color
-$text-color-dark: #ffffff; // Text color for dark mode
-$text-color-secondary-dark: #a6a6a6; // Secondary text color for dark mode
+// Primary color variations
+$primary-color-hover: #d6721a;
+$primary-color-light: #fef3e9;
+$primary-color-dark: #c96d17;
 
-$background-color: #ffffff; // Light background
-$background-color-light: #f5f5f5; // Secondary light background
-$background-color-dark: #141414; // Dark background
-$background-color-dark-light: #1f1f1f; // Secondary dark background
+// Secondary color variations
+$secondary-1-hover: #015a97;
+$secondary-1-light: #e6f4fc;
 
-$border-color: #e8e8e8; // Border color
-$border-color-dark: #434343; // Border color for dark mode
+$secondary-2-hover: #5fa037;
+$secondary-2-light: #f0f9eb;
 
-$success-color: #52c41a; // Success state color
-$warning-color: #faad14; // Warning state color
-$error-color: #f5222d; // Error state color
-$info-color: #1890ff; // Info state color
-// Button gradient colors
-$button-gradient-light-start: #02479c; // Light mode button gradient start
-$button-gradient-light-end: #0258c7; // Light mode button gradient end
-$button-gradient-dark-start: #052955; // Dark mode button gradient start
-$button-gradient-dark-end: #041a35; // Dark mode button gradient end
+// Background Colors
+$background-color: #ffffff;
+$background-color-dark: #121212;
+$background-color-dark-light: #1e1e1e;
 
-// Layout
-$border-radius-base: 4px;
-$box-shadow-base: 0 2px 8px rgba(0, 0, 0, 0.15);
+// Text Colors
+$text-color: #333333;
+$text-color-dark: #e0e0e0;
+$text-color-secondary: #666666;
+$text-color-secondary-dark: #a0a0a0;
 
-// Breakpoints
-$screen-xs: 480px;
-$screen-sm: 576px;
-$screen-md: 768px;
-$screen-lg: 992px;
-$screen-xl: 1200px;
-$screen-xxl: 1600px;
+// Border Colors
+$border-color: #e0e0e0;
+$border-color-dark: #3a3a3a;
 
-// No need for :export when using @use/@forward
+// Gradient variations
+$gradient-primary: linear-gradient(
+  135deg,
+  $primary-color 0%,
+  $primary-color-dark 100%
+);
+$gradient-secondary-1: linear-gradient(
+  135deg,
+  $secondary-color-1 0%,
+  $secondary-1-hover 100%
+);
+$gradient-secondary-2: linear-gradient(
+  135deg,
+  $secondary-color-2 0%,
+  $secondary-2-hover 100%
+);
+$gradient-blue: linear-gradient(135deg, #1890ff, #36cfc9);

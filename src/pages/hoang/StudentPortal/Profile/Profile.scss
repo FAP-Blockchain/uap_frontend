@@ -1,12 +1,14 @@
+@use "../../../../styles/variables" as *;
+
 // Profile Page Styles
 .profile-page {
   .page-header {
     text-align: center;
     padding: 24px;
-    background: linear-gradient(135deg, #722ed1, #eb2f96);
+    background: $gradient-blue;
     border-radius: 16px;
     margin-bottom: 24px;
-    box-shadow: 0 8px 24px rgba(114, 46, 209, 0.3);
+    box-shadow: 0 8px 24px rgba(24, 144, 255, 0.3);
 
     .ant-typography-title-2 {
       color: white;
@@ -26,10 +28,10 @@
 
         .ant-badge {
           .ant-badge-count {
-            background: #722ed1;
+            background: $secondary-color-2;
             color: white;
             border: 2px solid white;
-            box-shadow: 0 2px 8px rgba(114, 46, 209, 0.3);
+            box-shadow: 0 2px 8px rgba(244, 131, 28, 0.3);
           }
         }
 
@@ -39,7 +41,7 @@
           border: 4px solid #f0f0f0;
 
           &:hover {
-            border-color: #722ed1;
+            border-color: $secondary-color-2;
             transform: scale(1.05);
           }
         }
@@ -73,7 +75,7 @@
 
       &:hover,
       &:focus {
-        border-color: #722ed1;
+        border-color: $secondary-color-2;
       }
 
       &:disabled {
@@ -87,7 +89,7 @@
       .ant-input {
         &:hover,
         &:focus {
-          border-color: #722ed1;
+          border-color: $secondary-color-2;
         }
       }
     }
@@ -119,13 +121,17 @@
     font-weight: 500;
 
     &.ant-btn-primary {
-      background: linear-gradient(135deg, #722ed1, #eb2f96);
+      background: linear-gradient(135deg, $secondary-color-2, $primary-color);
       border: none;
 
       &:hover:not(:disabled) {
-        background: linear-gradient(135deg, #9254de, #f759ab);
+        background: linear-gradient(
+          135deg,
+          $secondary-2-hover,
+          $primary-color-hover
+        );
         transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(114, 46, 209, 0.3);
+        box-shadow: 0 4px 12px rgba(244, 131, 28, 0.3);
       }
     }
 
@@ -133,8 +139,8 @@
       border-color: #d9d9d9;
 
       &:hover {
-        border-color: #722ed1;
-        color: #722ed1;
+        border-color: $secondary-color-2;
+        color: $secondary-color-2;
       }
     }
 
@@ -149,10 +155,10 @@
   // Switch Styles
   .ant-switch {
     &.ant-switch-checked {
-      background: #722ed1;
+      background: $secondary-color-2;
 
       &:hover:not(.ant-switch-disabled) {
-        background: #9254de;
+        background: $secondary-2-hover;
       }
     }
   }
@@ -272,7 +278,7 @@
       background: transparent;
 
       &:hover {
-        border-color: #722ed1;
+        border-color: $secondary-color-2;
       }
     }
   }

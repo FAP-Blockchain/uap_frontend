@@ -1,7 +1,10 @@
+@use "../../../styles/variables" as *;
+
 // Public Portal Layout Styles
 .public-portal-layout {
-  min-height: 100vh;
-  background: linear-gradient(135deg, #722ed1 0%, #eb2f96 100%);
+  height: 100vh;
+  overflow: hidden;
+  background: $gradient-blue;
 
   .public-sider {
     box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
@@ -20,12 +23,12 @@
 
         .logo-icon {
           font-size: 32px;
-          color: #722ed1;
+          color: #1890ff;
         }
 
         .logo-text {
           margin: 0;
-          color: #722ed1;
+          color: #1890ff;
           font-weight: 700;
           font-size: 18px;
         }
@@ -47,19 +50,19 @@
         font-weight: 500;
 
         &.ant-menu-item-selected {
-          background: linear-gradient(135deg, #f9f0ff, #fff0f6);
-          color: #722ed1;
+          background: $white;
+          color: #1890ff;
 
           .anticon {
-            color: #722ed1;
+            color: #1890ff;
           }
         }
 
         &:hover {
-          color: #722ed1;
+          color: #1890ff;
 
           .anticon {
-            color: #722ed1;
+            color: #1890ff;
           }
         }
       }
@@ -110,21 +113,31 @@
       }
 
       .header-brand {
-        .ant-typography-title {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+
+        .brand-title {
           margin: 0;
           font-size: 20px;
+          background: $gradient-blue;
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          font-weight: 700;
         }
       }
     }
 
     .header-right {
       .ant-btn-primary {
-        background: linear-gradient(135deg, #722ed1, #eb2f96);
+        background: $gradient-blue;
         border: none;
 
         &:hover {
-          background: linear-gradient(135deg, #9254de, #f759ab);
+          background: $gradient-blue;
           transform: translateY(-1px);
+          opacity: 0.9;
         }
       }
     }
@@ -134,7 +147,9 @@
     background: #f8fafc !important;
     border-radius: 12px;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
+    overflow-y: auto;
+    overflow-x: hidden;
+    max-height: calc(100vh - 64px - 48px); // 64px header, 48px margin
 
     // Custom scrollbar
     &::-webkit-scrollbar {
@@ -182,6 +197,7 @@
   // Global Ant Design customizations for Public Portal
   .ant-layout {
     background: transparent;
+    overflow: hidden;
   }
 
   .ant-menu-inline {

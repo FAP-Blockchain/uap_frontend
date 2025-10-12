@@ -22,6 +22,7 @@ import {
   BarChartOutlined,
   FileSearchOutlined,
 } from "@ant-design/icons";
+import { PiStudentFill } from "react-icons/pi";
 import "./index.scss";
 
 const { Header, Sider, Content } = Layout;
@@ -32,12 +33,12 @@ function StudentPortal() {
   const navigate = useNavigate();
   const location = useLocation();
   const {
-    token: { colorBgContainer, borderRadiusLG },
+    token: { borderRadiusLG },
   } = theme.useToken();
 
   // Student mock data
   const studentInfo = {
-    name: "Nguyễn Văn Hoàng",
+    name: "Nghiêm Văn Hoàng",
     studentId: "SE171234",
     email: "hoang.nv@fpt.edu.vn",
     avatar:
@@ -123,7 +124,7 @@ function StudentPortal() {
 
   return (
     <div className="student-portal-layout">
-      <Layout style={{ minHeight: "100vh" }}>
+      <Layout style={{ height: "100vh" }}>
         <Sider
           trigger={null}
           collapsible
@@ -132,13 +133,15 @@ function StudentPortal() {
           theme="light"
           width={280}
           style={{
-            background: colorBgContainer,
+            background: "#ffffff",
             borderRight: "1px solid #f0f0f0",
           }}
         >
           <div className="logo-container">
             <div className="logo">
-              <span className="logo-icon">🎓</span>
+              <span className="logo-icon">
+                <PiStudentFill />
+              </span>
               {!collapsed && (
                 <Title level={4} className="logo-text">
                   Student Portal
@@ -160,7 +163,7 @@ function StudentPortal() {
             className="student-header"
             style={{
               padding: "0 24px",
-              background: colorBgContainer,
+              background: "#ffffff",
               borderBottom: "1px solid #f0f0f0",
             }}
           >
@@ -202,7 +205,7 @@ function StudentPortal() {
             style={{
               margin: "24px",
               padding: "24px",
-              background: colorBgContainer,
+              background: "#ffffff",
               borderRadius: borderRadiusLG,
               overflow: "auto",
             }}
