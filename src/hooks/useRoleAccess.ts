@@ -20,7 +20,7 @@ import {
 export const useRoleAccess = () => {
 //   const { userProfile } = useSelector((state: RootState) => state.auth);
     //   const currentRole = (userProfile?.roleCode || "") as RoleCode;
-    const currentRole = ROLE_CODES.ADMIN as RoleCode;
+    const currentRole = ROLE_CODES.STUDENT as RoleCode;
 
   /**
    * Check if current user has a specific role

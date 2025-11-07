@@ -32,7 +32,7 @@ const SiderComponent: React.FC<SiderProps> = ({ collapsed }) => {
   // const { userProfile } = useSelector((state: RootState) => state.auth);
   // const userRole = (userProfile?.roleCode || "") as RoleCode;
 
-  const userRole = ROLE_CODES.ADMIN;
+  const userRole = ROLE_CODES.STUDENT;
 
   // Generate menu items from App routes (memoized for performance)
   const mainNavItems = useMemo(

@@ -1,7 +1,7 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import Login from "./pages/hoang/Login";
+import Login from "./pages/Login";
 import {
   adminRoutes,
   studentPortalRoutes,
