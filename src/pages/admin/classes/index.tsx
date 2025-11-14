@@ -156,16 +156,12 @@ const ClassesManagement: React.FC = () => {
     {
       title: "Lớp học",
       key: "classInfo",
+      width: 220,
       render: (_, record) => (
         <div className="class-info">
-          <div className="class-info__header">
-            <BookOutlined className="class-info__icon" />
-            <div>
-              <div className="class-info__code">{record.classCode}</div>
-              <div className="class-info__subject">
-                {record.subjectCode} · {record.subjectName}
-              </div>
-            </div>
+          <div className="class-info__code">{record.classCode}</div>
+          <div className="class-info__subject">
+            {record.subjectCode} - {record.subjectName}
           </div>
         </div>
       ),
@@ -174,21 +170,21 @@ const ClassesManagement: React.FC = () => {
       title: "Giảng viên",
       dataIndex: "teacherName",
       key: "teacherName",
-      render: (teacherName: string, record) => (
-        <Space>
+      width: 150,
+      render: (teacherName: string) => (
+        <div className="teacher-info">
           <UserOutlined className="teacher-icon" />
-          <span>
-            {teacherName} ({record.teacherCode})
-          </span>
-        </Space>
+          <span>{teacherName}</span>
+        </div>
       ),
     },
     {
       title: "Kỳ học",
       dataIndex: "semesterName",
       key: "semesterName",
+      width: 120,
       render: (semesterName: string) => (
-        <Tag color="processing" className="semester-tag">
+        <Tag color="blue" className="semester-tag">
           {semesterName}
         </Tag>
       ),
@@ -197,56 +193,53 @@ const ClassesManagement: React.FC = () => {
       title: "Tín chỉ",
       dataIndex: "credits",
       key: "credits",
+      width: 80,
       align: "center",
       render: (credits: number) => (
-        <Tag color="purple" className="credit-tag">
-          {credits}
-        </Tag>
+        <span className="credit-value">{credits}</span>
       ),
     },
     {
       title: "Sĩ số",
       key: "capacity",
+      width: 80,
+      align: "center",
       render: (_, record) => (
-        <div className="capacity">
-          <span className="capacity__value">{record.totalStudents}</span>
-          <span className="capacity__label">Sinh viên</span>
-        </div>
+        <span className="number-value">{record.totalStudents}</span>
       ),
     },
     {
       title: "Đăng ký",
       key: "enrollments",
+      width: 90,
+      align: "center",
       render: (_, record) => (
-        <div className="capacity">
-          <span className="capacity__value">{record.totalEnrollments}</span>
-          <span className="capacity__label">Lượt</span>
-        </div>
+        <span className="number-value">{record.totalEnrollments}</span>
       ),
     },
     {
       title: "Chỗ trống",
       key: "slots",
+      width: 90,
+      align: "center",
       render: (_, record) => (
-        <div className="capacity">
-          <span className="capacity__value">{record.totalSlots}</span>
-          <span className="capacity__label">Chỗ</span>
-        </div>
+        <span className="number-value">{record.totalSlots}</span>
       ),
     },
     {
       title: "Thao tác",
       key: "actions",
-      width: 120,
+      width: 100,
       fixed: "right",
       render: (_, record) => (
-        <Space>
+        <Space size="small">
           <Tooltip title="Chỉnh sửa">
             <Button
-              type="primary"
+              type="text"
               icon={<EditOutlined />}
               size="small"
               onClick={() => handleEdit(record)}
+              className="action-btn-edit"
             />
           </Tooltip>
           <Popconfirm
@@ -256,7 +249,12 @@ const ClassesManagement: React.FC = () => {
             cancelText="Không"
           >
             <Tooltip title="Xóa">
-              <Button danger icon={<DeleteOutlined />} size="small" />
+              <Button
+                type="text"
+                icon={<DeleteOutlined />}
+                size="small"
+                className="action-btn-delete"
+              />
             </Tooltip>
           </Popconfirm>
         </Space>
@@ -353,9 +351,6 @@ const ClassesManagement: React.FC = () => {
             <div>
               <p className="eyebrow">Bảng quản trị</p>
               <h2>Quản lý Lớp học</h2>
-              <span className="subtitle">
-                Theo dõi và cập nhật tình trạng các lớp học trong hệ thống
-              </span>
             </div>
           </div>
           <div className="header-actions">
@@ -381,15 +376,16 @@ const ClassesManagement: React.FC = () => {
           </div>
         </div>
 
-        <div className="stats-compact">
-          {statsCards.map((stat) => (
-            <div key={stat.label} className={`stat-chip ${stat.accent}`}>
-              <span className="chip-icon">{stat.icon}</span>
-              <span className="value">{stat.value}</span>
-              <span className="label">{stat.label}</span>
-            </div>
-          ))}
-        </div>
+        {!showDetails && (
+          <div className="stats-compact">
+            {statsCards.map((stat) => (
+              <div key={stat.label} className={`stat-chip ${stat.accent}`}>
+                <span className="value">{stat.value}</span>
+                <span className="label">{stat.label}</span>
+              </div>
+            ))}
+          </div>
+        )}
 
         {showDetails && (
           <div className="stats-inline">
@@ -407,45 +403,78 @@ const ClassesManagement: React.FC = () => {
 
         <div
           className={`filters-row ${
-            showDetails ? "expanded" : "compact-layout"
+            !showDetails ? "compact-layout" : ""
           }`}
         >
-          <Row gutter={showDetails ? 16 : 12} align="middle">
-            <Col xs={showDetails ? 12 : 24} sm={showDetails ? 16 : 24}>
-              {showDetails && <label>Tìm kiếm lớp học</label>}
-              <Search
-                placeholder="Tìm theo mã lớp, môn học hoặc giảng viên..."
-                allowClear
-                value={searchText}
-                onChange={(e) => setSearchText(e.target.value)}
-                onSearch={(value) => setSearchText(value)}
-                prefix={<SearchOutlined />}
-                size={showDetails ? "large" : "middle"}
-              />
-            </Col>
-            <Col xs={showDetails ? 6 : 12} sm={showDetails ? 4 : 12}>
-              {showDetails && <label>Kỳ học</label>}
-              <Select
-                value={semesterFilter}
-                onChange={setSemesterFilter}
-                size={showDetails ? "large" : "middle"}
-                className="semester-select"
-              >
-                <Option value="all">Tất cả</Option>
-                {semesterOptions.map((semester) => (
-                  <Option key={semester} value={semester}>
-                    {semester}
-                  </Option>
-                ))}
-              </Select>
-            </Col>
-            <Col xs={showDetails ? 6 : 12} sm={showDetails ? 4 : 12}>
-              {showDetails && <label>Lớp hiển thị</label>}
-              <div className="filter-meta text-right">
-                {filteredClasses.length} / {classes.length}
-              </div>
-            </Col>
-          </Row>
+          {showDetails && (
+            <Row gutter={[16, 16]} className="filter-row-expanded">
+              <Col xs={24} sm={12} md={8} lg={10}>
+                <div className="filter-field">
+                  <label>Tìm kiếm lớp học</label>
+                  <Search
+                    placeholder="Nhập mã lớp, môn học hoặc giảng viên..."
+                    allowClear
+                    value={searchText}
+                    onChange={(e) => setSearchText(e.target.value)}
+                    onSearch={(value) => setSearchText(value)}
+                    prefix={<SearchOutlined />}
+                    size="large"
+                  />
+                </div>
+              </Col>
+              <Col xs={24} sm={12} md={8} lg={6}>
+                <div className="filter-field">
+                  <label>Kỳ học</label>
+                  <Select
+                    value={semesterFilter}
+                    onChange={setSemesterFilter}
+                    size="large"
+                    className="semester-select"
+                  >
+                    <Option value="all">Tất cả</Option>
+                    {semesterOptions.map((semester) => (
+                      <Option key={semester} value={semester}>
+                        {semester}
+                      </Option>
+                    ))}
+                  </Select>
+                </div>
+              </Col>
+              <Col xs={24} sm={24} md={24} lg={8}>
+                <div className="filter-meta">
+                  <span>
+                    Hiển thị: <strong>{filteredClasses.length}</strong> /{" "}
+                    <strong>{classes.length}</strong>
+                  </span>
+                </div>
+              </Col>
+            </Row>
+          )}
+
+          {!showDetails && (
+            <Row gutter={[8, 8]} align="middle" className="filter-row-compact">
+              <Col flex="1">
+                <Select
+                  value={semesterFilter}
+                  onChange={setSemesterFilter}
+                  size="small"
+                  className="semester-select-compact"
+                >
+                  <Option value="all">Tất cả</Option>
+                  {semesterOptions.map((semester) => (
+                    <Option key={semester} value={semester}>
+                      {semester}
+                    </Option>
+                  ))}
+                </Select>
+              </Col>
+              <Col className="filter-meta-compact">
+                <span>
+                  {filteredClasses.length} / {classes.length}
+                </span>
+              </Col>
+            </Row>
+          )}
         </div>
 
         <div className="table-section">
@@ -455,12 +484,14 @@ const ClassesManagement: React.FC = () => {
             loading={loading}
             rowKey="id"
             pagination={{
-              pageSize: 8,
+              pageSize: 12,
               showSizeChanger: false,
               showTotal: (total, range) =>
-                `${range[0]}-${range[1]} của ${total} lớp`,
+                `${range[0]}-${range[1]} của ${total}`,
+              size: "small",
             }}
-            scroll={{ x: 900 }}
+            scroll={{ x: 1000, y: "calc(100vh - 280px)" }}
+            size="small"
           />
         </div>
       </Card>
