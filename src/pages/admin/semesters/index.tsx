@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Table,
   Card,
@@ -28,12 +28,21 @@ import {
   CheckCircleOutlined,
   CloseCircleOutlined,
   ClockCircleOutlined,
+  CompressOutlined,
+  ExpandAltOutlined,
 } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 import type { Dayjs } from "dayjs";
-import type { Semester } from "../../../types/Semester";
+import type { SemesterDto } from "../../../types/Semester";
 import dayjs from "dayjs";
 import "./index.scss";
+import {
+  closeSemesterApi,
+  createSemesterApi,
+  deleteSemesterApi,
+  fetchSemestersApi,
+  updateSemesterApi,
+} from "../../../services/admin/semesters/api";
 
 const { Search } = Input;
 const { Option } = Select;
@@ -46,72 +55,94 @@ interface SemesterFormValues {
   isClosed?: boolean;
 }
 
-const SemestersManagement: React.FC = () => {
-  // Mock data - sẽ được thay thế bằng API call
-  const [semesters, setSemesters] = useState<Semester[]>([
-    {
-      id: "d5555555-5555-5555-5555-555555555555",
-      name: "Fall 2025",
-      startDate: "2025-09-01T00:00:00",
-      endDate: "2025-12-31T00:00:00",
-      totalSubjects: 1,
-      isActive: true,
-      isClosed: false,
-    },
-  ]);
+const DEFAULT_PAGE_SIZE = 10;
 
-  const [filteredSemesters, setFilteredSemesters] =
-    useState<Semester[]>(semesters);
+const SemestersManagement: React.FC = () => {
+  const [semesters, setSemesters] = useState<SemesterDto[]>([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [editingSemester, setEditingSemester] = useState<Semester | null>(null);
-  const [form] = Form.useForm();
+  const [editingSemester, setEditingSemester] = useState<SemesterDto | null>(
+    null
+  );
+  const [form] = Form.useForm<SemesterFormValues>();
   const [searchText, setSearchText] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [loading, setLoading] = useState(false);
+  const [showDetails, setShowDetails] = useState(false);
+  const [pagination, setPagination] = useState({
+    pageNumber: 1,
+    pageSize: DEFAULT_PAGE_SIZE,
+    totalCount: 0,
+  });
 
-  // Statistics
-  const stats = {
-    total: semesters.length,
-    active: semesters.filter((s) => s.isActive && !s.isClosed).length,
-    closed: semesters.filter((s) => s.isClosed).length,
-    totalSubjects: semesters.reduce((sum, s) => sum + s.totalSubjects, 0),
+  const stats = useMemo(
+    () => ({
+      total: pagination.totalCount,
+      active: semesters.filter((s) => s.isActive && !s.isClosed).length,
+      closed: semesters.filter((s) => s.isClosed).length,
+      totalSubjects: semesters.reduce((sum, s) => sum + s.totalSubjects, 0),
+    }),
+    [pagination.totalCount, semesters]
+  );
+
+  const buildStatusParams = (status: string) => {
+    if (status === "active") return { isActive: true, isClosed: false };
+    if (status === "inactive") return { isActive: false, isClosed: false };
+    if (status === "closed") return { isClosed: true };
+    return {};
   };
+
+  const fetchData = useCallback(
+    async (
+      pageNumber = 1,
+      pageSize = pagination.pageSize,
+      search = searchText,
+      status = statusFilter
+    ) => {
+      setLoading(true);
+      try {
+        const response = await fetchSemestersApi({
+          pageNumber,
+          pageSize,
+          searchTerm: search || undefined,
+          ...buildStatusParams(status),
+        });
+        setSemesters(response.data);
+        setPagination({
+          pageNumber: response.pageNumber || pageNumber,
+          pageSize: response.pageSize || pageSize,
+          totalCount: response.totalCount || response.data.length,
+        });
+      } catch {
+        message.error("Không thể tải danh sách học kì");
+      } finally {
+        setLoading(false);
+      }
+    },
+    [pagination.pageSize, searchText, statusFilter]
+  );
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const handleSearch = (value: string) => {
     setSearchText(value);
-    filterSemesters(value, statusFilter);
+    fetchData(1, pagination.pageSize, value, statusFilter);
   };
 
   const handleStatusFilter = (value: string) => {
     setStatusFilter(value);
-    filterSemesters(searchText, value);
+    fetchData(1, pagination.pageSize, searchText, value);
   };
 
-  const filterSemesters = (search: string, status: string) => {
-    let filtered = semesters;
-
-    if (search) {
-      filtered = filtered.filter((sem) =>
-        sem.name.toLowerCase().includes(search.toLowerCase())
-      );
-    }
-
-    if (status === "active") {
-      filtered = filtered.filter((sem) => sem.isActive && !sem.isClosed);
-    } else if (status === "closed") {
-      filtered = filtered.filter((sem) => sem.isClosed);
-    } else if (status === "inactive") {
-      filtered = filtered.filter((sem) => !sem.isActive && !sem.isClosed);
-    }
-
-    setFilteredSemesters(filtered);
-  };
-
-  const showModal = (semester?: Semester) => {
+  const showModal = (semester?: SemesterDto) => {
     if (semester) {
       setEditingSemester(semester);
       form.setFieldsValue({
         ...semester,
         dateRange: [dayjs(semester.startDate), dayjs(semester.endDate)],
+        isActive: semester.isActive,
+        isClosed: semester.isClosed,
       });
     } else {
       setEditingSemester(null);
@@ -121,56 +152,75 @@ const SemestersManagement: React.FC = () => {
   };
 
   const handleOk = () => {
-    form.validateFields().then((values: SemesterFormValues) => {
+    form.validateFields().then(async (values) => {
       if (!values.dateRange || values.dateRange.length < 2) {
         message.error("Vui lòng chọn thời gian học kì!");
         return;
       }
+
       const [startValue, endValue] = values.dateRange;
-      const semesterData: Semester = {
-        id: editingSemester?.id || Date.now().toString(),
-        name: values.name,
-        startDate: startValue.format("YYYY-MM-DDTHH:mm:ss"),
-        endDate: endValue.format("YYYY-MM-DDTHH:mm:ss"),
-        totalSubjects: editingSemester?.totalSubjects || 0,
+      const payload = {
+        name: values.name.trim(),
+        startDate: startValue.toISOString(),
+        endDate: endValue.toISOString(),
         isActive: values.isActive ?? true,
         isClosed: values.isClosed ?? false,
       };
 
-      if (editingSemester) {
-        setSemesters((prev) =>
-          prev.map((s) => (s.id === editingSemester.id ? semesterData : s))
+      try {
+        if (editingSemester) {
+          await updateSemesterApi(editingSemester.id, payload);
+          message.success("Cập nhật học kì thành công!");
+        } else {
+          await createSemesterApi(payload);
+          message.success("Thêm học kì thành công!");
+        }
+        setIsModalVisible(false);
+        fetchData(
+          editingSemester ? pagination.pageNumber : 1,
+          pagination.pageSize
         );
-        message.success("Cập nhật học kì thành công!");
-      } else {
-        setSemesters((prev) => [...prev, semesterData]);
-        message.success("Thêm học kì thành công!");
+      } catch {
+        message.error("Không thể lưu học kì");
       }
-
-      setIsModalVisible(false);
-      filterSemesters(searchText, statusFilter);
     });
   };
 
-  const handleDelete = (id: string) => {
-    setSemesters((prev) => prev.filter((s) => s.id !== id));
-    filterSemesters(searchText, statusFilter);
-    message.success("Xóa học kì thành công!");
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteSemesterApi(id);
+      message.success("Xóa học kì thành công!");
+      fetchData(pagination.pageNumber, pagination.pageSize);
+    } catch {
+      message.error("Không thể xóa học kì");
+    }
   };
 
-  const handleToggleStatus = (id: string, field: "isActive" | "isClosed") => {
-    setSemesters((prev) =>
-      prev.map((s) => (s.id === id ? { ...s, [field]: !s[field] } : s))
-    );
-    filterSemesters(searchText, statusFilter);
-    message.success(
-      `${field === "isActive" ? "Kích hoạt" : "Đóng"} học kì thành công!`
-    );
+  const handleToggleStatus = async (
+    record: SemesterDto,
+    field: "isActive" | "isClosed"
+  ) => {
+    try {
+      if (field === "isClosed" && !record.isClosed) {
+        await closeSemesterApi(record.id);
+      } else {
+        await updateSemesterApi(record.id, {
+          name: record.name,
+          startDate: record.startDate,
+          endDate: record.endDate,
+          isActive: field === "isActive" ? !record.isActive : record.isActive,
+          isClosed: field === "isClosed" ? !record.isClosed : record.isClosed,
+        });
+      }
+      message.success("Cập nhật trạng thái học kì thành công!");
+      fetchData(pagination.pageNumber, pagination.pageSize);
+    } catch {
+      message.error("Không thể cập nhật trạng thái");
+    }
   };
 
-  const formatDate = (dateString: string) => {
-    return dayjs(dateString).format("DD/MM/YYYY");
-  };
+  const formatDate = (dateString: string) =>
+    dayjs(dateString).format("DD/MM/YYYY");
 
   const getDuration = (startDate: string, endDate: string) => {
     const start = dayjs(startDate);
@@ -179,7 +229,7 @@ const SemestersManagement: React.FC = () => {
     return `${days} ngày`;
   };
 
-  const columns: ColumnsType<Semester> = [
+  const columns: ColumnsType<SemesterDto> = [
     {
       title: "Tên học kì",
       key: "name",
@@ -285,7 +335,7 @@ const SemestersManagement: React.FC = () => {
                 title={`Bạn có chắc muốn ${
                   record.isActive ? "tắt kích hoạt" : "kích hoạt"
                 } học kì này?`}
-                onConfirm={() => handleToggleStatus(record.id, "isActive")}
+                onConfirm={() => handleToggleStatus(record, "isActive")}
                 okText="Có"
                 cancelText="Không"
               >
@@ -306,7 +356,7 @@ const SemestersManagement: React.FC = () => {
           <Tooltip title="Đóng học kì">
             <Popconfirm
               title="Bạn có chắc muốn đóng học kì này? Hành động này không thể hoàn tác!"
-              onConfirm={() => handleToggleStatus(record.id, "isClosed")}
+              onConfirm={() => handleToggleStatus(record, "isClosed")}
               okText="Có"
               cancelText="Không"
               disabled={record.isClosed}
@@ -375,45 +425,72 @@ const SemestersManagement: React.FC = () => {
               </span>
             </div>
           </div>
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            className="primary-action"
-            onClick={() => showModal()}
-          >
-            Thêm học kì
-          </Button>
+          <div className="header-actions">
+            <Button
+              className="toggle-details-btn"
+              icon={showDetails ? <CompressOutlined /> : <ExpandAltOutlined />}
+              onClick={() => setShowDetails((prev) => !prev)}
+            >
+              {showDetails ? "Thu gọn" : "Chi tiết"}
+            </Button>
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              className="primary-action"
+              onClick={() => showModal()}
+            >
+              Thêm học kì
+            </Button>
+          </div>
         </div>
 
-        <div className="stats-inline">
+        <div className="stats-compact">
           {statsCards.map((item) => (
-            <div key={item.label} className={`stat-item ${item.accent}`}>
-              <div className="stat-icon-wrapper">{item.icon}</div>
-              <div className="stat-content">
-                <span className="stat-value">{item.value}</span>
-                <span className="stat-label">{item.label}</span>
-              </div>
+            <div key={item.label} className={`stat-chip ${item.accent}`}>
+              <span className="value">{item.value}</span>
+              <span className="label">{item.label}</span>
             </div>
           ))}
         </div>
 
-        <div className="filters-row">
+        {showDetails && (
+          <div className="stats-inline">
+            {statsCards.map((item) => (
+              <div key={item.label} className={`stat-item ${item.accent}`}>
+                <div className="stat-icon-wrapper">{item.icon}</div>
+                <div className="stat-content">
+                  <span className="stat-value">{item.value}</span>
+                  <span className="stat-label">{item.label}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <div
+          className={`filters-row ${
+            showDetails ? "expanded" : "compact-layout"
+          }`}
+        >
           <div className="filter-field">
-            <label>Tìm kiếm học kì</label>
+            {showDetails && <label>Tìm kiếm học kì</label>}
             <Search
               placeholder="Nhập tên học kì..."
               allowClear
-              onSearch={handleSearch}
+              value={searchText}
               onChange={(e) => handleSearch(e.target.value)}
+              onSearch={handleSearch}
               prefix={<SearchOutlined />}
+              size={showDetails ? "middle" : "large"}
             />
           </div>
           <div className="filter-field">
-            <label>Trạng thái</label>
+            {showDetails && <label>Trạng thái</label>}
             <Select
               value={statusFilter}
               onChange={handleStatusFilter}
               suffixIcon={<FilterOutlined />}
+              size={showDetails ? "middle" : "large"}
             >
               <Option value="all">Tất cả</Option>
               <Option value="active">Đang hoạt động</Option>
@@ -421,31 +498,38 @@ const SemestersManagement: React.FC = () => {
               <Option value="closed">Đã đóng</Option>
             </Select>
           </div>
-          <div className="filter-summary">
-            <span>
-              Hoạt động: <strong>{stats.active}</strong>
-            </span>
-            <span>
-              Đã đóng: <strong>{stats.closed}</strong>
-            </span>
-          </div>
+          {showDetails && (
+            <div className="filter-summary">
+              <span>
+                Hoạt động: <strong>{stats.active}</strong>
+              </span>
+              <span>
+                Đã đóng: <strong>{stats.closed}</strong>
+              </span>
+            </div>
+          )}
         </div>
       </Card>
 
       <Card className="semesters-table-card" bordered={false}>
         <Table
           columns={columns}
-          dataSource={filteredSemesters}
+          dataSource={semesters}
+          loading={loading}
           rowKey="id"
           className="semesters-table"
           pagination={{
-            pageSize: 8,
+            current: pagination.pageNumber,
+            pageSize: pagination.pageSize,
+            total: pagination.totalCount,
             showSizeChanger: false,
             showQuickJumper: false,
             showTotal: (total, range) => `${range[0]}-${range[1]} của ${total}`,
             size: "small",
+            onChange: (page) =>
+              fetchData(page, pagination.pageSize, searchText, statusFilter),
           }}
-          scroll={{ x: 1000 }}
+          scroll={{ x: 1000, y: "calc(100vh - 420px)" }}
           size="small"
         />
       </Card>

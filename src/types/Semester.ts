@@ -16,6 +16,17 @@ export interface GetSemestersRequest {
   isDescending?: boolean;
 }
 
+export interface CreateSemesterRequest {
+  name: string;
+  startDate: string;
+  endDate: string;
+}
+
+export interface UpdateSemesterRequest extends CreateSemesterRequest {
+  isActive?: boolean;
+  isClosed?: boolean;
+}
+
 // ==================== Response Types ====================
 
 export interface SemesterDto {
@@ -35,4 +46,5 @@ export interface PagedSemestersResponse {
   pageSize: number;
   totalPages: number;
 }
+
 

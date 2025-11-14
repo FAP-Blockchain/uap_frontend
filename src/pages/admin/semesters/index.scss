@@ -1,7 +1,7 @@
 @use "../../../styles/theme-variables" as *;
 
 .semesters-management {
-  padding: 24px;
+  padding: 20px;
   background: #f4f6fb;
   min-height: calc(100vh - 64px);
   height: calc(100vh - 64px);
@@ -15,13 +15,16 @@
     border: 1px solid #e4e9f2;
     box-shadow: 0 6px 24px rgba(15, 23, 42, 0.06);
     flex-shrink: 0;
+    .ant-card-body {
+      padding: 16px 20px;
+    }
 
     .overview-header {
       display: flex;
       justify-content: space-between;
-      align-items: center;
+      align-items: flex-start;
       gap: 16px;
-      margin-bottom: 20px;
+      margin-bottom: 12px;
 
       .title-block {
         display: flex;
@@ -69,13 +72,73 @@
         font-weight: 600;
         box-shadow: 0 12px 20px rgba(0, 85, 255, 0.2);
       }
+
+      .header-actions {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        .toggle-details-btn {
+          border-radius: 8px;
+          background: #edf2ff;
+          border-color: transparent;
+          color: #2f54eb;
+          font-weight: 500;
+          padding: 0 14px;
+
+          &:hover {
+            background: #d6e4ff;
+            color: #1d39c4;
+          }
+        }
+      }
+    }
+
+    .stats-compact {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 10px;
+
+      .stat-chip {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 10px;
+        border-radius: 20px;
+        background: #f5f7fb;
+        font-size: 12px;
+        font-weight: 600;
+        color: #475467;
+
+        .value {
+          font-size: 14px;
+          color: #262626;
+        }
+
+        &.total {
+          background: #fff7e6;
+          color: #ad6800;
+        }
+        &.active {
+          background: #f6ffed;
+          color: #389e0d;
+        }
+        &.closed {
+          background: #f4f4f5;
+          color: #595959;
+        }
+        &.subjects {
+          background: #e6f4ff;
+          color: #0958d9;
+        }
+      }
     }
 
     .stats-inline {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
       gap: 16px;
-      margin-bottom: 20px;
+      margin-bottom: 12px;
 
       .stat-item {
         border: 1px solid #edf1f7;
@@ -172,6 +235,28 @@
 
         strong {
           color: #111827;
+        }
+      }
+    }
+
+    .filters-row.compact-layout {
+      border-top: none;
+      padding-top: 4px;
+      gap: 12px;
+      align-items: center;
+
+      .filter-field {
+        min-width: 0;
+        flex: 1;
+
+        label {
+          display: none;
+        }
+
+        .ant-input-affix-wrapper,
+        .ant-select-selector {
+          min-height: 36px;
+          border-radius: 8px;
         }
       }
     }
