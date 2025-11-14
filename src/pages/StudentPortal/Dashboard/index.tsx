@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Row,
@@ -28,7 +28,26 @@ import {
   LinkOutlined,
   ArrowUpOutlined,
   UserOutlined,
+  RiseOutlined,
+  FallOutlined,
 } from "@ant-design/icons";
+import {
+  LineChart,
+  Line,
+  AreaChart,
+  Area,
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip as RechartsTooltip,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
 import "./Dashboard.scss";
 
 const { Title, Text, Paragraph } = Typography;
@@ -68,6 +87,51 @@ const Dashboard: React.FC = () => {
     pendingCredentials: 2,
     recentVerifications: 15,
   };
+
+  // Data for line chart - Credentials over time
+  const credentialsOverTime = [
+    { month: "Jan", credentials: 2 },
+    { month: "Feb", credentials: 3 },
+    { month: "Mar", credentials: 4 },
+    { month: "Apr", credentials: 5 },
+    { month: "May", credentials: 6 },
+    { month: "Jun", credentials: 8 },
+  ];
+
+  // Data for bar chart - Credentials by type
+  const credentialsByType = [
+    { type: "Degrees", count: 3, color: "#52c41a" },
+    { type: "Certificates", count: 4, color: "#1890ff" },
+    { type: "Transcripts", count: 1, color: "#722ed1" },
+  ];
+
+  // Data for pie chart - Status distribution
+  const statusData = [
+    { name: "Active", value: 6, color: "#52c41a" },
+    { name: "Pending", value: 2, color: "#faad14" },
+    { name: "Revoked", value: 0, color: "#ff4d4f" },
+  ];
+
+  // Data for area chart - Verifications over time
+  const verificationsOverTime = [
+    { month: "Jan", verifications: 2 },
+    { month: "Feb", verifications: 5 },
+    { month: "Mar", verifications: 8 },
+    { month: "Apr", verifications: 10 },
+    { month: "May", verifications: 12 },
+    { month: "Jun", verifications: 15 },
+  ];
+
+  // Data for mini chart in stat cards
+  const monthlyGrowth = [
+    { month: "M", value: 2 },
+    { month: "T", value: 3 },
+    { month: "W", value: 4 },
+    { month: "T", value: 3 },
+    { month: "F", value: 5 },
+    { month: "S", value: 4 },
+    { month: "S", value: 6 },
+  ];
 
   const recentCredentials: CredentialSummary[] = [
     {
@@ -185,16 +249,33 @@ const Dashboard: React.FC = () => {
     navigate(`/student-portal/credentials/${credentialId}`);
   };
 
+  // Custom tooltip for charts
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="custom-tooltip">
+          <p style={{ margin: 0, fontWeight: 600 }}>{label}</p>
+          {payload.map((entry: any, index: number) => (
+            <p key={index} style={{ margin: "4px 0", color: entry.color }}>
+              {entry.name}: {entry.value}
+            </p>
+          ))}
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
     <div className="antd-dashboard">
       {/* Welcome Header */}
       <Card className="welcome-card" style={{ marginBottom: 24 }}>
         <Row align="middle" justify="space-between">
           <Col>
-            <Title level={2} style={{ margin: 0, color: "#1890ff" }}>
+            <Title level={2} style={{ margin: 0, color: "white" }}>
               Welcome back!
             </Title>
-            <Text type="secondary" style={{ fontSize: 16 }}>
+            <Text style={{ fontSize: 16, color: "rgba(255, 255, 255, 0.9)" }}>
               Here's what's happening with your credentials today.
             </Text>
           </Col>
@@ -222,24 +303,38 @@ const Dashboard: React.FC = () => {
         </Row>
       </Card>
 
-      {/* Statistics Cards */}
+      {/* Statistics Cards with Mini Charts */}
       <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
         <Col xs={24} sm={12} md={6}>
-          <Card hoverable>
+          <Card hoverable className="stat-card">
             <Statistic
               title="Total Credentials"
               value={dashboardStats.totalCredentials}
-              prefix={<FileTextOutlined style={{ color: "#1890ff" }} />}
+              prefix={<FileTextOutlined style={{ color: "#1a94fc" }} />}
               suffix={
                 <Tag color="blue" style={{ marginLeft: 8 }}>
                   +2 this month
                 </Tag>
               }
             />
+            <div className="mini-chart">
+              <ResponsiveContainer width="100%" height={40}>
+                <AreaChart data={monthlyGrowth}>
+                  <Area
+                    type="monotone"
+                    dataKey="value"
+                    stroke="#1a94fc"
+                    fill="#1a94fc"
+                    fillOpacity={0.2}
+                    strokeWidth={2}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
           </Card>
         </Col>
         <Col xs={24} sm={12} md={6}>
-          <Card hoverable>
+          <Card hoverable className="stat-card">
             <Statistic
               title="Verified Credentials"
               value={dashboardStats.verifiedCredentials}
@@ -258,25 +353,225 @@ const Dashboard: React.FC = () => {
                 />
               }
             />
+            <div className="mini-chart">
+              <ResponsiveContainer width="100%" height={40}>
+                <AreaChart data={monthlyGrowth}>
+                  <Area
+                    type="monotone"
+                    dataKey="value"
+                    stroke="#52c41a"
+                    fill="#52c41a"
+                    fillOpacity={0.2}
+                    strokeWidth={2}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
           </Card>
         </Col>
         <Col xs={24} sm={12} md={6}>
-          <Card hoverable>
+          <Card hoverable className="stat-card">
             <Statistic
               title="Pending Review"
               value={dashboardStats.pendingCredentials}
               prefix={<ClockCircleOutlined style={{ color: "#faad14" }} />}
               suffix={<Tag color="orange">In progress</Tag>}
             />
+            <div className="mini-chart">
+              <ResponsiveContainer width="100%" height={40}>
+                <AreaChart data={monthlyGrowth}>
+                  <Area
+                    type="monotone"
+                    dataKey="value"
+                    stroke="#faad14"
+                    fill="#faad14"
+                    fillOpacity={0.2}
+                    strokeWidth={2}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
           </Card>
         </Col>
         <Col xs={24} sm={12} md={6}>
-          <Card hoverable>
+          <Card hoverable className="stat-card">
             <Statistic
               title="Recent Verifications"
               value={dashboardStats.recentVerifications}
               prefix={<EyeOutlined style={{ color: "#722ed1" }} />}
+              suffix={
+                <RiseOutlined style={{ color: "#52c41a", fontSize: 16 }} />
+              }
             />
+            <div className="mini-chart">
+              <ResponsiveContainer width="100%" height={40}>
+                <AreaChart data={monthlyGrowth}>
+                  <Area
+                    type="monotone"
+                    dataKey="value"
+                    stroke="#722ed1"
+                    fill="#722ed1"
+                    fillOpacity={0.2}
+                    strokeWidth={2}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </Card>
+        </Col>
+      </Row>
+
+      {/* Charts Row 1 */}
+      <Row gutter={[24, 24]} style={{ marginBottom: 24 }}>
+        {/* Credentials Over Time - Line Chart */}
+        <Col xs={24} lg={12}>
+          <Card
+            title={
+              <Space>
+                <RiseOutlined style={{ color: "#1a94fc" }} />
+                <Text strong>Credentials Growth</Text>
+              </Space>
+            }
+            hoverable
+            className="chart-card"
+          >
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={credentialsOverTime}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                <XAxis
+                  dataKey="month"
+                  stroke="#8c8c8c"
+                  style={{ fontSize: 12 }}
+                />
+                <YAxis stroke="#8c8c8c" style={{ fontSize: 12 }} />
+                <RechartsTooltip content={<CustomTooltip />} />
+                <Line
+                  type="monotone"
+                  dataKey="credentials"
+                  stroke="#1a94fc"
+                  strokeWidth={3}
+                  dot={{ fill: "#1a94fc", r: 5 }}
+                  activeDot={{ r: 7 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </Card>
+        </Col>
+
+        {/* Credentials by Type - Bar Chart */}
+        <Col xs={24} lg={12}>
+          <Card
+            title={
+              <Space>
+                <FileTextOutlined style={{ color: "#1a94fc" }} />
+                <Text strong>Credentials by Type</Text>
+              </Space>
+            }
+            hoverable
+            className="chart-card"
+          >
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={credentialsByType}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                <XAxis
+                  dataKey="type"
+                  stroke="#8c8c8c"
+                  style={{ fontSize: 12 }}
+                />
+                <YAxis stroke="#8c8c8c" style={{ fontSize: 12 }} />
+                <RechartsTooltip content={<CustomTooltip />} />
+                <Bar dataKey="count" radius={[8, 8, 0, 0]}>
+                  {credentialsByType.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </Card>
+        </Col>
+      </Row>
+
+      {/* Charts Row 2 */}
+      <Row gutter={[24, 24]} style={{ marginBottom: 24 }}>
+        {/* Status Distribution - Pie Chart */}
+        <Col xs={24} lg={8}>
+          <Card
+            title={
+              <Space>
+                <CheckCircleOutlined style={{ color: "#1a94fc" }} />
+                <Text strong>Status Distribution</Text>
+              </Space>
+            }
+            hoverable
+            className="chart-card"
+          >
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={statusData}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  label={({ name, percent }) =>
+                    `${name}: ${(percent * 100).toFixed(0)}%`
+                  }
+                  outerRadius={100}
+                  fill="#8884d8"
+                  dataKey="value"
+                >
+                  {statusData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <RechartsTooltip />
+              </PieChart>
+            </ResponsiveContainer>
+          </Card>
+        </Col>
+
+        {/* Verifications Over Time - Area Chart */}
+        <Col xs={24} lg={16}>
+          <Card
+            title={
+              <Space>
+                <EyeOutlined style={{ color: "#1a94fc" }} />
+                <Text strong>Verifications Trend</Text>
+              </Space>
+            }
+            hoverable
+            className="chart-card"
+          >
+            <ResponsiveContainer width="100%" height={300}>
+              <AreaChart data={verificationsOverTime}>
+                <defs>
+                  <linearGradient
+                    id="colorVerifications"
+                    x1="0"
+                    y1="0"
+                    x2="0"
+                    y2="1"
+                  >
+                    <stop offset="5%" stopColor="#1a94fc" stopOpacity={0.8} />
+                    <stop offset="95%" stopColor="#1a94fc" stopOpacity={0.1} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                <XAxis
+                  dataKey="month"
+                  stroke="#8c8c8c"
+                  style={{ fontSize: 12 }}
+                />
+                <YAxis stroke="#8c8c8c" style={{ fontSize: 12 }} />
+                <RechartsTooltip content={<CustomTooltip />} />
+                <Area
+                  type="monotone"
+                  dataKey="verifications"
+                  stroke="#1a94fc"
+                  strokeWidth={3}
+                  fill="url(#colorVerifications)"
+                />
+              </AreaChart>
+            </ResponsiveContainer>
           </Card>
         </Col>
       </Row>
@@ -288,7 +583,7 @@ const Dashboard: React.FC = () => {
           <Card
             title={
               <Space>
-                <FileTextOutlined style={{ color: "#1890ff" }} />
+                <FileTextOutlined style={{ color: "#1a94fc" }} />
                 <Text strong>Recent Credentials</Text>
               </Space>
             }
@@ -491,7 +786,7 @@ const Dashboard: React.FC = () => {
                   size={64}
                   style={{
                     backgroundColor: "#e6f7ff",
-                    color: "#1890ff",
+                    color: "#1a94fc",
                     marginBottom: 16,
                   }}
                 >

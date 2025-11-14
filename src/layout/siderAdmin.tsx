@@ -1,4 +1,4 @@
-import { Layout, Menu } from "antd";
+import { Layout, Menu, Button } from "antd";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
@@ -16,6 +16,15 @@ import {
   type MenuItem,
 } from "../utils/menuUtils";
 import type { RootState } from "../redux/store";
+import {
+  FaGift,
+  FaFileAlt,
+  FaEllipsisV,
+  FaTwitter,
+  FaInstagram,
+  FaDiscord,
+} from "react-icons/fa";
+import { SiTiktok } from "react-icons/si";
 import "./index.scss";
 
 const { Sider } = Layout;
@@ -171,8 +180,8 @@ const SiderComponent: React.FC<SiderProps> = ({ collapsed }) => {
       width={240}
       className="sidebar-layout"
       style={{
-        overflow: "auto",
-        height: "100vh",
+        overflow: "hidden",
+        height: "calc(100vh - 64px)",
         position: "fixed",
         left: 0,
         top: 64, // Height of the header
@@ -180,59 +189,91 @@ const SiderComponent: React.FC<SiderProps> = ({ collapsed }) => {
       }}
     >
       <div className="sidebar-menu-container">
-        {/* Main Navigation - Filtered by user permissions */}
-        {filteredMainNavItems.length > 0 && (
-          <Menu
-            theme="light"
-            mode="inline"
-            selectedKeys={selectedKeys}
-            onClick={({ key }) => navigate(key)}
-            className="sidebar-menu"
-            items={filteredMainNavItems.map((item) => ({
-              ...item,
-              style: {
-                "--item-index": item["data-index"],
-              } as React.CSSProperties,
-            }))}
-          />
-        )}
-
-        {/* Tools Section - Filtered by user permissions */}
-        {!collapsed && filteredToolsNavItems.length > 0 && (
-          <>
-            <div className="menu-divider" />
-            <div className="sidebar-section-title">{SECTION_TITLES.TOOLS}</div>
+        {/* Scrollable Menu Section */}
+        <div className="sidebar-menu-scrollable">
+          {/* Main Navigation - Filtered by user permissions */}
+          {filteredMainNavItems.length > 0 && (
             <Menu
               theme="light"
               mode="inline"
               selectedKeys={selectedKeys}
+              onClick={({ key }) => navigate(key)}
               className="sidebar-menu"
-              items={filteredToolsNavItems.map((item) => ({
+              items={filteredMainNavItems.map((item) => ({
                 ...item,
                 style: {
                   "--item-index": item["data-index"],
                 } as React.CSSProperties,
               }))}
-              onClick={({ key }) => navigate(key)}
             />
-          </>
-        )}
+          )}
 
-        {/* Footer Section */}
+          {/* Tools Section - Filtered by user permissions */}
+          {!collapsed && filteredToolsNavItems.length > 0 && (
+            <>
+              <div className="menu-divider" />
+              <div className="sidebar-section-title">
+                {SECTION_TITLES.TOOLS}
+              </div>
+              <Menu
+                theme="light"
+                mode="inline"
+                selectedKeys={selectedKeys}
+                className="sidebar-menu"
+                items={filteredToolsNavItems.map((item) => ({
+                  ...item,
+                  style: {
+                    "--item-index": item["data-index"],
+                  } as React.CSSProperties,
+                }))}
+                onClick={({ key }) => navigate(key)}
+              />
+            </>
+          )}
+        </div>
+
+        {/* Footer Section - Credits & Additional Links - Always visible at bottom */}
         {!collapsed && (
-          <>
-            <div className="menu-divider" />
-            <div className="sidebar-footer">
-              <div className="footer-link">Help</div>
-              <div className="footer-link">Support</div>
-              <div className="footer-link">Contact</div>
-              <div className="footer-link">Terms</div>
-              <div className="footer-link">Privacy</div>
-              <div className="footer-copyright">
-                © 2024 FAP Blockchain System
+          <div className="sidebar-footer-content">
+            {/* Credits Display */}
+            <div className="credits-display">50 Credits</div>
+
+            {/* Go Pro Card */}
+            <div className="go-pro-card">
+              <div className="go-pro-title">Go Pro</div>
+              <div className="go-pro-description">
+                Unlock new features, more credits, better access, and more!
+              </div>
+              <Button className="upgrade-btn" type="default">
+                Upgrade
+              </Button>
+            </div>
+
+            {/* Additional Links */}
+            <div className="footer-links-section">
+              <div className="footer-link-item">
+                <FaGift className="footer-link-icon" />
+                <span>Earn Credits</span>
+              </div>
+              <div className="footer-link-item">
+                <FaFileAlt className="footer-link-icon" />
+                <span>What's new?</span>
+                <span className="new-badge">20</span>
+              </div>
+              <div className="footer-link-item">
+                <FaEllipsisV className="footer-link-icon" />
+                <span>More from FAP</span>
               </div>
             </div>
-          </>
+
+            {/* Social Media Icons */}
+            <div className="social-media-icons">
+              <FaTwitter className="social-icon" />
+              <FaInstagram className="social-icon" />
+              <SiTiktok className="social-icon" />
+              <FaDiscord className="social-icon" />
+            </div>
+          </div>
         )}
       </div>
     </Sider>

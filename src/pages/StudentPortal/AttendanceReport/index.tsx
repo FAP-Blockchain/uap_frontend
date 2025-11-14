@@ -38,6 +38,9 @@ interface AttendanceRecord {
 
 const AttendanceReport: React.FC = () => {
   const [selectedCourse, setSelectedCourse] = useState("MLN131");
+  const [activeSemesterKey, setActiveSemesterKey] = useState<string | string[]>(
+    ["sem9"]
+  );
 
   // Mock semester data
   const semesters: Semester[] = [
@@ -473,25 +476,35 @@ const AttendanceReport: React.FC = () => {
         <Col xs={24} lg={6}>
           <Card className="sidebar-card">
             <div className="semester-list">
-              <Collapse defaultActiveKey={["sem9"]} ghost>
-                {semesters.map((semester) => (
-                  <Panel header={semester.name} key={semester.id}>
-                    {semester.courses.map((course) => (
-                      <div
-                        key={course.code}
-                        className={`course-item ${
-                          course.isActive ? "active" : ""
-                        }`}
-                        onClick={() => handleCourseClick(course.code)}
-                      >
-                        <Text strong className="course-code">
-                          {course.code}
-                        </Text>
-                        <Text className="course-name">{course.name}</Text>
-                      </div>
-                    ))}
-                  </Panel>
-                ))}
+              <Collapse
+                activeKey={activeSemesterKey}
+                onChange={(keys) => setActiveSemesterKey(keys)}
+                ghost
+              >
+                {semesters.map((semester) => {
+                  const isActive = Array.isArray(activeSemesterKey)
+                    ? activeSemesterKey.includes(semester.id)
+                    : activeSemesterKey === semester.id;
+
+                  return (
+                    <Panel header={semester.name} key={semester.id}>
+                      {semester.courses.map((course) => (
+                        <div
+                          key={course.code}
+                          className={`course-item ${
+                            course.isActive ? "active" : ""
+                          }`}
+                          onClick={() => handleCourseClick(course.code)}
+                        >
+                          <Text strong className="course-code">
+                            {course.code}
+                          </Text>
+                          <Text className="course-name">{course.name}</Text>
+                        </div>
+                      ))}
+                    </Panel>
+                  );
+                })}
               </Collapse>
             </div>
           </Card>

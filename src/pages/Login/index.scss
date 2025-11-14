@@ -105,11 +105,14 @@
   color: $text-color;
 
   .forgot-password-link {
-    color: $primary-color;
+    color: rgba(0, 0, 0, 0.5);
     text-decoration: none;
-    font-size: 14px;
+    font-size: 13px;
+    font-weight: 400;
+    transition: all 0.2s ease;
 
     &:hover {
+      color: #1a94fc;
       text-decoration: underline;
     }
   }
@@ -186,6 +189,14 @@ html.dark {
 
   .login-links {
     color: $text-color-dark;
+
+    .forgot-password-link {
+      color: rgba(255, 255, 255, 0.6);
+
+      &:hover {
+        color: #1a94fc;
+      }
+    }
   }
 
   .login-checkbox {

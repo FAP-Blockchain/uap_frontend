@@ -4,9 +4,11 @@
 .antd-dashboard {
   // Welcome Card
   .welcome-card {
-    background: linear-gradient(135deg, #1a94fc, #0d73c9);
-    color: $white;
+    background: linear-gradient(135deg, #1a94fc 0%, #0d73c9 100%);
+    color: white;
     border: none;
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(26, 148, 252, 0.25);
 
     .ant-typography {
       color: white !important;
@@ -17,35 +19,139 @@
         background: rgba(255, 255, 255, 0.2);
         border-color: rgba(255, 255, 255, 0.3);
         backdrop-filter: blur(10px);
+        color: white !important;
+
+        span {
+          color: white !important;
+        }
 
         &:hover {
           background: rgba(255, 255, 255, 0.3);
           border-color: rgba(255, 255, 255, 0.4);
           transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2);
         }
       }
 
       &:not(.ant-btn-primary) {
         background: rgba(255, 255, 255, 0.9);
         border-color: rgba(255, 255, 255, 0.9);
-        color: $primary-color;
+        color: #1a94fc !important;
+
+        span {
+          color: #1a94fc !important;
+        }
 
         &:hover {
           background: white;
           border-color: white;
-          color: $primary-color;
+          color: #1a94fc !important;
           transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(255, 255, 255, 0.3);
         }
       }
     }
   }
 
+  // Statistics Cards with Mini Charts
+  .stat-card {
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    transition: all 0.3s ease;
+    overflow: hidden;
+
+    &:hover {
+      box-shadow: 0 8px 24px rgba(26, 148, 252, 0.15);
+      transform: translateY(-4px);
+    }
+
+    .ant-statistic {
+      margin-bottom: 12px;
+
+      .ant-statistic-title {
+        font-weight: 500;
+        margin-bottom: 8px;
+        color: rgba(0, 0, 0, 0.65);
+        font-size: 14px;
+      }
+
+      .ant-statistic-content {
+        .ant-statistic-content-value {
+          font-weight: 700;
+          font-size: 28px;
+          color: #1a94fc;
+        }
+      }
+    }
+
+    .mini-chart {
+      margin-top: 8px;
+      height: 40px;
+      opacity: 0.8;
+      transition: opacity 0.3s ease;
+
+      &:hover {
+        opacity: 1;
+      }
+    }
+  }
+
+  // Chart Cards
+  .chart-card {
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    transition: all 0.3s ease;
+    background: white;
+
+    &:hover {
+      box-shadow: 0 8px 24px rgba(26, 148, 252, 0.12);
+      transform: translateY(-2px);
+    }
+
+    .ant-card-head {
+      border-bottom: 1px solid #f0f2f5;
+      padding: 16px 24px;
+
+      .ant-card-head-title {
+        font-weight: 600;
+        font-size: 16px;
+      }
+    }
+
+    .ant-card-body {
+      padding: 24px;
+    }
+  }
+
+  // Custom Tooltip for Charts
+  .custom-tooltip {
+    background: white;
+    border: 1px solid #e8e8e8;
+    border-radius: 8px;
+    padding: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+
+    p {
+      margin: 0;
+      font-size: 13px;
+      font-weight: 500;
+    }
+  }
+
   // Credential List Items
   .credential-list-item {
+    transition: all 0.3s ease;
+    border-radius: 8px;
+    margin-bottom: 8px;
+
     &:hover {
-      background: $primary-color-light !important;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(244, 131, 28, 0.1);
+      background: linear-gradient(
+        135deg,
+        rgba(26, 148, 252, 0.08),
+        rgba(13, 115, 201, 0.05)
+      ) !important;
+      transform: translateX(4px);
+      box-shadow: 0 4px 12px rgba(26, 148, 252, 0.1);
     }
   }
 
@@ -53,11 +159,12 @@
   .quick-access-card {
     transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     border-radius: 12px;
+    height: 100%;
 
     &:hover {
       transform: translateY(-8px) scale(1.02);
-      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
-      border-color: $primary-color;
+      box-shadow: 0 12px 24px rgba(26, 148, 252, 0.2);
+      border-color: #1a94fc;
     }
 
     .ant-avatar {
@@ -65,8 +172,8 @@
     }
 
     &:hover .ant-avatar {
-      transform: scale(1.1);
-      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+      transform: scale(1.1) rotate(5deg);
+      box-shadow: 0 8px 16px rgba(26, 148, 252, 0.2);
     }
   }
 
@@ -75,15 +182,27 @@
     border-radius: 12px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
     transition: all 0.3s ease;
+    border: 1px solid #f0f0f0;
 
     &:hover {
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+      box-shadow: 0 4px 16px rgba(26, 148, 252, 0.12);
       transform: translateY(-2px);
+      border-color: rgba(26, 148, 252, 0.2);
     }
 
     .ant-card-head {
       border-bottom: 1px solid #f0f2f5;
       padding: 16px 24px;
+      background: linear-gradient(
+        135deg,
+        rgba(26, 148, 252, 0.02),
+        rgba(13, 115, 201, 0.01)
+      );
+
+      .ant-card-head-title {
+        font-weight: 600;
+        font-size: 16px;
+      }
     }
 
     .ant-card-body {
@@ -96,11 +215,13 @@
     .ant-statistic-title {
       font-weight: 500;
       margin-bottom: 4px;
+      color: rgba(0, 0, 0, 0.65);
     }
 
     .ant-statistic-content {
       .ant-statistic-content-value {
         font-weight: 600;
+        color: #1a94fc;
       }
     }
   }
@@ -110,9 +231,18 @@
     padding: 12px 16px;
     border-radius: 8px;
     transition: all 0.2s ease;
+    border-bottom: 1px solid #f0f0f0;
+
+    &:last-child {
+      border-bottom: none;
+    }
 
     &:hover {
-      background: #fafafa;
+      background: linear-gradient(
+        135deg,
+        rgba(26, 148, 252, 0.05),
+        rgba(13, 115, 201, 0.02)
+      );
     }
 
     .ant-list-item-meta {
@@ -147,6 +277,7 @@
     font-weight: 500;
     padding: 0 8px;
     line-height: 20px;
+    border: none;
   }
 
   // Button Customizations
@@ -182,21 +313,21 @@
 
     // Share Button Outline Style
     &.share-btn-outline {
-      background: #e6f7ff;
-      color: #0d73c9 !important;
-      border: 2px solid #0d73c9;
+      background: rgba(255, 255, 255, 0.9);
+      color: white !important;
+      border: 2px solid rgba(255, 255, 255, 0.5);
       font-weight: 500;
 
       span {
-        color: #0d73c9 !important;
+        color: white !important;
       }
 
       &:hover {
         background: white;
-        border-color: #1a94fc;
+        border-color: white;
         color: #1a94fc !important;
         transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(26, 148, 252, 0.2);
+        box-shadow: 0 4px 12px rgba(255, 255, 255, 0.3);
 
         span {
           color: #1a94fc !important;
@@ -206,18 +337,20 @@
 
     // Generate QR Button Gradient Style
     &.generate-btn-gradient {
-      background: linear-gradient(135deg, #1a94fc, #0d73c9);
-      border: none;
+      background: rgba(255, 255, 255, 0.2);
+      border: 2px solid rgba(255, 255, 255, 0.3);
       color: white !important;
+      backdrop-filter: blur(10px);
 
       span {
         color: white !important;
       }
 
       &:hover {
-        background: linear-gradient(135deg, #0d73c9, #0a5ca8);
+        background: rgba(255, 255, 255, 0.3);
+        border-color: rgba(255, 255, 255, 0.4);
         transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(26, 148, 252, 0.4);
+        box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2);
 
         span {
           color: white !important;
@@ -261,6 +394,20 @@
     }
   }
 
+  // Recharts Customizations
+  .recharts-wrapper {
+    .recharts-cartesian-grid-horizontal line,
+    .recharts-cartesian-grid-vertical line {
+      stroke: #f0f0f0;
+      stroke-dasharray: 3 3;
+    }
+
+    .recharts-text {
+      fill: #8c8c8c;
+      font-size: 12px;
+    }
+  }
+
   // Responsive Design
   @media (max-width: 768px) {
     .welcome-card {
@@ -273,6 +420,55 @@
 
     .quick-access-card {
       margin-bottom: 16px;
+    }
+
+    .chart-card {
+      .ant-card-body {
+        padding: 16px;
+      }
+    }
+
+    .stat-card {
+      .mini-chart {
+        height: 30px;
+      }
+    }
+  }
+
+  // Dark mode support
+  html.dark & {
+    .chart-card,
+    .stat-card,
+    .ant-card {
+      background: $background-color-dark-light;
+      border-color: $border-color-dark;
+
+      .ant-card-head {
+        background: rgba(26, 148, 252, 0.05);
+        border-bottom-color: $border-color-dark;
+      }
+    }
+
+    .custom-tooltip {
+      background: $background-color-dark-light;
+      border-color: $border-color-dark;
+      color: $text-color-dark;
+
+      p {
+        color: $text-color-dark;
+      }
+    }
+
+    .ant-statistic-title {
+      color: $text-color-secondary-dark;
+    }
+
+    .ant-list-item {
+      border-bottom-color: $border-color-dark;
+
+      &:hover {
+        background: rgba(26, 148, 252, 0.1);
+      }
     }
   }
 }

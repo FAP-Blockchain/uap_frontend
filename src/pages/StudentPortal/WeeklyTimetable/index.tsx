@@ -211,7 +211,7 @@ const WeeklyTimetable: React.FC = () => {
       title: "Time Slot",
       dataIndex: "slot",
       key: "slot",
-      width: 120,
+      width: 100,
       render: (slot: number, record: TimetableSlot) => (
         <div className="time-slot-header">
           <div className="slot-number">Slot {slot}</div>
@@ -229,6 +229,7 @@ const WeeklyTimetable: React.FC = () => {
       ),
       dataIndex: "monday",
       key: "monday",
+      width: 110,
       render: (classInfo: ClassInfo) => renderClassCell(classInfo, "mon"),
     },
     {
@@ -241,6 +242,7 @@ const WeeklyTimetable: React.FC = () => {
       ),
       dataIndex: "tuesday",
       key: "tuesday",
+      width: 110,
       render: (classInfo: ClassInfo) => renderClassCell(classInfo, "tue"),
     },
     {
@@ -253,6 +255,7 @@ const WeeklyTimetable: React.FC = () => {
       ),
       dataIndex: "wednesday",
       key: "wednesday",
+      width: 110,
       render: (classInfo: ClassInfo) => renderClassCell(classInfo, "wed"),
     },
     {
@@ -265,6 +268,7 @@ const WeeklyTimetable: React.FC = () => {
       ),
       dataIndex: "thursday",
       key: "thursday",
+      width: 110,
       render: (classInfo: ClassInfo) => renderClassCell(classInfo, "thu"),
     },
     {
@@ -277,6 +281,7 @@ const WeeklyTimetable: React.FC = () => {
       ),
       dataIndex: "friday",
       key: "friday",
+      width: 110,
       render: (classInfo: ClassInfo) => renderClassCell(classInfo, "fri"),
     },
     {
@@ -289,6 +294,7 @@ const WeeklyTimetable: React.FC = () => {
       ),
       dataIndex: "saturday",
       key: "saturday",
+      width: 110,
       render: (classInfo: ClassInfo) => renderClassCell(classInfo, "sat"),
     },
     {
@@ -301,6 +307,7 @@ const WeeklyTimetable: React.FC = () => {
       ),
       dataIndex: "sunday",
       key: "sunday",
+      width: 110,
       render: (classInfo: ClassInfo) => renderClassCell(classInfo, "sun"),
     },
   ];
@@ -342,23 +349,35 @@ const WeeklyTimetable: React.FC = () => {
               </div>
             </Col>
             <Col>
-              <Space>
-                <Button
-                  icon={<ReloadOutlined />}
-                  onClick={() => setSelectedWeek(dayjs())}
-                >
-                  Current Week
-                </Button>
-                <Select defaultValue="2025" style={{ width: 100 }}>
-                  <Option value="2024">2024</Option>
-                  <Option value="2025">2025</Option>
-                </Select>
-                <DatePicker.WeekPicker
-                  value={selectedWeek}
-                  onChange={(date) => date && setSelectedWeek(date)}
-                  style={{ width: 200 }}
-                />
-              </Space>
+              <div className="date-controls">
+                <Space size="middle">
+                  <Button
+                    icon={<ReloadOutlined />}
+                    onClick={() => setSelectedWeek(dayjs())}
+                    className="current-week-btn"
+                  >
+                    Current Week
+                  </Button>
+                  <div className="date-select-group">
+                    <Select
+                      defaultValue="2025"
+                      className="year-select"
+                      suffixIcon={null}
+                    >
+                      <Option value="2024">2024</Option>
+                      <Option value="2025">2025</Option>
+                    </Select>
+                    <DatePicker.WeekPicker
+                      value={selectedWeek}
+                      onChange={(date) => date && setSelectedWeek(date)}
+                      className="week-picker"
+                      format="YYYY-wo"
+                      placeholder="Select Week"
+                      allowClear={false}
+                    />
+                  </div>
+                </Space>
+              </div>
             </Col>
           </Row>
         </Card>
@@ -374,7 +393,6 @@ const WeeklyTimetable: React.FC = () => {
           bordered
           size="middle"
           className="timetable-table"
-          scroll={{ x: 1200 }}
         />
       </Card>
 

@@ -422,143 +422,326 @@
   }
 }
 
-// Sidebar styles
+// Sidebar styles - Modern minimalist design (Suno.com style)
 .sidebar-layout {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  background-color: #fff;
+  box-shadow: none;
+  background-color: #fafafa; // Beige/cream background
   transition: width 0.2s cubic-bezier(0.645, 0.045, 0.355, 1);
+  border-right: 1px solid rgba(0, 0, 0, 0.06);
+  overflow: hidden !important; // Hide external scrollbar
+  display: flex !important;
+  flex-direction: column !important;
 
-  .sidebar-menu-container {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
+  // Custom scrollbar - hidden
+  &::-webkit-scrollbar {
+    width: 0;
+    display: none;
   }
 
-  .sidebar-new-post-btn {
-    margin: 16px 16px 8px;
-    padding: 8px 12px;
-    background-color: #1890ff;
-    border: none;
-    border-radius: 6px;
-    color: #fff;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
+  -ms-overflow-style: none; // IE and Edge
+  scrollbar-width: none; // Firefox
 
-    &:hover {
-      background-color: #40a9ff;
-      transform: translateY(-1px);
-    }
+  // Override Ant Design Sider styles
+  .ant-layout-sider-children {
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+  }
 
-    &:active {
-      background-color: #096dd9;
-      transform: translateY(0);
+  .sidebar-menu-container {
+    height: 100% !important;
+    max-height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    padding: 0;
+    overflow: hidden;
+
+    // Menu scrollable section
+    .sidebar-menu-scrollable {
+      flex: 1 1 auto;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 16px 12px;
+      min-height: 0; // Important for flex scrolling
+      max-height: 100%;
+
+      // Hide scrollbar but keep functionality
+      &::-webkit-scrollbar {
+        width: 0;
+        display: none;
+      }
+
+      -ms-overflow-style: none;
+      scrollbar-width: none;
     }
   }
 
   .menu-divider {
     height: 1px;
-    margin: 8px 16px;
-    background-color: #f0f0f0;
+    margin: 12px 0;
+    background-color: rgba(0, 0, 0, 0.08);
+    border: none;
   }
 
   .sidebar-section-title {
-    padding: 12px 24px 4px;
+    padding: 8px 16px 4px;
     color: #8c8c8c;
-    font-size: 12px;
+    font-size: 11px;
     text-transform: uppercase;
-    letter-spacing: 1px;
+    letter-spacing: 0.5px;
+    font-weight: 600;
   }
 
-  // Enhance the menu styling
+  // Modern menu styling - Suno.com style
   .sidebar-menu {
     border-right: none;
+    background: transparent;
+    padding: 0;
 
     .ant-menu-item {
       position: relative;
-      margin: 4px 8px;
-      border-radius: 6px;
-      transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
-      animation-delay: calc(var(--item-index) * 0.05s);
+      margin: 2px 0;
+      border-radius: 10px;
+      height: 44px;
+      line-height: 44px;
+      padding: 0 16px !important;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      font-size: 14px;
+      font-weight: 500;
+      color: rgba(0, 0, 0, 0.5); // Muted black/gray - default state
+      background: transparent;
 
-      &::before {
-        content: "";
-        position: absolute;
-        left: 0;
-        top: 0;
-        height: 100%;
-        width: 3px;
-        background-color: #1890ff;
-        border-radius: 0 2px 2px 0;
-        transform: scaleY(0);
-        opacity: 0;
-        transition: transform 0.3s cubic-bezier(0.645, 0.045, 0.355, 1),
-          opacity 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
+      // Icon styling - Default gray color
+      .ant-menu-item-icon {
+        font-size: 20px;
+        margin-right: 12px;
+        color: rgba(0, 0, 0, 0.5) !important; // Gray color like Student Profile
+        transition: all 0.2s ease;
       }
 
-      &:hover {
-        background-color: #f0f7ff;
-        transform: translateX(2px);
-      }
-
+      // Active/Selected state - Blue color matching project theme
       &.ant-menu-item-selected {
-        background-color: #e6f7ff;
-        color: #1890ff;
-        font-weight: 500;
+        background: linear-gradient(
+          135deg,
+          rgba(26, 148, 252, 0.1),
+          rgba(13, 115, 201, 0.08)
+        );
+        color: #1a94fc; // Blue when active
+        font-weight: 600;
 
-        &::before {
-          transform: scaleY(1);
-          opacity: 1;
+        // Removed vertical bar (::before)
+
+        .ant-menu-item-icon {
+          color: #1a94fc !important;
         }
       }
 
-      .ant-menu-title-content {
-        transition: margin-left 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
+      // Hover state - Blue with smooth transition
+      &:hover:not(.ant-menu-item-selected) {
+        background: rgba(26, 148, 252, 0.08);
+        color: #1a94fc;
+        transform: translateX(2px);
+
+        .ant-menu-item-icon {
+          color: #1a94fc !important;
+        }
       }
 
-      &:hover .ant-menu-title-content {
-        margin-left: 2px;
+      // Active state
+      &:active {
+        transform: translateX(1px) scale(0.98);
+      }
+
+      .ant-menu-title-content {
+        transition: all 0.2s ease;
       }
     }
 
     .ant-menu-submenu-title {
-      margin: 4px 8px;
-      border-radius: 6px;
-      transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
+      margin: 2px 0;
+      border-radius: 10px;
+      height: 44px;
+      line-height: 44px;
+      padding: 0 16px !important;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      font-size: 14px;
+      font-weight: 500;
+      color: rgba(0, 0, 0, 0.5); // Muted black/gray
+      background: transparent;
+
+      .ant-menu-item-icon {
+        font-size: 20px;
+        margin-right: 12px;
+        color: inherit;
+      }
 
       &:hover {
-        background-color: #f0f7ff;
+        background: rgba(26, 148, 252, 0.08);
+        color: #1a94fc;
+
+        .ant-menu-item-icon {
+          color: #1a94fc !important;
+        }
       }
     }
 
-    // Add subtle entrance animation for items
-    .ant-menu-item,
-    .ant-menu-submenu {
-      animation: fadeInRight 0.5s cubic-bezier(0.645, 0.045, 0.355, 1) both;
-      animation-delay: calc(var(--item-index) * 0.05s);
+    // Submenu items
+    .ant-menu-sub {
+      background: transparent;
+      padding-left: 0;
+
+      .ant-menu-item {
+        padding-left: 48px !important;
+        font-size: 13px;
+        height: 40px;
+        line-height: 40px;
+      }
     }
   }
 
   .sidebar-footer {
     margin-top: auto;
-    padding: 16px;
+    padding: 16px 0 8px;
+    display: none; // Hidden as requested
+  }
 
-    .footer-link {
-      font-size: 12px;
-      color: #8c8c8c;
-      cursor: pointer;
-      margin-bottom: 6px;
-      transition: color 0.2s ease;
+  // Footer Content Section (Suno.com style)
+  .sidebar-footer-content {
+    flex-shrink: 0;
+    flex-grow: 0;
+    padding: 12px 12px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    background: #fafafa;
+    border-top: 1px solid rgba(0, 0, 0, 0.06);
+    position: relative;
+    z-index: 1;
 
-      &:hover {
-        color: #1890ff;
+    // Credits Display
+    .credits-display {
+      text-align: center;
+      color: rgba(0, 0, 0, 0.5);
+      font-size: 13px;
+      font-weight: 500;
+      padding: 4px 0;
+    }
+
+    // Go Pro Card
+    .go-pro-card {
+      background: linear-gradient(135deg, #1a94fc, #0d73c9);
+      border-radius: 10px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      box-shadow: 0 2px 8px rgba(26, 148, 252, 0.25);
+
+      .go-pro-title {
+        font-size: 15px;
+        font-weight: 700;
+        color: #ffffff;
+      }
+
+      .go-pro-description {
+        font-size: 12px;
+        color: #ffffff;
+        line-height: 1.4;
+        opacity: 0.95;
+      }
+
+      .upgrade-btn {
+        background: rgba(255, 255, 255, 0.95);
+        border: none;
+        border-radius: 8px;
+        height: 32px;
+        font-weight: 600;
+        font-size: 13px;
+        color: #1a94fc;
+        transition: all 0.2s ease;
+
+        &:hover {
+          background: #ffffff;
+          transform: translateY(-1px);
+          box-shadow: 0 2px 4px rgba(255, 255, 255, 0.3);
+          color: #0d73c9;
+        }
       }
     }
 
-    .footer-copyright {
-      font-size: 11px;
-      color: #bfbfbf;
-      margin-top: 8px;
+    // Footer Links Section
+    .footer-links-section {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+
+      .footer-link-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 6px 10px;
+        border-radius: 8px;
+        color: rgba(0, 0, 0, 0.5);
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        position: relative;
+
+        .footer-link-icon {
+          font-size: 18px;
+          color: inherit;
+        }
+
+        .new-badge {
+          margin-left: auto;
+          background: #000000;
+          color: #ffffff;
+          border-radius: 50%;
+          width: 20px;
+          height: 20px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 11px;
+          font-weight: 600;
+        }
+
+        &:hover {
+          background: rgba(26, 148, 252, 0.08);
+          color: #1a94fc;
+
+          .footer-link-icon {
+            color: #1a94fc !important;
+          }
+        }
+      }
+    }
+
+    // Social Media Icons
+    .social-media-icons {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      padding: 8px 0 0;
+      margin-top: 4px;
+      border-top: 1px solid rgba(0, 0, 0, 0.08);
+      min-height: 40px; // Ensure minimum height
+
+      .social-icon {
+        font-size: 16px;
+        color: rgba(0, 0, 0, 0.5);
+        cursor: pointer;
+        transition: all 0.2s ease;
+        flex-shrink: 0;
+
+        &:hover {
+          color: #000000;
+          transform: scale(1.1);
+        }
+      }
     }
   }
 }

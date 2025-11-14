@@ -4,24 +4,25 @@
  */
 
 import {
-  BarChartOutlined,
   BellOutlined,
   BookOutlined,
   CalendarOutlined,
   CheckSquareOutlined,
   DashboardOutlined,
   EditOutlined,
-  FileSearchOutlined,
   FileTextOutlined,
+  HomeOutlined,
+  IdcardOutlined,
   LineChartOutlined,
   ScheduleOutlined,
   SecurityScanOutlined,
   SettingOutlined,
   ShareAltOutlined,
-  SolutionOutlined,
   TeamOutlined,
   TrophyOutlined,
   UserOutlined,
+  CheckCircleOutlined,
+  RiseOutlined,
 } from "@ant-design/icons";
 import { Outlet } from "react-router-dom";
 import type { Permission, RoleCode } from "../constants/roles";
@@ -226,7 +227,7 @@ export const studentPortalRoutes: RouteConfig = {
       path: "",
       element: <Dashboard />,
       menuLabel: "Student Dashboard",
-      menuIcon: <SolutionOutlined />,
+      menuIcon: <HomeOutlined style={{ color: "rgba(0, 0, 0, 0.5)" }} />,
       showInMenu: true,
       allowedRoles: [ROLE_CODES.STUDENT], // Only students
       menuIndex: 5,
@@ -241,7 +242,7 @@ export const studentPortalRoutes: RouteConfig = {
       path: "credentials",
       element: <MyCredentials />,
       menuLabel: "My Credentials",
-      menuIcon: <FileTextOutlined />,
+      menuIcon: <IdcardOutlined style={{ color: "rgba(0, 0, 0, 0.5)" }} />,
       showInMenu: true,
       allowedRoles: [ROLE_CODES.STUDENT], // Only students
       menuIndex: 6,
@@ -256,7 +257,7 @@ export const studentPortalRoutes: RouteConfig = {
       path: "timetable",
       element: <WeeklyTimetable />,
       menuLabel: "Weekly Timetable",
-      menuIcon: <CalendarOutlined />,
+      menuIcon: <CalendarOutlined style={{ color: "rgba(0, 0, 0, 0.5)" }} />,
       showInMenu: true,
       allowedRoles: [ROLE_CODES.STUDENT], // Only students
       menuIndex: 7,
@@ -266,7 +267,7 @@ export const studentPortalRoutes: RouteConfig = {
       path: "attendance-report",
       element: <AttendanceReport />,
       menuLabel: "Attendance Report",
-      menuIcon: <FileSearchOutlined />,
+      menuIcon: <CheckCircleOutlined style={{ color: "rgba(0, 0, 0, 0.5)" }} />,
       showInMenu: true,
       allowedRoles: [ROLE_CODES.STUDENT], // Only students
       menuIndex: 8,
@@ -276,7 +277,7 @@ export const studentPortalRoutes: RouteConfig = {
       path: "grade-report",
       element: <GradeReport />,
       menuLabel: "Grade Report",
-      menuIcon: <BarChartOutlined />,
+      menuIcon: <RiseOutlined style={{ color: "rgba(0, 0, 0, 0.5)" }} />,
       showInMenu: true,
       allowedRoles: [ROLE_CODES.STUDENT], // Only students
       menuIndex: 9,
@@ -286,7 +287,7 @@ export const studentPortalRoutes: RouteConfig = {
       path: "share",
       element: <SharePortal />,
       menuLabel: "Share Portal",
-      menuIcon: <ShareAltOutlined />,
+      menuIcon: <ShareAltOutlined style={{ color: "rgba(0, 0, 0, 0.5)" }} />,
       showInMenu: true,
       allowedRoles: [ROLE_CODES.STUDENT], // Only students
       menuIndex: 10,
@@ -296,7 +297,7 @@ export const studentPortalRoutes: RouteConfig = {
       path: "profile",
       element: <Profile />,
       menuLabel: "Student Profile",
-      menuIcon: <UserOutlined />,
+      menuIcon: <UserOutlined style={{ color: "rgba(0, 0, 0, 0.5)" }} />,
       showInMenu: true,
       allowedRoles: [ROLE_CODES.STUDENT], // Only students
       menuIndex: 11,
