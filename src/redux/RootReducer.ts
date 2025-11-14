@@ -6,5 +6,5 @@ const rootReducer = combineReducers({
   cart: cartSlice,
   auth: authSlice,
 });
-export type RootState = ReturnType<typeof rootReducer>;
+
 export default rootReducer;

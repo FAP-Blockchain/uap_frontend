@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Card,
   Tabs,
@@ -15,6 +15,7 @@ import {
   Divider,
   Tag,
   Alert,
+  Result,
 } from "antd";
 import {
   UploadOutlined,
@@ -23,8 +24,12 @@ import {
   SaveOutlined,
   DownloadOutlined,
 } from "@ant-design/icons";
+import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import dayjs from "dayjs";
+import { useSelector } from "react-redux";
+import type { RootState } from "../../../redux/store";
+import { useRoleAccess } from "../../../hooks/useRoleAccess";
 import AuthServices from "../../../services/auth/api.service";
 import type {
   RegisterUserRequest,
@@ -46,6 +51,32 @@ const BulkRegister: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<BulkRegisterResponse | null>(null);
   const [form] = Form.useForm();
+  const navigate = useNavigate();
+  const { isAdmin, userProfile } = useRoleAccess();
+  const isAuthenticated = useSelector(
+    (state: RootState) => state.auth.isAuthenticated
+  );
+  const accessToken = useSelector(
+    (state: RootState) => state.auth.accessToken
+  );
+
+  // Check authentication and admin role on mount
+  useEffect(() => {
+    if (!isAuthenticated || !accessToken) {
+      toast.error("Please login to access this page");
+      setTimeout(() => {
+        navigate("/login");
+      }, 2000);
+      return;
+    }
+
+    if (!isAdmin()) {
+      toast.error("Only Admin users can bulk register users");
+      setTimeout(() => {
+        navigate(-1); // Go back to previous page
+      }, 2000);
+    }
+  }, [isAuthenticated, accessToken, isAdmin, navigate]);
 
   const handleAddUser = (values: any) => {
     const newUser: UserFormData = {
@@ -175,6 +206,46 @@ const BulkRegister: React.FC = () => {
     },
   ];
 
+  // Show error if not authenticated
+  if (!isAuthenticated || !accessToken) {
+    return (
+      <div className="bulk-register-container">
+        <Card>
+          <Result
+            status="403"
+            title="Authentication Required"
+            subTitle="Please login to access this page"
+            extra={
+              <Button type="primary" onClick={() => navigate("/login")}>
+                Go to Login
+              </Button>
+            }
+          />
+        </Card>
+      </div>
+    );
+  }
+
+  // Show error if not admin
+  if (!isAdmin()) {
+    return (
+      <div className="bulk-register-container">
+        <Card>
+          <Result
+            status="403"
+            title="Access Denied"
+            subTitle="Only Admin users can bulk register users"
+            extra={
+              <Button type="primary" onClick={() => navigate(-1)}>
+                Go Back
+              </Button>
+            }
+          />
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="bulk-register-container">
       <Card>
@@ -183,6 +254,14 @@ const BulkRegister: React.FC = () => {
             <UserAddOutlined /> Bulk Register Users
           </Title>
         </div>
+
+        <Alert
+          message="Admin Only"
+          description={`You are logged in as ${userProfile?.fullName} (${userProfile?.role}). Only Admin users can bulk register users.`}
+          type="info"
+          showIcon
+          style={{ marginBottom: 24 }}
+        />
 
         <Tabs defaultActiveKey="manual">
           <TabPane tab="Manual Input" key="manual">

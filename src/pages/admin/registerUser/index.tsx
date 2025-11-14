@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Card,
   Form,
@@ -10,11 +10,16 @@ import {
   Space,
   message,
   Divider,
+  Alert,
+  Result,
 } from "antd";
-import { UserAddOutlined, SaveOutlined } from "@ant-design/icons";
+import { UserAddOutlined, SaveOutlined, LockOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import dayjs from "dayjs";
+import { useSelector } from "react-redux";
+import type { RootState } from "../../../redux/store";
+import { useRoleAccess } from "../../../hooks/useRoleAccess";
 import AuthServices from "../../../services/auth/api.service";
 import type { RegisterUserRequest } from "../../../Types/Auth";
 import "./index.scss";
@@ -29,6 +34,29 @@ const RegisterUser: React.FC = () => {
     ""
   );
   const navigate = useNavigate();
+  const { isAdmin, userProfile } = useRoleAccess();
+  const isAuthenticated = useSelector(
+    (state: RootState) => state.auth.isAuthenticated
+  );
+  const accessToken = useSelector((state: RootState) => state.auth.accessToken);
+
+  // Check authentication and admin role on mount
+  useEffect(() => {
+    if (!isAuthenticated || !accessToken) {
+      toast.error("Please login to access this page");
+      setTimeout(() => {
+        navigate("/login");
+      }, 2000);
+      return;
+    }
+
+    if (!isAdmin()) {
+      toast.error("Only Admin users can register new users");
+      setTimeout(() => {
+        navigate(-1); // Go back to previous page
+      }, 2000);
+    }
+  }, [isAuthenticated, accessToken, isAdmin, navigate]);
 
   const handleRoleChange = (value: string) => {
     setSelectedRole(value as "Student" | "Teacher");
@@ -95,6 +123,46 @@ const RegisterUser: React.FC = () => {
     }
   };
 
+  // Show error if not authenticated
+  if (!isAuthenticated || !accessToken) {
+    return (
+      <div className="register-user-container">
+        <Card>
+          <Result
+            status="403"
+            title="Authentication Required"
+            subTitle="Please login to access this page"
+            extra={
+              <Button type="primary" onClick={() => navigate("/login")}>
+                Go to Login
+              </Button>
+            }
+          />
+        </Card>
+      </div>
+    );
+  }
+
+  // Show error if not admin
+  if (!isAdmin()) {
+    return (
+      <div className="register-user-container">
+        <Card>
+          <Result
+            status="403"
+            title="Access Denied"
+            subTitle="Only Admin users can register new users"
+            extra={
+              <Button type="primary" onClick={() => navigate(-1)}>
+                Go Back
+              </Button>
+            }
+          />
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="register-user-container">
       <Card>
@@ -103,6 +171,14 @@ const RegisterUser: React.FC = () => {
             <UserAddOutlined /> Register New User
           </Title>
         </div>
+
+        <Alert
+          message="Admin Only"
+          description={`You are logged in as ${userProfile?.fullName} (${userProfile?.role}). Only Admin users can register new users.`}
+          type="info"
+          showIcon
+          style={{ marginBottom: 24 }}
+        />
 
         <Form
           form={form}

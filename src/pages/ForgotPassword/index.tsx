@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { Button, Form, Input, Typography, Steps, message } from "antd";
-import { MailOutlined, SafetyOutlined, LockOutlined } from "@ant-design/icons";
+import { Button, Form, Input, Typography, Steps } from "antd";
+import { MailOutlined, LockOutlined } from "@ant-design/icons";
 import { useNavigate, Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import AuthServices from "../../services/auth/api.service";
@@ -12,11 +12,8 @@ interface EmailForm {
   email: string;
 }
 
-interface OtpForm {
-  otp: string;
-}
-
-interface PasswordForm {
+interface ResetPasswordForm {
+  otpCode: string;
   newPassword: string;
   confirmPassword: string;
 }
@@ -24,14 +21,12 @@ interface PasswordForm {
 const ForgotPassword: React.FC = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [email, setEmail] = useState("");
-  const [otpCode, setOtpCode] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [countdown, setCountdown] = useState(0);
   const navigate = useNavigate();
 
   const [emailForm] = Form.useForm<EmailForm>();
-  const [otpForm] = Form.useForm<OtpForm>();
-  const [passwordForm] = Form.useForm<PasswordForm>();
+  const [resetPasswordForm] = Form.useForm<ResetPasswordForm>();
 
   // Countdown timer for resend OTP
   React.useEffect(() => {
@@ -64,36 +59,13 @@ const ForgotPassword: React.FC = () => {
     }
   };
 
-  // Step 2: Verify OTP
-  const handleVerifyOtp = async (values: OtpForm) => {
-    setIsLoading(true);
-    try {
-      await AuthServices.verifyOtp({
-        email: email,
-        code: values.otp,
-        purpose: "PasswordReset",
-      });
-      setOtpCode(values.otp);
-      setCurrentStep(2);
-      toast.success("OTP verified successfully!");
-    } catch (error: any) {
-      const errorMessage =
-        error.response?.data?.message ||
-        error.message ||
-        "Invalid or expired OTP!";
-      toast.error(errorMessage);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Step 3: Reset Password
-  const handleResetPassword = async (values: PasswordForm) => {
+  // Step 2: Reset Password with OTP
+  const handleResetPassword = async (values: ResetPasswordForm) => {
     setIsLoading(true);
     try {
       await AuthServices.resetPasswordWithOtp({
         email: email,
-        otpCode: otpCode,
+        otpCode: values.otpCode,
         newPassword: values.newPassword,
         confirmPassword: values.confirmPassword,
       });
@@ -105,7 +77,7 @@ const ForgotPassword: React.FC = () => {
       const errorMessage =
         error.response?.data?.message ||
         error.message ||
-        "Failed to reset password. Please try again!";
+        "Failed to reset password. Please check your OTP and try again!";
       toast.error(errorMessage);
     } finally {
       setIsLoading(false);
@@ -140,11 +112,7 @@ const ForgotPassword: React.FC = () => {
       icon: <MailOutlined />,
     },
     {
-      title: "Verify OTP",
-      icon: <SafetyOutlined />,
-    },
-    {
-      title: "Set New Password",
+      title: "Reset Password",
       icon: <LockOutlined />,
     },
   ];
@@ -208,11 +176,11 @@ const ForgotPassword: React.FC = () => {
             </Form>
           )}
 
-          {/* Step 2: OTP Verification */}
+          {/* Step 2: Reset Password with OTP */}
           {currentStep === 1 && (
             <Form
-              form={otpForm}
-              onFinish={handleVerifyOtp}
+              form={resetPasswordForm}
+              onFinish={handleResetPassword}
               layout="vertical"
               size="large"
               className="forgot-password-form"
@@ -225,10 +193,9 @@ const ForgotPassword: React.FC = () => {
 
               <Form.Item
                 label="OTP Code"
-                name="otp"
+                name="otpCode"
                 rules={[
                   { required: true, message: "Please enter OTP code!" },
-                  { len: 6, message: "OTP code must be 6 digits!" },
                   {
                     pattern: /^\d+$/,
                     message: "OTP code must contain only numbers!",
@@ -236,51 +203,13 @@ const ForgotPassword: React.FC = () => {
                 ]}
               >
                 <Input
-                  prefix={<SafetyOutlined />}
-                  placeholder="Enter OTP code (6 digits)"
-                  maxLength={6}
+                  placeholder="Enter OTP code"
+                  maxLength={10}
                   disabled={isLoading}
                   className="otp-input"
                 />
               </Form.Item>
 
-              <Form.Item>
-                <Button
-                  type="primary"
-                  htmlType="submit"
-                  block
-                  loading={isLoading}
-                  className="forgot-password-button"
-                >
-                  Verify OTP
-                </Button>
-              </Form.Item>
-
-              <div className="forgot-password-links">
-                <Button
-                  type="link"
-                  onClick={handleResendOtp}
-                  disabled={countdown > 0 || isLoading}
-                  className="resend-otp-button"
-                >
-                  {countdown > 0
-                    ? `Resend code in ${countdown}s`
-                    : "Resend OTP Code"}
-                </Button>
-                <Link to="/login">Back to login</Link>
-              </div>
-            </Form>
-          )}
-
-          {/* Step 3: New Password */}
-          {currentStep === 2 && (
-            <Form
-              form={passwordForm}
-              onFinish={handleResetPassword}
-              layout="vertical"
-              size="large"
-              className="forgot-password-form"
-            >
               <Form.Item
                 label="New Password"
                 name="newPassword"
@@ -337,6 +266,16 @@ const ForgotPassword: React.FC = () => {
               </Form.Item>
 
               <div className="forgot-password-links">
+                <Button
+                  type="link"
+                  onClick={handleResendOtp}
+                  disabled={countdown > 0 || isLoading}
+                  className="resend-otp-button"
+                >
+                  {countdown > 0
+                    ? `Resend code in ${countdown}s`
+                    : "Resend OTP Code"}
+                </Button>
                 <Link to="/login">Back to login</Link>
               </div>
             </Form>

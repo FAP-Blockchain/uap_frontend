@@ -7,8 +7,8 @@ import type {
   ChangePasswordRequest,
   ChangePasswordResponse,
   SendOtpRequest,
-  VerifyOtpRequest,
   ResetPasswordWithOtpRequest,
+  ChangePasswordWithOtpRequest,
   OtpResponse,
   LogoutResponse,
   RegisterUserRequest,
@@ -56,28 +56,20 @@ class AuthServices {
   }
 
   /**
-   * Verify OTP code
+   * Change password with OTP (requires authentication)
    */
-  static async verifyOtp(params: VerifyOtpRequest): Promise<OtpResponse> {
-    const response = await api.post<OtpResponse>("/Auth/verify-otp", params);
-    return response.data;
-  }
-
-  /**
-   * Change password (requires authentication)
-   */
-  static async changePassword(
-    params: ChangePasswordRequest
+  static async changePasswordWithOtp(
+    params: ChangePasswordWithOtpRequest
   ): Promise<ChangePasswordResponse> {
     const response = await api.put<ChangePasswordResponse>(
-      "/Auth/change-password",
+      "/Auth/change-password-with-otp",
       params
     );
     return response.data;
   }
 
   /**
-   * Reset password using OTP
+   * Reset password using OTP (for forgot password - no login required)
    */
   static async resetPasswordWithOtp(
     params: ResetPasswordWithOtpRequest

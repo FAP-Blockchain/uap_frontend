@@ -23,18 +23,19 @@ export interface ChangePasswordRequest {
 
 export interface SendOtpRequest {
   email: string;
-  purpose: "Registration" | "PasswordReset";
-}
-
-export interface VerifyOtpRequest {
-  email: string;
-  code: string;
-  purpose: "Registration" | "PasswordReset";
+  purpose?: string; // Optional, backend defaults to "General" if not provided
 }
 
 export interface ResetPasswordWithOtpRequest {
   email: string;
   otpCode: string;
+  newPassword: string;
+  confirmPassword: string;
+}
+
+export interface ChangePasswordWithOtpRequest {
+  otpCode: string;
+  currentPassword: string;
   newPassword: string;
   confirmPassword: string;
 }
