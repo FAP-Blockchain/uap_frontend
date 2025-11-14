@@ -1,21 +1,24 @@
 @use "../../../styles/theme-variables" as *;
 
 .classes-management {
-  padding: 20px;
-  background: #f4f6fb;
-  min-height: calc(100vh - 64px);
+ 
+  
 
   .classes-panel {
     border-radius: 12px;
     border: 1px solid #e4e9f2;
     box-shadow: 0 6px 24px rgba(15, 23, 42, 0.06);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 
     .ant-card-body {
-      min-height: calc(100vh - 120px);
-      padding: 16px 20px;
+      flex: 1;
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      padding: 14px 18px;
+      overflow: hidden;
     }
   }
 
@@ -24,49 +27,47 @@
     justify-content: space-between;
     align-items: flex-start;
     gap: 16px;
+    margin-bottom: 10px;
 
     .title-block {
       display: flex;
       align-items: center;
-      gap: 14px;
+      gap: 12px;
 
       .title-icon {
-        width: 48px;
-        height: 48px;
-        border-radius: 12px;
-        background: linear-gradient(135deg, #6157ff, #ee49fd);
-        color: #fff;
+        width: 42px;
+        height: 42px;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #1a94fc, #0d73c9);
+        color: white;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 20px;
-        box-shadow: 0 8px 20px rgba(97, 87, 255, 0.35);
+        font-size: 18px;
+        box-shadow: 0 6px 16px rgba(26, 148, 252, 0.3);
       }
 
       .eyebrow {
         text-transform: uppercase;
-        font-size: 12px;
+        font-size: 11px;
         letter-spacing: 0.08em;
-        margin-bottom: 4px;
+        margin-bottom: 2px;
         color: #8c8c8c;
       }
 
       h2 {
         margin: 0;
-        font-size: 24px;
+        font-size: 22px;
         font-weight: 700;
         color: #0f172a;
-      }
-
-      .subtitle {
-        font-size: 13px;
-        color: #8c8c8c;
+        line-height: 1.2;
       }
     }
 
     .header-actions {
       display: flex;
       gap: 8px;
+      align-items: center;
 
       .toggle-details-btn {
         border-radius: 8px;
@@ -74,7 +75,8 @@
         border-color: transparent;
         color: #2f54eb;
         font-weight: 500;
-        padding: 0 14px;
+        padding: 0 12px;
+        height: 36px;
 
         &:hover {
           background: #d6e4ff;
@@ -83,11 +85,11 @@
       }
 
       .primary-action {
-        border-radius: 10px;
-        padding: 0 20px;
+        height: 36px;
+        padding: 0 18px;
+        border-radius: 8px;
         font-weight: 600;
-        height: 42px;
-        box-shadow: 0 12px 20px rgba(0, 85, 255, 0.2);
+        box-shadow: 0 8px 16px rgba(0, 85, 255, 0.15);
       }
     }
   }
@@ -95,22 +97,28 @@
   .stats-compact {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
+    gap: 8px;
+    margin-bottom: 8px;
 
     .stat-chip {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      padding: 6px 12px;
-      border-radius: 999px;
+      padding: 4px 10px;
+      border-radius: 20px;
       background: #f5f7fb;
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 600;
       color: #475467;
 
       .value {
-        font-size: 16px;
+        font-size: 13px;
         color: #111827;
+        font-weight: 700;
+      }
+
+      .label {
+        font-size: 11px;
       }
 
       &.total {
@@ -179,48 +187,83 @@
 
   .filters-row {
     border-top: 1px solid #eef1f7;
-    padding-top: 16px;
+    padding-top: 12px;
+    margin-bottom: 8px;
 
-    label {
-      font-size: 13px;
-      color: #6b7280;
-      font-weight: 500;
-      display: block;
-      margin-bottom: 6px;
-    }
+    .filter-row-expanded {
+      .filter-field {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        width: 100%;
 
-    .ant-input-affix-wrapper,
-    .ant-select-selector {
-      border-radius: 8px !important;
-      min-height: 40px;
-    }
+        label {
+          font-size: 12px;
+          color: #6b7280;
+        }
 
-    .filter-meta {
-      font-size: 13px;
-      color: #6b7280;
+        .ant-input-affix-wrapper,
+        .ant-select-selector {
+          border-radius: 8px;
+          border: 1px solid #d9dce3;
+          min-height: 40px;
+        }
+      }
 
-      &.text-right {
-        text-align: right;
+      .filter-meta {
+        display: flex;
+        align-items: flex-end;
+        font-size: 12px;
+        color: #6b7280;
+        padding-bottom: 8px;
+
+        strong {
+          color: #111827;
+        }
       }
     }
   }
 
   .filters-row.compact-layout {
     border-top: none;
-    padding-top: 8px;
+    padding-top: 6px;
 
-    label {
-      display: none;
+    .filter-row-compact {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      .ant-col {
+        flex: 1;
+      }
+
+      .semester-select-compact {
+        .ant-select-selector {
+          min-height: 32px;
+          border-radius: 8px;
+        }
+      }
+
+      .filter-meta-compact {
+        display: flex;
+        font-size: 12px;
+        color: #6b7280;
+        white-space: nowrap;
+      }
     }
   }
 
   .table-section {
     flex: 1;
+    display: flex;
+    flex-direction: column;
+    margin-top: 8px;
 
     .ant-table-wrapper {
       flex: 1;
       display: flex;
       flex-direction: column;
+      overflow: hidden;
     }
 
     .ant-table {
@@ -231,68 +274,91 @@
 
     .ant-table-container {
       flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .ant-table-body {
+      flex: 1;
+      overflow-y: auto !important;
     }
 
     .ant-table-thead > tr > th {
-      background: #f9fafc;
+      background: #f8fafc;
+      color: #4b5563;
       font-weight: 600;
-      color: #6b7280;
       text-transform: uppercase;
-      font-size: 12px;
+      font-size: 11px;
+      border-bottom: 1px solid #e4e9f2;
+      padding: 10px 12px;
     }
 
     .ant-table-tbody > tr > td {
-      border-bottom: 1px solid #f3f4f6;
+      padding: 10px 12px;
+      border-bottom: 1px solid #f1f5f9;
     }
 
-    .class-info__header {
-      display: flex;
-      align-items: center;
-      gap: 12px;
+    .ant-table-tbody > tr:hover > td {
+      background: #f0f5ff;
+    }
 
-      .class-info__icon {
-        width: 44px;
-        height: 44px;
-        border-radius: 10px;
-        background: rgba(97, 87, 255, 0.1);
-        color: #6157ff;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-
+    .class-info {
       .class-info__code {
-        font-size: 15px;
+        font-size: 14px;
         font-weight: 600;
-        color: #0f172a;
+        color: #111827;
+        margin-bottom: 2px;
+        line-height: 1.3;
       }
 
       .class-info__subject {
-        font-size: 13px;
-        color: #8c8c8c;
+        font-size: 12px;
+        color: #6b7280;
+        line-height: 1.3;
       }
     }
 
-    .capacity {
+    .teacher-info {
       display: flex;
-      flex-direction: column;
       align-items: center;
-      gap: 4px;
+      gap: 6px;
+      color: #4b5563;
+      font-size: 13px;
 
-      &__value {
-        font-size: 16px;
-        font-weight: 600;
-        color: #111827;
-      }
-
-      &__label {
+      .teacher-icon {
+        color: #6b7280;
         font-size: 12px;
-        color: #8c8c8c;
       }
     }
 
     .semester-tag {
       border-radius: 999px;
+      border: none;
+      font-size: 11px;
+      padding: 2px 10px;
+    }
+
+    .credit-value,
+    .number-value {
+      font-size: 14px;
+      font-weight: 600;
+      color: #111827;
+    }
+
+    .action-btn-edit,
+    .action-btn-delete {
+      color: #6b7280;
+      padding: 4px 8px;
+
+      &:hover {
+        color: #1890ff;
+        background: #e6f7ff;
+      }
+    }
+
+    .action-btn-delete:hover {
+      color: #ff4d4f;
+      background: #fff1f0;
     }
   }
 
