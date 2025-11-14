@@ -234,6 +234,15 @@
         align-items: center;
       }
 
+      .year-field {
+        .ant-select-selector {
+          border-radius: 8px;
+          min-height: 40px;
+          display: flex;
+          align-items: center;
+        }
+      }
+
       .filter-summary {
         display: flex;
         gap: 16px;

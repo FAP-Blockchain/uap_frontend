@@ -38,7 +38,6 @@ import "./index.scss";
 import {
   closeSemesterApi,
   createSemesterApi,
- 
   fetchSemestersApi,
   updateSemesterApi,
 } from "../../../services/admin/semesters/api";
@@ -65,6 +64,7 @@ const SemestersManagement: React.FC = () => {
   const [form] = Form.useForm<SemesterFormValues>();
   const [searchText, setSearchText] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [yearFilter, setYearFilter] = useState<string>("all");
   const [loading, setLoading] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
   const [pagination, setPagination] = useState({
@@ -82,6 +82,13 @@ const SemestersManagement: React.FC = () => {
     }),
     [pagination.totalCount, semesters]
   );
+
+  const yearOptions = useMemo(() => {
+    const years = new Set(
+      semesters.map((sem) => dayjs(sem.startDate).year().toString())
+    );
+    return Array.from(years).sort((a, b) => Number(b) - Number(a));
+  }, [semesters]);
 
   const buildStatusParams = (status: string) => {
     if (status === "active") return { isActive: true, isClosed: false };
@@ -132,6 +139,10 @@ const SemestersManagement: React.FC = () => {
   const handleStatusFilter = (value: string) => {
     setStatusFilter(value);
     fetchData(1, pagination.pageSize, searchText, value);
+  };
+
+  const handleYearFilter = (value: string) => {
+    setYearFilter(value);
   };
 
   const showModal = (semester?: SemesterDto) => {
@@ -185,8 +196,6 @@ const SemestersManagement: React.FC = () => {
     });
   };
 
-
-
   const handleToggleStatus = async (
     record: SemesterDto,
     field: "isActive" | "isClosed"
@@ -219,6 +228,15 @@ const SemestersManagement: React.FC = () => {
     const days = end.diff(start, "day");
     return `${days} ngày`;
   };
+
+  const filteredSemesters = useMemo(() => {
+    if (yearFilter === "all") {
+      return semesters;
+    }
+    return semesters.filter(
+      (sem) => dayjs(sem.startDate).year().toString() === yearFilter
+    );
+  }, [semesters, yearFilter]);
 
   const columns: ColumnsType<SemesterDto> = [
     {
@@ -360,7 +378,6 @@ const SemestersManagement: React.FC = () => {
               />
             </Popconfirm>
           </Tooltip>
-       
         </Space>
       ),
     },
@@ -458,7 +475,7 @@ const SemestersManagement: React.FC = () => {
         >
           <Row gutter={showDetails ? 16 : 12} align="middle">
             {showDetails && (
-              <Col xs={24} sm={16} className="filter-field search-field">
+              <Col xs={24} md={12} className="filter-field search-field">
                 <label>Tìm kiếm học kì</label>
                 <Search
                   placeholder="Nhập tên học kì..."
@@ -472,8 +489,8 @@ const SemestersManagement: React.FC = () => {
               </Col>
             )}
             <Col
-              xs={showDetails ? 24 : 12}
-              sm={showDetails ? 8 : 12}
+              xs={showDetails ? 12 : 12}
+              md={showDetails ? 6 : 12}
               className="filter-field status-field"
             >
               {showDetails && <label>Trạng thái</label>}
@@ -488,6 +505,27 @@ const SemestersManagement: React.FC = () => {
                 <Option value="active">Đang hoạt động</Option>
                 <Option value="inactive">Chưa kích hoạt</Option>
                 <Option value="closed">Đã đóng</Option>
+              </Select>
+            </Col>
+            <Col
+              xs={showDetails ? 12 : 12}
+              md={showDetails ? 6 : 12}
+              className="filter-field year-field"
+            >
+              {showDetails && <label>Năm</label>}
+              <Select
+                value={yearFilter}
+                onChange={handleYearFilter}
+                placeholder="Chọn năm"
+                size={showDetails ? "large" : "middle"}
+                allowClear={false}
+              >
+                <Option value="all">Tất cả năm</Option>
+                {yearOptions.map((year) => (
+                  <Option key={year} value={year}>
+                    {year}
+                  </Option>
+                ))}
               </Select>
             </Col>
 
@@ -518,7 +556,7 @@ const SemestersManagement: React.FC = () => {
         <div className="table-section">
           <Table
             columns={columns}
-            dataSource={semesters}
+            dataSource={filteredSemesters}
             loading={loading}
             rowKey="id"
             className="semesters-table"
