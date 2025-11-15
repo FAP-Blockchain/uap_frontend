@@ -115,11 +115,12 @@ const RegisterUser: React.FC = () => {
           page: pageNumber,
           pageSize,
         });
-        setUsers(response.data || []);
+        const usersList = response.data || [];
+        setUsers(usersList);
         setPagination({
           pageNumber: response.pageNumber || pageNumber,
           pageSize: response.pageSize || pageSize,
-          totalCount: response.totalCount || response.data?.length || 0,
+          totalCount: response.totalCount || usersList.length,
         });
       } catch {
         toast.error("Không thể tải danh sách người dùng");

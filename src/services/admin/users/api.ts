@@ -25,11 +25,15 @@ export interface UserDto {
 }
 
 export interface PagedUsersResponse {
-  data: UserDto[];
+  items?: UserDto[];
+  data?: UserDto[];
   totalCount: number;
-  pageNumber: number;
+  page?: number;
+  pageNumber?: number;
   pageSize: number;
-  totalPages: number;
+  totalPages?: number;
+  hasPreviousPage?: boolean;
+  hasNextPage?: boolean;
 }
 
 export interface UpdateUserRequest {
@@ -71,7 +75,14 @@ export const fetchUsersApi = async (
       SortOrder: params?.sortOrder,
     },
   });
-  return response.data;
+  const apiData = response.data;
+  // Normalize response to match our interface
+  return {
+    ...apiData,
+    data: normalizeItems<UserDto>(apiData),
+    pageNumber: apiData.page || apiData.pageNumber || 1,
+    totalPages: apiData.totalPages || Math.ceil((apiData.totalCount || 0) / (apiData.pageSize || 10)),
+  };
 };
 
 export const getUserByIdApi = async (id: string): Promise<UserDto> => {
