@@ -1,102 +1,594 @@
 @use "../../styles/variables" as *;
 
 .forgot-password-container {
-  min-height: 100vh;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  padding: 2rem;
-}
-
-.forgot-password-content {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
-  padding: 3rem;
+  height: 100vh;
   width: 100%;
-  max-width: 500px;
+  background-color: $background-color;
 }
 
-.forgot-password-header {
+.forgot-password-left {
+  flex: 1;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: $background-color;
+}
+
+.forgot-password-right {
+  flex: 1;
+  background: linear-gradient(135deg, #1777ff 0%, #0d5bc9 100%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  position: relative;
+}
+
+.fap-logo {
+  color: white;
+  font-size: 100px;
+  font-weight: 700;
+  line-height: 1.1;
   text-align: center;
-  margin-bottom: 2rem;
-
-  h2 {
-    margin-bottom: 0.5rem;
-    color: $primary-color;
-  }
-}
-
-.forgot-password-steps {
-  margin-bottom: 2rem;
 }
 
 .forgot-password-form-wrapper {
-  margin-top: 2rem;
+  width: 100%;
+  max-width: 450px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0 auto;
+}
+
+// Step Indicator (Bottom dots)
+.step-indicator {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+  width: 100%;
+  align-self: stretch;
+
+  .step-dot {
+    flex: 1;
+    height: 8px;
+    border-radius: 4px;
+    background-color: #e5e7eb;
+    transition: all 0.3s ease;
+
+    &.active {
+      background-color: #1777ff;
+    }
+
+    &.completed {
+      background-color: #1777ff;
+    }
+  }
+}
+
+// Icon Wrapper
+.forgot-password-icon {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 32px;
+
+  .icon-wrapper {
+    width: 64px;
+    height: 64px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #e6f4ff 0%, #bae0ff 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    color: #1777ff;
+  }
+}
+
+.forgot-password-title {
+  font-size: 32px !important;
+  font-weight: 600 !important;
+  margin-bottom: 12px !important;
+  color: $text-color !important;
+  text-align: center;
+  width: 100%;
+}
+
+.forgot-password-subtitle {
+  margin-bottom: 40px;
+  color: $text-color-secondary;
+  text-align: center;
+  width: 100%;
+  font-size: 15px;
+  line-height: 1.5;
+
+  strong {
+    color: $text-color;
+    font-weight: 600;
+  }
 }
 
 .forgot-password-form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+
   .ant-form-item-label > label {
     font-weight: 500;
-  }
-
-  .otp-info {
-    text-align: center;
-    margin-bottom: 1.5rem;
-    padding: 1rem;
-    background: #f0f2f5;
-    border-radius: 8px;
-  }
-
-  .otp-input {
-    text-align: center;
-    font-size: 1.5rem;
-    letter-spacing: 0.5rem;
-    font-weight: bold;
+    color: $text-color;
   }
 
   .forgot-password-button {
-    height: 45px;
-    font-size: 16px;
-    font-weight: 500;
-    margin-top: 1rem;
+    height: 50px !important;
+    min-height: 50px !important;
+    background-color: #1777ff !important;
+    border-color: #1777ff !important;
+    font-weight: 500 !important;
+    border-radius: 10px !important;
+    font-size: 16px !important;
+    line-height: 1.5715 !important;
+    padding: 6.4px 15px !important;
+  }
+
+  .forgot-password-button:hover {
+    background-color: #0d5bc9 !important;
+    border-color: #0d5bc9 !important;
   }
 
   .forgot-password-links {
     display: flex;
+    flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    margin-top: 1rem;
+    margin-top: 24px;
+    width: 100%;
 
-    a {
-      color: $primary-color;
-      text-decoration: none;
+    .resend-code-section {
+      display: flex;
+      align-items: center;
 
-      &:hover {
-        text-decoration: underline;
+      .resend-countdown {
+        color: $text-color-secondary;
+        font-size: 14px;
+        font-weight: 400;
+
+        .countdown-number {
+          color: #1777ff;
+          font-weight: 600;
+        }
+      }
+
+      .resend-text {
+        color: $text-color-secondary;
+        font-size: 14px;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+
+        .resend-link {
+          padding: 0;
+          height: auto;
+          margin-left: 4px;
+          color: #1777ff !important;
+          font-size: 14px;
+          text-decoration: underline;
+          transition: all 0.2s ease;
+
+          &:hover {
+            color: #0d5bc9 !important;
+            text-decoration: underline;
+          }
+
+          &:disabled {
+            color: $text-color-secondary !important;
+            cursor: not-allowed;
+          }
+        }
       }
     }
 
-    .resend-otp-button {
-      padding: 0;
+    a.back-to-login,
+    .back-to-login {
+      color: rgba(0, 0, 0, 0.5) !important;
+      text-decoration: none !important;
+      font-size: 13px !important;
+      transition: all 0.2s ease !important;
+      display: flex !important;
+      align-items: center !important;
+      gap: 4px !important;
+      font-weight: 400 !important;
+      cursor: pointer !important;
+
+      &,
+      &:link,
+      &:visited {
+        color: rgba(0, 0, 0, 0.5) !important;
+        text-decoration: none !important;
+      }
+
+      &:hover,
+      &:hover:link,
+      &:hover:visited {
+        color: #1a94fc !important;
+        text-decoration: underline !important;
+      }
+
+      &:active,
+      &:focus {
+        color: #1a94fc !important;
+        text-decoration: underline !important;
+        outline: none !important;
+      }
     }
   }
 }
 
-// Responsive
-@media (max-width: 768px) {
+// OTP Input Wrapper
+.otp-input-wrapper {
+  width: 100%;
+  margin-bottom: 0;
+}
+
+// OTP Input Container
+.otp-input-container {
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: 0;
+
+  .otp-input {
+    flex: 1;
+    min-width: 56px;
+    height: 72px !important;
+    text-align: center;
+    font-size: 28px !important;
+    font-weight: 600;
+    border-radius: 12px !important;
+    border: 2px solid $border-color !important;
+    background-color: $background-color !important;
+    transition: all 0.2s ease;
+
+    &:focus {
+      border-color: #1777ff !important;
+      box-shadow: 0 0 0 3px rgba(23, 119, 255, 0.1) !important;
+    }
+
+    &:disabled {
+      background-color: #f5f5f5 !important;
+      cursor: not-allowed;
+    }
+  }
+}
+
+// Password Strength Indicator
+.password-strength {
+  display: flex;
+  gap: 4px;
+  margin-top: -8px;
+  margin-bottom: 24px;
+
+  .strength-bar {
+    flex: 1;
+    height: 4px;
+    border-radius: 2px;
+    background-color: #e5e7eb;
+    transition: all 0.3s ease;
+
+    &.active {
+      background-color: #1777ff;
+    }
+
+    &:nth-child(1).active {
+      background-color: #ef4444;
+    }
+
+    &:nth-child(2).active {
+      background-color: #f59e0b;
+    }
+
+    &:nth-child(3).active {
+      background-color: #10b981;
+    }
+
+    &:nth-child(4).active {
+      background-color: #1777ff;
+    }
+  }
+}
+
+// Input Styles
+.ant-input,
+.ant-input-password {
+  height: 50px !important;
+  border-radius: 10px !important;
+  background-color: $background-color !important;
+  border-color: $border-color !important;
+  color: $text-color !important;
+}
+
+.ant-input-affix-wrapper {
+  height: 50px !important;
+  border-radius: 10px !important;
+  padding: 0 11px;
+  background-color: $background-color !important;
+  border-color: $border-color !important;
+
+  .ant-input {
+    background-color: transparent !important;
+  }
+
+  .anticon {
+    color: $text-color-secondary;
+  }
+}
+
+.ant-input-affix-wrapper > input.ant-input {
+  height: 48px !important;
+}
+
+.ant-form-item {
+  margin-bottom: 20px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.ant-form-item-label {
+  font-weight: 500;
+
+  > label {
+    color: $text-color !important;
+  }
+}
+
+// Dark mode styles
+html.dark {
   .forgot-password-container {
-    padding: 1rem;
+    background-color: $background-color-dark;
   }
 
-  .forgot-password-content {
-    padding: 2rem 1.5rem;
+  .forgot-password-left {
+    background-color: $background-color-dark;
   }
 
-  .forgot-password-steps {
-    .ant-steps-item-title {
-      font-size: 12px;
+  .forgot-password-title {
+    color: $text-color-dark !important;
+  }
+
+  .forgot-password-subtitle {
+    color: $text-color-secondary-dark;
+
+    strong {
+      color: $text-color-dark;
+    }
+  }
+
+  .forgot-password-form {
+    .ant-form-item-label > label {
+      color: $text-color-dark !important;
+    }
+
+    .forgot-password-links {
+      .resend-code-section {
+        .resend-countdown {
+          color: $text-color-secondary-dark;
+
+          .countdown-number {
+            color: #1777ff;
+          }
+        }
+
+        .resend-text {
+          color: $text-color-secondary-dark;
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
+
+          .resend-link {
+            margin-left: 4px;
+            color: #1777ff !important;
+
+            &:hover {
+              color: #0d5bc9 !important;
+            }
+
+            &:disabled {
+              color: $text-color-secondary-dark !important;
+            }
+          }
+        }
+      }
+
+      a.back-to-login,
+      .back-to-login {
+        color: rgba(255, 255, 255, 0.6) !important;
+        text-decoration: none !important;
+        font-size: 13px !important;
+        font-weight: 400 !important;
+        transition: all 0.2s ease !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 4px !important;
+        cursor: pointer !important;
+
+        &,
+        &:link,
+        &:visited {
+          color: rgba(255, 255, 255, 0.6) !important;
+          text-decoration: none !important;
+        }
+
+        &:hover,
+        &:hover:link,
+        &:hover:visited {
+          color: #1a94fc !important;
+          text-decoration: underline !important;
+        }
+
+        &:active,
+        &:focus {
+          color: #1a94fc !important;
+          text-decoration: underline !important;
+          outline: none !important;
+        }
+      }
+    }
+  }
+
+  .step-indicator {
+    .step-dot {
+      background-color: #374151;
+
+      &.active,
+      &.completed {
+        background-color: #1777ff;
+      }
+    }
+  }
+
+  .forgot-password-icon {
+    .icon-wrapper {
+      background: linear-gradient(135deg, #1e3a5f 0%, #2d4a6b 100%);
+      color: #60a5fa;
+    }
+  }
+
+  .otp-input-container {
+    .otp-input {
+      background-color: $background-color-dark-light !important;
+      border-color: $border-color-dark !important;
+      color: $text-color-dark !important;
+
+      &:focus {
+        border-color: #1777ff !important;
+      }
+
+      &:disabled {
+        background-color: #1f2937 !important;
+      }
+    }
+  }
+
+  .password-strength {
+    .strength-bar {
+      background-color: #374151;
+
+      &.active {
+        background-color: #1777ff;
+      }
+    }
+  }
+
+  .ant-input,
+  .ant-input-password {
+    background-color: $background-color-dark-light !important;
+    border-color: $border-color-dark !important;
+    color: $text-color-dark !important;
+
+    &::placeholder {
+      color: $text-color-secondary-dark;
+    }
+  }
+
+  .ant-input-affix-wrapper {
+    background-color: $background-color-dark-light !important;
+    border-color: $border-color-dark !important;
+
+    .anticon {
+      color: $text-color-secondary-dark;
+    }
+  }
+
+  .ant-form-item-label > label {
+    color: $text-color-dark !important;
+  }
+
+  .forgot-password-button {
+    height: 50px !important;
+    background-color: #1777ff !important;
+    border-color: #1777ff !important;
+    font-weight: 500 !important;
+    font-size: 16px !important;
+    line-height: 1.5715 !important;
+    padding: 6.4px 15px !important;
+
+    &:hover {
+      background-color: #0d5bc9 !important;
+      border-color: #0d5bc9 !important;
+    }
+  }
+}
+
+// Responsive design
+@media (max-width: 992px) {
+  .forgot-password-container {
+    flex-direction: column-reverse;
+  }
+
+  .forgot-password-left {
+    flex: 1;
+    padding: 24px;
+  }
+
+  .forgot-password-form-wrapper {
+    width: 100%;
+    max-width: 400px;
+  }
+
+  .forgot-password-right {
+    flex: 1;
+    min-height: 200px;
+  }
+
+  .fap-logo {
+    font-size: 60px;
+  }
+
+  .otp-input-container {
+    gap: 10px;
+
+    .otp-input {
+      flex: 1;
+      min-width: 48px;
+      height: 64px !important;
+      font-size: 24px !important;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .forgot-password-container {
+    padding: 0;
+  }
+
+  .forgot-password-form-wrapper {
+    width: 90%;
+  }
+
+  .forgot-password-title {
+    font-size: 24px !important;
+  }
+
+  .forgot-password-subtitle {
+    font-size: 14px;
+  }
+
+  .otp-input-container {
+    gap: 8px;
+
+    .otp-input {
+      flex: 1;
+      min-width: 44px;
+      height: 56px !important;
+      font-size: 20px !important;
     }
   }
 }
