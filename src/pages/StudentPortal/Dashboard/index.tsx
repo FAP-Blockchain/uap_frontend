@@ -1,52 +1,49 @@
-import React, { useMemo } from "react";
-import { useNavigate } from "react-router-dom";
 import {
-  Row,
-  Col,
-  Card,
-  Statistic,
-  List,
-  Tag,
-  Button,
-  Space,
-  Typography,
-  Avatar,
-  Badge,
-  Tooltip,
-  Progress,
-} from "antd";
-import {
-  FileTextOutlined,
+  BookOutlined,
   CheckCircleOutlined,
   ClockCircleOutlined,
   EyeOutlined,
-  ShareAltOutlined,
-  QrcodeOutlined,
-  TrophyOutlined,
-  BookOutlined,
-  SafetyCertificateOutlined,
+  FileTextOutlined,
   LinkOutlined,
-  ArrowUpOutlined,
-  UserOutlined,
+  QrcodeOutlined,
   RiseOutlined,
-  FallOutlined,
+  SafetyCertificateOutlined,
+  ShareAltOutlined,
+  TrophyOutlined,
+  UserOutlined,
 } from "@ant-design/icons";
 import {
-  LineChart,
-  Line,
-  AreaChart,
+  Avatar,
+  Badge,
+  Button,
+  Card,
+  Col,
+  List,
+  Progress,
+  Row,
+  Space,
+  Statistic,
+  Tag,
+  Tooltip,
+  Typography,
+} from "antd";
+import React from "react";
+import { useNavigate } from "react-router-dom";
+import {
   Area,
-  BarChart,
+  AreaChart,
   Bar,
-  PieChart,
-  Pie,
+  BarChart,
+  CartesianGrid,
   Cell,
+  Line,
+  LineChart,
+  Pie,
+  PieChart,
+  Tooltip as RechartsTooltip,
+  ResponsiveContainer,
   XAxis,
   YAxis,
-  CartesianGrid,
-  Tooltip as RechartsTooltip,
-  Legend,
-  ResponsiveContainer,
 } from "recharts";
 import "./Dashboard.scss";
 
@@ -90,47 +87,47 @@ const Dashboard: React.FC = () => {
 
   // Data for line chart - Credentials over time
   const credentialsOverTime = [
-    { month: "Jan", credentials: 2 },
-    { month: "Feb", credentials: 3 },
-    { month: "Mar", credentials: 4 },
-    { month: "Apr", credentials: 5 },
-    { month: "May", credentials: 6 },
-    { month: "Jun", credentials: 8 },
+    { month: "Tháng 1", credentials: 2 },
+    { month: "Tháng 2", credentials: 3 },
+    { month: "Tháng 3", credentials: 4 },
+    { month: "Tháng 4", credentials: 5 },
+    { month: "Tháng 5", credentials: 6 },
+    { month: "Tháng 6", credentials: 8 },
   ];
 
   // Data for bar chart - Credentials by type
   const credentialsByType = [
-    { type: "Degrees", count: 3, color: "#52c41a" },
-    { type: "Certificates", count: 4, color: "#1890ff" },
-    { type: "Transcripts", count: 1, color: "#722ed1" },
+    { type: "Bằng cấp", count: 3, color: "#52c41a" },
+    { type: "Chứng chỉ", count: 4, color: "#1890ff" },
+    { type: "Bảng điểm", count: 1, color: "#722ed1" },
   ];
 
   // Data for pie chart - Status distribution
   const statusData = [
-    { name: "Active", value: 6, color: "#52c41a" },
-    { name: "Pending", value: 2, color: "#faad14" },
-    { name: "Revoked", value: 0, color: "#ff4d4f" },
+    { name: "Hoạt động", value: 6, color: "#52c41a" },
+    { name: "Đang chờ", value: 2, color: "#faad14" },
+    { name: "Đã thu hồi", value: 0, color: "#ff4d4f" },
   ];
 
   // Data for area chart - Verifications over time
   const verificationsOverTime = [
-    { month: "Jan", verifications: 2 },
-    { month: "Feb", verifications: 5 },
-    { month: "Mar", verifications: 8 },
-    { month: "Apr", verifications: 10 },
-    { month: "May", verifications: 12 },
-    { month: "Jun", verifications: 15 },
+    { month: "Tháng 1", verifications: 2 },
+    { month: "Tháng 2", verifications: 5 },
+    { month: "Tháng 3", verifications: 8 },
+    { month: "Tháng 4", verifications: 10 },
+    { month: "Tháng 5", verifications: 12 },
+    { month: "Tháng 6", verifications: 15 },
   ];
 
   // Data for mini chart in stat cards
   const monthlyGrowth = [
-    { month: "M", value: 2 },
-    { month: "T", value: 3 },
-    { month: "W", value: 4 },
-    { month: "T", value: 3 },
-    { month: "F", value: 5 },
-    { month: "S", value: 4 },
-    { month: "S", value: 6 },
+    { month: "T2", value: 2 },
+    { month: "T3", value: 3 },
+    { month: "T4", value: 4 },
+    { month: "T5", value: 3 },
+    { month: "T6", value: 5 },
+    { month: "T7", value: 4 },
+    { month: "CN", value: 6 },
   ];
 
   const recentCredentials: CredentialSummary[] = [
@@ -176,30 +173,30 @@ const Dashboard: React.FC = () => {
   const recentActivities: ActivityItem[] = [
     {
       id: 1,
-      action: "Credential Verified",
-      description: "Your Bachelor's degree was verified by TechCorp Vietnam",
-      timestamp: "2 hours ago",
+      action: "Chứng chỉ đã được xác thực",
+      description: "Bằng cử nhân của bạn đã được xác thực bởi TechCorp Vietnam",
+      timestamp: "2 giờ trước",
       type: "verification",
     },
     {
       id: 2,
-      action: "QR Code Generated",
-      description: "QR code created for AWS Cloud Practitioner certificate",
-      timestamp: "1 day ago",
+      action: "Mã QR đã được tạo",
+      description: "Mã QR đã được tạo cho chứng chỉ AWS Cloud Practitioner",
+      timestamp: "1 ngày trước",
       type: "share",
     },
     {
       id: 3,
-      action: "New Credential Issued",
-      description: "Academic Transcript - Spring 2024 has been issued",
-      timestamp: "3 days ago",
+      action: "Chứng chỉ mới được cấp",
+      description: "Bảng điểm học kỳ Spring 2024 đã được cấp",
+      timestamp: "3 ngày trước",
       type: "credential",
     },
     {
       id: 4,
-      action: "Profile Updated",
-      description: "Contact information updated successfully",
-      timestamp: "1 week ago",
+      action: "Hồ sơ đã được cập nhật",
+      description: "Thông tin liên hệ đã được cập nhật thành công",
+      timestamp: "1 tuần trước",
       type: "profile",
     },
   ];
@@ -220,13 +217,13 @@ const Dashboard: React.FC = () => {
   const getStatusTag = (status: string) => {
     switch (status) {
       case "active":
-        return <Tag color="success">Active</Tag>;
+        return <Tag color="success">Hoạt động</Tag>;
       case "pending":
-        return <Tag color="warning">Pending</Tag>;
+        return <Tag color="warning">Đang chờ</Tag>;
       case "revoked":
-        return <Tag color="error">Revoked</Tag>;
+        return <Tag color="error">Đã thu hồi</Tag>;
       default:
-        return <Tag>Unknown</Tag>;
+        return <Tag>Không xác định</Tag>;
     }
   };
 
@@ -250,12 +247,24 @@ const Dashboard: React.FC = () => {
   };
 
   // Custom tooltip for charts
-  const CustomTooltip = ({ active, payload, label }: any) => {
+  interface TooltipPayload {
+    name: string;
+    value: number;
+    color: string;
+  }
+
+  interface CustomTooltipProps {
+    active?: boolean;
+    payload?: TooltipPayload[];
+    label?: string;
+  }
+
+  const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
     if (active && payload && payload.length) {
       return (
         <div className="custom-tooltip">
           <p style={{ margin: 0, fontWeight: 600 }}>{label}</p>
-          {payload.map((entry: any, index: number) => (
+          {payload.map((entry, index) => (
             <p key={index} style={{ margin: "4px 0", color: entry.color }}>
               {entry.name}: {entry.value}
             </p>
@@ -273,10 +282,10 @@ const Dashboard: React.FC = () => {
         <Row align="middle" justify="space-between">
           <Col>
             <Title level={2} style={{ margin: 0, color: "white" }}>
-              Welcome back!
+              Chào mừng trở lại!
             </Title>
             <Text style={{ fontSize: 16, color: "rgba(255, 255, 255, 0.9)" }}>
-              Here's what's happening with your credentials today.
+              Đây là những gì đang diễn ra với chứng chỉ của bạn hôm nay.
             </Text>
           </Col>
           <Col>
@@ -287,7 +296,7 @@ const Dashboard: React.FC = () => {
                 onClick={() => navigate("/student-portal/share")}
                 className="share-btn-outline"
               >
-                Share Credentials
+                Chia sẻ chứng chỉ
               </Button>
               <Button
                 type="primary"
@@ -296,7 +305,7 @@ const Dashboard: React.FC = () => {
                 onClick={() => navigate("/student-portal/share")}
                 className="generate-btn-gradient"
               >
-                Generate QR
+                Tạo mã QR
               </Button>
             </Space>
           </Col>
@@ -308,12 +317,12 @@ const Dashboard: React.FC = () => {
         <Col xs={24} sm={12} md={6}>
           <Card hoverable className="stat-card">
             <Statistic
-              title="Total Credentials"
+              title="Tổng số chứng chỉ"
               value={dashboardStats.totalCredentials}
               prefix={<FileTextOutlined style={{ color: "#1a94fc" }} />}
               suffix={
                 <Tag color="blue" style={{ marginLeft: 8 }}>
-                  +2 this month
+                  +2 tháng này
                 </Tag>
               }
             />
@@ -336,7 +345,7 @@ const Dashboard: React.FC = () => {
         <Col xs={24} sm={12} md={6}>
           <Card hoverable className="stat-card">
             <Statistic
-              title="Verified Credentials"
+              title="Chứng chỉ đã xác thực"
               value={dashboardStats.verifiedCredentials}
               prefix={<CheckCircleOutlined style={{ color: "#52c41a" }} />}
               suffix={
@@ -372,10 +381,10 @@ const Dashboard: React.FC = () => {
         <Col xs={24} sm={12} md={6}>
           <Card hoverable className="stat-card">
             <Statistic
-              title="Pending Review"
+              title="Đang chờ xem xét"
               value={dashboardStats.pendingCredentials}
               prefix={<ClockCircleOutlined style={{ color: "#faad14" }} />}
-              suffix={<Tag color="orange">In progress</Tag>}
+              suffix={<Tag color="orange">Đang xử lý</Tag>}
             />
             <div className="mini-chart">
               <ResponsiveContainer width="100%" height={40}>
@@ -396,7 +405,7 @@ const Dashboard: React.FC = () => {
         <Col xs={24} sm={12} md={6}>
           <Card hoverable className="stat-card">
             <Statistic
-              title="Recent Verifications"
+              title="Xác thực gần đây"
               value={dashboardStats.recentVerifications}
               prefix={<EyeOutlined style={{ color: "#722ed1" }} />}
               suffix={
@@ -429,7 +438,7 @@ const Dashboard: React.FC = () => {
             title={
               <Space>
                 <RiseOutlined style={{ color: "#1a94fc" }} />
-                <Text strong>Credentials Growth</Text>
+                <Text strong>Tăng trưởng chứng chỉ</Text>
               </Space>
             }
             hoverable
@@ -464,7 +473,7 @@ const Dashboard: React.FC = () => {
             title={
               <Space>
                 <FileTextOutlined style={{ color: "#1a94fc" }} />
-                <Text strong>Credentials by Type</Text>
+                <Text strong>Chứng chỉ theo loại</Text>
               </Space>
             }
             hoverable
@@ -499,7 +508,7 @@ const Dashboard: React.FC = () => {
             title={
               <Space>
                 <CheckCircleOutlined style={{ color: "#1a94fc" }} />
-                <Text strong>Status Distribution</Text>
+                <Text strong>Phân bổ trạng thái</Text>
               </Space>
             }
             hoverable
@@ -512,9 +521,12 @@ const Dashboard: React.FC = () => {
                   cx="50%"
                   cy="50%"
                   labelLine={false}
-                  label={({ name, percent }) =>
-                    `${name}: ${(percent * 100).toFixed(0)}%`
-                  }
+                  label={(props) => {
+                    const name = props.name || "";
+                    const percent =
+                      (props as { percent?: number }).percent || 0;
+                    return `${name}: ${(percent * 100).toFixed(0)}%`;
+                  }}
                   outerRadius={100}
                   fill="#8884d8"
                   dataKey="value"
@@ -535,7 +547,7 @@ const Dashboard: React.FC = () => {
             title={
               <Space>
                 <EyeOutlined style={{ color: "#1a94fc" }} />
-                <Text strong>Verifications Trend</Text>
+                <Text strong>Xu hướng xác thực</Text>
               </Space>
             }
             hoverable
@@ -584,7 +596,7 @@ const Dashboard: React.FC = () => {
             title={
               <Space>
                 <FileTextOutlined style={{ color: "#1a94fc" }} />
-                <Text strong>Recent Credentials</Text>
+                <Text strong>Chứng chỉ gần đây</Text>
               </Space>
             }
             extra={
@@ -592,7 +604,7 @@ const Dashboard: React.FC = () => {
                 type="link"
                 onClick={() => navigate("/student-portal/credentials")}
               >
-                View All →
+                Xem tất cả →
               </Button>
             }
             hoverable
@@ -648,8 +660,10 @@ const Dashboard: React.FC = () => {
                         <Text type="secondary">{credential.institution}</Text>
                         <br />
                         <Text type="secondary" style={{ fontSize: 12 }}>
-                          Issued:{" "}
-                          {new Date(credential.issueDate).toLocaleDateString()}
+                          Cấp ngày:{" "}
+                          {new Date(credential.issueDate).toLocaleDateString(
+                            "vi-VN"
+                          )}
                         </Text>
                       </div>
                     }
@@ -666,10 +680,10 @@ const Dashboard: React.FC = () => {
             title={
               <Space>
                 <EyeOutlined style={{ color: "#722ed1" }} />
-                <Text strong>Recent Activities</Text>
+                <Text strong>Hoạt động gần đây</Text>
               </Space>
             }
-            extra={<Button type="link">View All →</Button>}
+            extra={<Button type="link">Xem tất cả →</Button>}
             hoverable
           >
             <List
@@ -715,7 +729,7 @@ const Dashboard: React.FC = () => {
         title={
           <Space>
             <TrophyOutlined style={{ color: "#fa541c" }} />
-            <Text strong>Quick Access</Text>
+            <Text strong>Truy cập nhanh</Text>
           </Space>
         }
         hoverable
@@ -739,10 +753,10 @@ const Dashboard: React.FC = () => {
                   <TrophyOutlined style={{ fontSize: 32 }} />
                 </Avatar>
                 <Title level={4} style={{ margin: "8px 0" }}>
-                  My Degrees
+                  Bằng cấp của tôi
                 </Title>
                 <Text type="secondary">
-                  View and manage your academic degrees
+                  Xem và quản lý bằng cấp học thuật của bạn
                 </Text>
               </div>
             </Card>
@@ -766,10 +780,10 @@ const Dashboard: React.FC = () => {
                   <BookOutlined style={{ fontSize: 32 }} />
                 </Avatar>
                 <Title level={4} style={{ margin: "8px 0" }}>
-                  Transcripts
+                  Bảng điểm
                 </Title>
                 <Text type="secondary">
-                  Official academic transcripts and grades
+                  Bảng điểm học thuật chính thức và điểm số
                 </Text>
               </div>
             </Card>
@@ -793,10 +807,10 @@ const Dashboard: React.FC = () => {
                   <SafetyCertificateOutlined style={{ fontSize: 32 }} />
                 </Avatar>
                 <Title level={4} style={{ margin: "8px 0" }}>
-                  Certificates
+                  Chứng chỉ
                 </Title>
                 <Text type="secondary">
-                  Professional certifications and achievements
+                  Chứng chỉ chuyên nghiệp và thành tích
                 </Text>
               </div>
             </Card>
@@ -820,11 +834,9 @@ const Dashboard: React.FC = () => {
                   <ShareAltOutlined style={{ fontSize: 32 }} />
                 </Avatar>
                 <Title level={4} style={{ margin: "8px 0" }}>
-                  Share Portal
+                  Cổng chia sẻ
                 </Title>
-                <Text type="secondary">
-                  Generate QR codes and verification links
-                </Text>
+                <Text type="secondary">Tạo mã QR và liên kết xác thực</Text>
               </div>
             </Card>
           </Col>

@@ -1,37 +1,37 @@
 import { useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import {
-  Card,
-  Row,
-  Col,
-  Typography,
-  Space,
-  Tag,
-  Button,
-  Descriptions,
-  Statistic,
   Avatar,
-  Modal,
-  message,
+  Button,
+  Card,
+  Col,
+  Descriptions,
   Divider,
-  Timeline,
+  message,
+  Modal,
   QRCode,
+  Row,
+  Space,
+  Statistic,
+  Tag,
+  Timeline,
+  Typography,
 } from "antd";
 import {
   ArrowLeftOutlined,
-  ShareAltOutlined,
-  DownloadOutlined,
-  QrcodeOutlined,
-  LinkOutlined,
-  CopyOutlined,
-  TrophyOutlined,
-  BookOutlined,
-  FileTextOutlined,
   CalendarOutlined,
-  SafetyCertificateOutlined,
-  EyeOutlined,
   CheckCircleOutlined,
   ClockCircleOutlined,
+  CopyOutlined,
+  DownloadOutlined,
+  EyeOutlined,
+  QrcodeOutlined,
+  SafetyCertificateOutlined,
+  ShareAltOutlined,
+  BookOutlined,
+  TrophyOutlined,
+  FileTextOutlined,
+  LinkOutlined,
 } from "@ant-design/icons";
 import dayjs from "dayjs";
 import "./CredentialDetail.scss";
@@ -175,9 +175,9 @@ const CredentialDetail: React.FC = () => {
       <div className="credential-detail">
         <Card>
           <div style={{ textAlign: "center", padding: "48px 0" }}>
-            <Title level={3}>Credential Not Found</Title>
+            <Title level={3}>Không tìm thấy chứng chỉ</Title>
             <Text type="secondary">
-              The requested credential could not be found.
+              Chứng chỉ được yêu cầu không thể tìm thấy.
             </Text>
             <br />
             <Button
@@ -186,7 +186,7 @@ const CredentialDetail: React.FC = () => {
               onClick={() => navigate("/student-portal/credentials")}
               style={{ marginTop: 16 }}
             >
-              Back to Credentials
+              Quay lại chứng chỉ
             </Button>
           </div>
         </Card>
@@ -216,19 +216,19 @@ const CredentialDetail: React.FC = () => {
       case "active":
         return (
           <Tag color="success" icon={<CheckCircleOutlined />}>
-            Active
+            Hoạt động
           </Tag>
         );
       case "pending":
         return (
           <Tag color="warning" icon={<ClockCircleOutlined />}>
-            Pending
+            Đang chờ
           </Tag>
         );
       case "revoked":
-        return <Tag color="error">Revoked</Tag>;
+        return <Tag color="error">Đã thu hồi</Tag>;
       default:
-        return <Tag>Unknown</Tag>;
+        return <Tag>Không xác định</Tag>;
     }
   };
 
@@ -236,21 +236,19 @@ const CredentialDetail: React.FC = () => {
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(verificationUrl);
-    message.success("Verification link copied to clipboard!");
+    message.success("Đã sao chép liên kết xác thực vào clipboard!");
   };
 
   const handleDownloadPDF = () => {
-    // Mock PDF download
-    message.success("PDF download started!");
+    message.success("Đã bắt đầu tải xuống PDF!");
   };
 
   const handleDownloadImage = () => {
-    // Mock image download
-    message.success("Image download started!");
+    message.success("Đã bắt đầu tải xuống hình ảnh!");
   };
 
   const handleShare = (platform: string) => {
-    message.success(`Shared to ${platform}!`);
+    message.success(`Đã chia sẻ lên ${platform}!`);
     setShareModalVisible(false);
   };
 
@@ -263,7 +261,7 @@ const CredentialDetail: React.FC = () => {
           onClick={() => navigate("/student-portal/credentials")}
           style={{ marginBottom: 16 }}
         >
-          Back to Credentials
+          Quay lại chứng chỉ
         </Button>
 
         <Row
@@ -291,16 +289,16 @@ const CredentialDetail: React.FC = () => {
                 icon={<ShareAltOutlined />}
                 onClick={() => setShareModalVisible(true)}
               >
-                Share
+                Chia sẻ
               </Button>
               <Button
                 icon={<QrcodeOutlined />}
                 onClick={() => setQrModalVisible(true)}
               >
-                QR Code
+                Mã QR
               </Button>
               <Button icon={<DownloadOutlined />} onClick={handleDownloadPDF}>
-                Download
+                Tải xuống
               </Button>
             </Space>
           </Col>
@@ -310,9 +308,9 @@ const CredentialDetail: React.FC = () => {
       <Row gutter={[24, 24]}>
         {/* Main Information */}
         <Col xs={24} lg={16}>
-          <Card title=" Basic Information" style={{ marginBottom: 24 }}>
+          <Card title="Thông tin cơ bản" style={{ marginBottom: 24 }}>
             <Descriptions column={2} bordered>
-              <Descriptions.Item label="Credential Type">
+              <Descriptions.Item label="Loại chứng chỉ">
                 <Tag
                   color={
                     credentialData.type === "degree"
@@ -322,24 +320,27 @@ const CredentialDetail: React.FC = () => {
                       : "purple"
                   }
                 >
-                  {credentialData.type.charAt(0).toUpperCase() +
-                    credentialData.type.slice(1)}
+                  {credentialData.type === "degree"
+                    ? "Bằng cấp"
+                    : credentialData.type === "certificate"
+                    ? "Chứng chỉ"
+                    : "Bảng điểm"}
                 </Tag>
               </Descriptions.Item>
-              <Descriptions.Item label="Status">
+              <Descriptions.Item label="Trạng thái">
                 {getStatusTag(credentialData.status)}
               </Descriptions.Item>
-              <Descriptions.Item label="Issue Date">
+              <Descriptions.Item label="Ngày cấp">
                 <Space>
                   <CalendarOutlined />
-                  {dayjs(credentialData.issueDate).format("MMMM DD, YYYY")}
+                  {dayjs(credentialData.issueDate).format("DD/MM/YYYY")}
                 </Space>
               </Descriptions.Item>
               {credentialData.validUntil && (
-                <Descriptions.Item label="Valid Until">
+                <Descriptions.Item label="Có hiệu lực đến">
                   <Space>
                     <CalendarOutlined />
-                    {dayjs(credentialData.validUntil).format("MMMM DD, YYYY")}
+                    {dayjs(credentialData.validUntil).format("DD/MM/YYYY")}
                   </Space>
                 </Descriptions.Item>
               )}
@@ -349,7 +350,7 @@ const CredentialDetail: React.FC = () => {
                 </Descriptions.Item>
               )}
               {credentialData.major && (
-                <Descriptions.Item label="Major">
+                <Descriptions.Item label="Chuyên ngành">
                   {credentialData.major}
                 </Descriptions.Item>
               )}
@@ -358,7 +359,7 @@ const CredentialDetail: React.FC = () => {
             {credentialData.description && (
               <>
                 <Divider />
-                <Title level={5}>Description</Title>
+                <Title level={5}>Mô tả</Title>
                 <Paragraph>{credentialData.description}</Paragraph>
               </>
             )}
@@ -367,7 +368,7 @@ const CredentialDetail: React.FC = () => {
               credentialData.achievements.length > 0 && (
                 <>
                   <Divider />
-                  <Title level={5}> Achievements & Honors</Title>
+                  <Title level={5}>Thành tích & Danh hiệu</Title>
                   <Timeline
                     items={credentialData.achievements.map((achievement) => ({
                       dot: <CheckCircleOutlined style={{ color: "#52c41a" }} />,
@@ -379,18 +380,18 @@ const CredentialDetail: React.FC = () => {
           </Card>
 
           {/* Issuer Information */}
-          <Card title=" Issuer Information">
+          <Card title="Thông tin người cấp">
             <Descriptions column={1} bordered>
-              <Descriptions.Item label="Institution">
+              <Descriptions.Item label="Tổ chức">
                 {credentialData.issuer.name}
               </Descriptions.Item>
               {credentialData.issuer.department && (
-                <Descriptions.Item label="Department">
+                <Descriptions.Item label="Khoa/Bộ phận">
                   {credentialData.issuer.department}
                 </Descriptions.Item>
               )}
               {credentialData.issuer.contact && (
-                <Descriptions.Item label="Contact">
+                <Descriptions.Item label="Liên hệ">
                   {credentialData.issuer.contact}
                 </Descriptions.Item>
               )}
@@ -405,14 +406,14 @@ const CredentialDetail: React.FC = () => {
             <Row gutter={16}>
               <Col span={12}>
                 <Statistic
-                  title="Verifications"
+                  title="Lần xác thực"
                   value={credentialData.verificationCount}
                   prefix={<EyeOutlined />}
                 />
               </Col>
               <Col span={12}>
                 <Statistic
-                  title="Security"
+                  title="Bảo mật"
                   value="100"
                   prefix={<SafetyCertificateOutlined />}
                   suffix="%"
@@ -422,10 +423,10 @@ const CredentialDetail: React.FC = () => {
           </Card>
 
           {/* Blockchain Information */}
-          <Card title="Blockchain Verification" style={{ marginBottom: 24 }}>
+          <Card title="Xác thực Blockchain" style={{ marginBottom: 24 }}>
             <Space direction="vertical" style={{ width: "100%" }}>
               <div>
-                <Text strong>Blockchain Hash:</Text>
+                <Text strong>Mã hash Blockchain:</Text>
                 <br />
                 <Text code copyable style={{ fontSize: 11 }}>
                   {credentialData.blockchainHash}
@@ -433,7 +434,7 @@ const CredentialDetail: React.FC = () => {
               </div>
 
               <div>
-                <Text strong>Transaction:</Text>
+                <Text strong>Giao dịch:</Text>
                 <br />
                 <Text code copyable style={{ fontSize: 11 }}>
                   {credentialData.transactionHash}
@@ -441,7 +442,7 @@ const CredentialDetail: React.FC = () => {
               </div>
 
               <div>
-                <Text strong>Block Number:</Text>
+                <Text strong>Số khối:</Text>
                 <br />
                 <Text>{credentialData.blockNumber?.toLocaleString()}</Text>
               </div>
@@ -449,23 +450,23 @@ const CredentialDetail: React.FC = () => {
               <Divider />
 
               <div>
-                <Text strong>Verification Method:</Text>
+                <Text strong>Phương thức xác thực:</Text>
                 <br />
                 <Text>{credentialData.verification.method}</Text>
               </div>
 
               <div>
-                <Text strong>Algorithm:</Text>
+                <Text strong>Thuật toán:</Text>
                 <br />
                 <Text>{credentialData.verification.algorithm}</Text>
               </div>
 
               <div>
-                <Text strong>Verified At:</Text>
+                <Text strong>Xác thực lúc:</Text>
                 <br />
                 <Text>
                   {dayjs(credentialData.verification.timestamp).format(
-                    "MMM DD, YYYY HH:mm"
+                    "DD/MM/YYYY HH:mm"
                   )}
                 </Text>
               </div>
@@ -473,24 +474,24 @@ const CredentialDetail: React.FC = () => {
           </Card>
 
           {/* Quick Actions */}
-          <Card title="Quick Actions">
+          <Card title="Thao tác nhanh">
             <Space direction="vertical" style={{ width: "100%" }}>
               <Button block icon={<LinkOutlined />} onClick={handleCopyLink}>
-                Copy Verification Link
+                Sao chép liên kết xác thực
               </Button>
               <Button
                 block
                 icon={<DownloadOutlined />}
                 onClick={handleDownloadImage}
               >
-                Download as Image
+                Tải xuống dưới dạng hình ảnh
               </Button>
               <Button
                 block
                 icon={<ShareAltOutlined />}
                 onClick={() => setShareModalVisible(true)}
               >
-                Share Credential
+                Chia sẻ chứng chỉ
               </Button>
             </Space>
           </Card>
@@ -499,19 +500,19 @@ const CredentialDetail: React.FC = () => {
 
       {/* QR Code Modal */}
       <Modal
-        title="QR Code for Verification"
+        title="Mã QR để xác thực"
         open={qrModalVisible}
         onCancel={() => setQrModalVisible(false)}
         footer={[
           <Button key="close" onClick={() => setQrModalVisible(false)}>
-            Close
+            Đóng
           </Button>,
           <Button
             key="download"
             type="primary"
-            onClick={() => message.success("QR Code downloaded!")}
+            onClick={() => message.success("Đã tải xuống mã QR!")}
           >
-            Download QR
+            Tải xuống mã QR
           </Button>,
         ]}
       >
@@ -520,20 +521,20 @@ const CredentialDetail: React.FC = () => {
           <br />
           <br />
           <Text type="secondary">
-            Scan this QR code to verify the credential
+            Quét mã QR này để xác thực chứng chỉ
           </Text>
         </div>
       </Modal>
 
       {/* Share Modal */}
       <Modal
-        title="Share Credential"
+        title="Chia sẻ chứng chỉ"
         open={shareModalVisible}
         onCancel={() => setShareModalVisible(false)}
         footer={null}
       >
         <div style={{ padding: "20px 0" }}>
-          <Text strong>Verification Link:</Text>
+          <Text strong>Liên kết xác thực:</Text>
           <div
             style={{
               background: "#f5f5f5",
@@ -554,18 +555,20 @@ const CredentialDetail: React.FC = () => {
               icon={<CopyOutlined />}
               onClick={handleCopyLink}
             >
-              Copy
+              Sao chép
             </Button>
           </div>
 
           <Divider />
 
-          <Title level={5}>Share to:</Title>
+          <Title level={5}>Chia sẻ đến:</Title>
           <Space wrap>
             <Button onClick={() => handleShare("Email")}>📧 Email</Button>
             <Button onClick={() => handleShare("LinkedIn")}>💼 LinkedIn</Button>
             <Button onClick={() => handleShare("Twitter")}>🐦 Twitter</Button>
-            <Button onClick={() => handleShare("Facebook")}>📘 Facebook</Button>
+            <Button onClick={() => handleShare("Facebook")}>
+              📘 Facebook
+            </Button>
           </Space>
         </div>
       </Modal>
