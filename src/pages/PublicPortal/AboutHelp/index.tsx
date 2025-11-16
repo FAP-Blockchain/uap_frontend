@@ -24,9 +24,8 @@ import {
   SafetyCertificateOutlined,
   RocketOutlined,
   TeamOutlined,
- 
   CheckCircleOutlined,
-  
+  CloseCircleOutlined,
 } from "@ant-design/icons";
 import "./AboutHelp.scss";
 
@@ -38,22 +37,22 @@ const AboutHelp: React.FC = () => {
   const faqData = [
     {
       key: "what-is-blockchain-verification",
-      label: "What is blockchain credential verification?",
+      label: "Xác thực chứng chỉ blockchain là gì?",
       children: (
         <div>
           <Paragraph>
-            Blockchain credential verification is a tamper-proof method of
-            validating academic credentials using distributed ledger technology.
-            Each credential is recorded on an immutable blockchain, ensuring its
-            authenticity and preventing fraud.
+            Xác thực chứng chỉ blockchain là một phương pháp chống giả mạo để
+            xác thực chứng chỉ học thuật bằng công nghệ sổ cái phân tán.
+            Mỗi chứng chỉ được ghi lại trên blockchain bất biến, đảm bảo tính
+            xác thực và ngăn chặn gian lận.
           </Paragraph>
           <Paragraph>
-            <strong>Benefits:</strong>
+            <strong>Lợi ích:</strong>
             <ul>
-              <li>Instant verification (2-3 seconds)</li>
-              <li>100% tamper-proof records</li>
-              <li>Global accessibility 24/7</li>
-              <li>Eliminates fake credentials</li>
+              <li>Xác thực tức thì (2-3 giây)</li>
+              <li>Hồ sơ chống giả mạo 100%</li>
+              <li>Truy cập toàn cầu 24/7</li>
+              <li>Loại bỏ chứng chỉ giả</li>
             </ul>
           </Paragraph>
         </div>
@@ -61,50 +60,49 @@ const AboutHelp: React.FC = () => {
     },
     {
       key: "how-to-verify",
-      label: "How do I verify a credential?",
+      label: "Làm thế nào để xác thực chứng chỉ?",
       children: (
         <div>
-          <Paragraph>We offer three convenient verification methods:</Paragraph>
+          <Paragraph>Chúng tôi cung cấp ba phương thức xác thực tiện lợi:</Paragraph>
           <div style={{ marginLeft: 16 }}>
             <Space direction="vertical" size="middle" style={{ width: "100%" }}>
               <div>
-                <Tag color="green">QR Code Scan</Tag>
+                <Tag color="green">Quét mã QR</Tag>
                 <Text>
-                  Use your camera to scan the QR code from the credential
+                  Sử dụng camera để quét mã QR từ chứng chỉ
                 </Text>
               </div>
               <div>
-                <Tag color="blue">Manual Entry</Tag>
-                <Text>Enter the credential ID or blockchain hash manually</Text>
+                <Tag color="blue">Nhập thủ công</Tag>
+                <Text>Nhập ID chứng chỉ hoặc mã hash blockchain thủ công</Text>
               </div>
               <div>
-                <Tag color="purple">File Upload</Tag>
+                <Tag color="purple">Tải lên file</Tag>
                 <Text>
-                  Upload a digital copy of the credential for analysis
+                  Tải lên bản sao kỹ thuật số của chứng chỉ để phân tích
                 </Text>
               </div>
             </Space>
           </div>
           <Paragraph style={{ marginTop: 16 }}>
-            Simply go to our <strong>Verify Credentials</strong> page and choose
-            your preferred method. Results are typically available within
-            seconds.
+            Chỉ cần vào trang <strong>Xác thực chứng chỉ</strong> của chúng tôi và chọn
+            phương thức ưa thích của bạn. Kết quả thường có sẵn trong vài giây.
           </Paragraph>
         </div>
       ),
     },
     {
       key: "supported-institutions",
-      label: "Which institutions are supported?",
+      label: "Những tổ chức nào được hỗ trợ?",
       children: (
         <div>
           <Paragraph>
-            We currently support credentials from over{" "}
-            <strong>127 institutions</strong> worldwide, including:
+            Hiện tại chúng tôi hỗ trợ chứng chỉ từ hơn{" "}
+            <strong>127 tổ chức</strong> trên toàn thế giới, bao gồm:
           </Paragraph>
           <Row gutter={[16, 8]}>
             <Col xs={24} md={12}>
-              <Title level={5}>🇻🇳 Vietnam Universities:</Title>
+              <Title level={5}>🇻🇳 Các trường đại học Việt Nam:</Title>
               <ul>
                 <li>FPT University</li>
                 <li>Vietnam National University (VNU)</li>
@@ -114,19 +112,19 @@ const AboutHelp: React.FC = () => {
               </ul>
             </Col>
             <Col xs={24} md={12}>
-              <Title level={5}>🌍 International Partners:</Title>
+              <Title level={5}>🌍 Đối tác quốc tế:</Title>
               <ul>
-                <li>Amazon Web Services (Certifications)</li>
-                <li>Google (Professional Certificates)</li>
-                <li>Microsoft (Azure Certifications)</li>
-                <li>Coursera (Online Degrees)</li>
+                <li>Amazon Web Services (Chứng chỉ)</li>
+                <li>Google (Chứng chỉ chuyên nghiệp)</li>
+                <li>Microsoft (Chứng chỉ Azure)</li>
+                <li>Coursera (Bằng cấp trực tuyến)</li>
                 <li>edX (MicroMasters)</li>
               </ul>
             </Col>
           </Row>
           <Alert
-            message="Don't see your institution?"
-            description="Contact us to discuss adding your institution to our verification network."
+            message="Không thấy tổ chức của bạn?"
+            description="Liên hệ với chúng tôi để thảo luận về việc thêm tổ chức của bạn vào mạng xác thực của chúng tôi."
             type="info"
             showIcon
             style={{ marginTop: 16 }}
@@ -136,35 +134,34 @@ const AboutHelp: React.FC = () => {
     },
     {
       key: "verification-failed",
-      label: "What if verification fails?",
+      label: "Nếu xác thực thất bại thì sao?",
       children: (
         <div>
           <Paragraph>
-            If credential verification fails, it could be due to several
-            reasons:
+            Nếu xác thực chứng chỉ thất bại, có thể do một số lý do sau:
           </Paragraph>
           <List
             itemLayout="horizontal"
             dataSource={[
               {
-                title: "Credential not found",
+                title: "Không tìm thấy chứng chỉ",
                 description:
-                  "The credential ID or blockchain hash doesn't exist in our records",
+                  "ID chứng chỉ hoặc mã hash blockchain không tồn tại trong hồ sơ của chúng tôi",
               },
               {
-                title: "Invalid format",
+                title: "Định dạng không hợp lệ",
                 description:
-                  "The credential ID format is incorrect or contains typos",
+                  "Định dạng ID chứng chỉ không đúng hoặc có lỗi chính tả",
               },
               {
-                title: "Revoked credential",
+                title: "Chứng chỉ đã bị thu hồi",
                 description:
-                  "The institution has revoked or cancelled this credential",
+                  "Tổ chức đã thu hồi hoặc hủy chứng chỉ này",
               },
               {
-                title: "Institution not supported",
+                title: "Tổ chức không được hỗ trợ",
                 description:
-                  "The issuing institution is not part of our verification network",
+                  "Tổ chức cấp chứng chỉ không thuộc mạng xác thực của chúng tôi",
               },
             ]}
             renderItem={(item) => (
@@ -183,8 +180,8 @@ const AboutHelp: React.FC = () => {
             )}
           />
           <Alert
-            message="Next Steps"
-            description="If verification fails, please double-check the credential ID and contact the issuing institution for assistance."
+            message="Bước tiếp theo"
+            description="Nếu xác thực thất bại, vui lòng kiểm tra lại ID chứng chỉ và liên hệ với tổ chức cấp để được hỗ trợ."
             type="warning"
             showIcon
             style={{ marginTop: 16 }}
@@ -194,40 +191,40 @@ const AboutHelp: React.FC = () => {
     },
     {
       key: "data-privacy",
-      label: "How is my data protected?",
+      label: "Dữ liệu của tôi được bảo vệ như thế nào?",
       children: (
         <div>
           <Paragraph>
-            We take data privacy seriously and follow industry best practices:
+            Chúng tôi coi trọng quyền riêng tư dữ liệu và tuân theo các thực hành tốt nhất trong ngành:
           </Paragraph>
           <Space direction="vertical" style={{ width: "100%" }}>
             <div>
               <CheckCircleOutlined
                 style={{ color: "#52c41a", marginRight: 8 }}
               />
-              <Text strong>No personal data storage:</Text> We don't store
-              personal information from verifications
+              <Text strong>Không lưu trữ dữ liệu cá nhân:</Text> Chúng tôi không lưu trữ
+              thông tin cá nhân từ các lần xác thực
             </div>
             <div>
               <CheckCircleOutlined
                 style={{ color: "#52c41a", marginRight: 8 }}
               />
-              <Text strong>Encrypted connections:</Text> All data transmission
-              uses SSL/TLS encryption
+              <Text strong>Kết nối được mã hóa:</Text> Tất cả việc truyền dữ liệu
+              sử dụng mã hóa SSL/TLS
             </div>
             <div>
               <CheckCircleOutlined
                 style={{ color: "#52c41a", marginRight: 8 }}
               />
-              <Text strong>Anonymous verification:</Text> Verifications can be
-              performed without creating accounts
+              <Text strong>Xác thực ẩn danh:</Text> Có thể thực hiện xác thực
+              mà không cần tạo tài khoản
             </div>
             <div>
               <CheckCircleOutlined
                 style={{ color: "#52c41a", marginRight: 8 }}
               />
-              <Text strong>GDPR compliant:</Text> We comply with international
-              data protection regulations
+              <Text strong>Tuân thủ GDPR:</Text> Chúng tôi tuân thủ các quy định
+              bảo vệ dữ liệu quốc tế
             </div>
           </Space>
         </div>
@@ -238,27 +235,27 @@ const AboutHelp: React.FC = () => {
   const contactInfo = [
     {
       icon: <PhoneOutlined style={{ color: "#1890ff" }} />,
-      title: "Phone Support",
+      title: "Hỗ trợ qua điện thoại",
       description: "+84 (0) 123 456 789",
-      subtitle: "Monday - Friday, 9:00 AM - 6:00 PM (GMT+7)",
+      subtitle: "Thứ Hai - Thứ Sáu, 9:00 - 18:00 (GMT+7)",
     },
     {
       icon: <MailOutlined style={{ color: "#52c41a" }} />,
-      title: "Email Support",
+      title: "Hỗ trợ qua email",
       description: "support@credentialverifier.com",
-      subtitle: "Response within 24 hours",
+      subtitle: "Phản hồi trong vòng 24 giờ",
     },
     {
       icon: <GlobalOutlined style={{ color: "#722ed1" }} />,
-      title: "Live Chat",
-      description: "Available on our website",
-      subtitle: "Monday - Friday, 9:00 AM - 6:00 PM (GMT+7)",
+      title: "Trò chuyện trực tiếp",
+      description: "Có sẵn trên trang web của chúng tôi",
+      subtitle: "Thứ Hai - Thứ Sáu, 9:00 - 18:00 (GMT+7)",
     },
     {
       icon: <TeamOutlined style={{ color: "#fa541c" }} />,
-      title: "Enterprise Support",
+      title: "Hỗ trợ doanh nghiệp",
       description: "enterprise@credentialverifier.com",
-      subtitle: "Dedicated support for large organizations",
+      subtitle: "Hỗ trợ chuyên dụng cho các tổ chức lớn",
     },
   ];
 
@@ -266,25 +263,25 @@ const AboutHelp: React.FC = () => {
     {
       method: "POST",
       endpoint: "/api/v1/verify",
-      description: "Verify a credential by ID or hash",
+      description: "Xác thực chứng chỉ theo ID hoặc hash",
       parameters: "credential_id, verification_method",
     },
     {
       method: "GET",
       endpoint: "/api/v1/institutions",
-      description: "Get list of supported institutions",
+      description: "Lấy danh sách các tổ chức được hỗ trợ",
       parameters: "page, limit, search",
     },
     {
       method: "GET",
       endpoint: "/api/v1/status/{credential_id}",
-      description: "Get credential status and details",
+      description: "Lấy trạng thái và chi tiết chứng chỉ",
       parameters: "credential_id",
     },
     {
       method: "POST",
       endpoint: "/api/v1/batch-verify",
-      description: "Verify multiple credentials at once",
+      description: "Xác thực nhiều chứng chỉ cùng lúc",
       parameters: "credential_ids[]",
     },
   ];
@@ -301,10 +298,9 @@ const AboutHelp: React.FC = () => {
       children: (
         <div className="faq-section">
           <div style={{ textAlign: "center", marginBottom: 32 }}>
-            <Title level={3}>Frequently Asked Questions</Title>
+            <Title level={3}>Câu hỏi thường gặp</Title>
             <Text type="secondary">
-              Find answers to common questions about our credential verification
-              service
+              Tìm câu trả lời cho các câu hỏi phổ biến về dịch vụ xác thực chứng chỉ của chúng tôi
             </Text>
           </div>
 
@@ -322,15 +318,15 @@ const AboutHelp: React.FC = () => {
       label: (
         <span>
           <PhoneOutlined />
-          Contact Us
+          Liên hệ
         </span>
       ),
       children: (
         <div className="contact-section">
           <div style={{ textAlign: "center", marginBottom: 32 }}>
-            <Title level={3}>Get in Touch</Title>
+            <Title level={3}>Liên hệ với chúng tôi</Title>
             <Text type="secondary">
-              Need help? Our support team is here to assist you
+              Cần hỗ trợ? Đội ngũ hỗ trợ của chúng tôi sẵn sàng giúp đỡ bạn
             </Text>
           </div>
 
@@ -358,15 +354,15 @@ const AboutHelp: React.FC = () => {
 
           <Divider />
 
-          <Card title="📍 Office Location" style={{ textAlign: "center" }}>
-            <Title level={4}>FPT Software Building</Title>
+          <Card title="📍 Vị trí văn phòng" style={{ textAlign: "center" }}>
+            <Title level={4}>Tòa nhà FPT Software</Title>
             <Paragraph>
-              Nam Kỳ Khởi Nghĩa Street, Nguyễn Du Ward
+              Đường Nam Kỳ Khởi Nghĩa, Phường Nguyễn Du
               <br />
-              District 1, Ho Chi Minh City, Vietnam
+              Quận 1, Thành phố Hồ Chí Minh, Việt Nam
             </Paragraph>
             <Button type="primary" icon={<GlobalOutlined />}>
-              View on Google Maps
+              Xem trên Google Maps
             </Button>
           </Card>
         </div>
@@ -377,43 +373,43 @@ const AboutHelp: React.FC = () => {
       label: (
         <span>
           <ApiOutlined />
-          API Docs
+          Tài liệu API
         </span>
       ),
       children: (
         <div className="api-section">
           <div style={{ textAlign: "center", marginBottom: 32 }}>
-            <Title level={3}>API Documentation</Title>
+            <Title level={3}>Tài liệu API</Title>
             <Text type="secondary">
-              Integrate credential verification into your applications
+              Tích hợp xác thực chứng chỉ vào ứng dụng của bạn
             </Text>
           </div>
 
           <Alert
-            message="API Access"
-            description="API access is available for enterprise customers. Contact our sales team to get started."
+            message="Truy cập API"
+            description="Truy cập API có sẵn cho khách hàng doanh nghiệp. Liên hệ đội ngũ bán hàng của chúng tôi để bắt đầu."
             type="info"
             showIcon
             style={{ marginBottom: 24 }}
           />
 
-          <Card title="🚀 Getting Started" style={{ marginBottom: 24 }}>
+          <Card title="🚀 Bắt đầu" style={{ marginBottom: 24 }}>
             <Paragraph>
-              Our RESTful API allows you to integrate credential verification
-              directly into your applications. All endpoints return JSON
-              responses and use standard HTTP status codes.
+              RESTful API của chúng tôi cho phép bạn tích hợp xác thực chứng chỉ
+              trực tiếp vào ứng dụng của bạn. Tất cả các endpoint trả về phản hồi JSON
+              và sử dụng mã trạng thái HTTP tiêu chuẩn.
             </Paragraph>
             <Paragraph>
-              <Text strong>Base URL:</Text>{" "}
+              <Text strong>URL cơ sở:</Text>{" "}
               <Text code>https://api.credentialverifier.com</Text>
             </Paragraph>
             <Paragraph>
-              <Text strong>Authentication:</Text> Bearer token (provided upon
-              registration)
+              <Text strong>Xác thực:</Text> Bearer token (được cung cấp khi
+              đăng ký)
             </Paragraph>
           </Card>
 
-          <Card title=" API Endpoints">
+          <Card title=" Các endpoint API">
             <List
               itemLayout="vertical"
               dataSource={apiEndpoints}
@@ -427,14 +423,14 @@ const AboutHelp: React.FC = () => {
                       <Text code>{item.endpoint}</Text>
                     </Space>
                     <Text>{item.description}</Text>
-                    <Text type="secondary">Parameters: {item.parameters}</Text>
+                    <Text type="secondary">Tham số: {item.parameters}</Text>
                   </Space>
                 </List.Item>
               )}
             />
           </Card>
 
-          <Card title="💻 Example Request" style={{ marginTop: 24 }}>
+          <Card title="💻 Ví dụ yêu cầu" style={{ marginTop: 24 }}>
             <pre
               style={{ background: "#f5f5f5", padding: 16, borderRadius: 8 }}
             >
@@ -455,16 +451,15 @@ const AboutHelp: React.FC = () => {
       label: (
         <span>
           <BookOutlined />
-          About Us
+          Về chúng tôi
         </span>
       ),
       children: (
         <div className="about-section">
           <div style={{ textAlign: "center", marginBottom: 32 }}>
-            <Title level={3}>About Our Platform</Title>
+            <Title level={3}>Về nền tảng của chúng tôi</Title>
             <Text type="secondary">
-              Leading the future of credential verification with blockchain
-              technology
+              Dẫn đầu tương lai của xác thực chứng chỉ với công nghệ blockchain
             </Text>
           </div>
 
@@ -474,10 +469,10 @@ const AboutHelp: React.FC = () => {
                 <SafetyCertificateOutlined
                   style={{ fontSize: 48, color: "#52c41a", marginBottom: 16 }}
                 />
-                <Title level={4}>Secure & Trusted</Title>
+                <Title level={4}>An toàn & Đáng tin cậy</Title>
                 <Paragraph>
-                  Built on blockchain technology ensuring tamper-proof
-                  verification and eliminating credential fraud.
+                  Được xây dựng trên công nghệ blockchain đảm bảo xác thực chống giả mạo
+                  và loại bỏ gian lận chứng chỉ.
                 </Paragraph>
               </Card>
             </Col>
@@ -486,10 +481,10 @@ const AboutHelp: React.FC = () => {
                 <RocketOutlined
                   style={{ fontSize: 48, color: "#1890ff", marginBottom: 16 }}
                 />
-                <Title level={4}>Fast & Reliable</Title>
+                <Title level={4}>Nhanh & Đáng tin cậy</Title>
                 <Paragraph>
-                  Get verification results in seconds with 99.9% uptime and
-                  global accessibility.
+                  Nhận kết quả xác thực trong vài giây với thời gian hoạt động 99.9% và
+                  khả năng truy cập toàn cầu.
                 </Paragraph>
               </Card>
             </Col>
@@ -498,10 +493,10 @@ const AboutHelp: React.FC = () => {
                 <GlobalOutlined
                   style={{ fontSize: 48, color: "#722ed1", marginBottom: 16 }}
                 />
-                <Title level={4}>Global Network</Title>
+                <Title level={4}>Mạng lưới toàn cầu</Title>
                 <Paragraph>
-                  Partnered with 127+ institutions worldwide, trusted by 500+
-                  organizations.
+                  Đối tác với hơn 127 tổ chức trên toàn thế giới, được tin tưởng bởi hơn 500+
+                  tổ chức.
                 </Paragraph>
               </Card>
             </Col>
@@ -510,17 +505,17 @@ const AboutHelp: React.FC = () => {
           <Divider />
 
           <Card>
-            <Title level={4}>🎯 Our Mission</Title>
+            <Title level={4}>🎯 Sứ mệnh của chúng tôi</Title>
             <Paragraph style={{ fontSize: 16, lineHeight: 1.8 }}>
-              To revolutionize credential verification by providing instant,
-              secure, and globally accessible validation of academic
-              achievements. We believe in creating a world where authentic
-              credentials can be verified anywhere, anytime, eliminating fraud
-              and building trust in education.
+              Cách mạng hóa xác thực chứng chỉ bằng cách cung cấp xác nhận tức thì,
+              an toàn và có thể truy cập toàn cầu cho các thành tựu học thuật.
+              Chúng tôi tin vào việc tạo ra một thế giới nơi chứng chỉ xác thực
+              có thể được xác thực ở bất cứ đâu, bất cứ lúc nào, loại bỏ gian lận
+              và xây dựng niềm tin trong giáo dục.
             </Paragraph>
 
             <Title level={4} style={{ marginTop: 32 }}>
-              📊 Platform Statistics
+              📊 Thống kê nền tảng
             </Title>
             <Row gutter={[16, 16]}>
               <Col xs={12} sm={6}>
@@ -528,7 +523,7 @@ const AboutHelp: React.FC = () => {
                   <Title level={2} style={{ color: "#722ed1", margin: 0 }}>
                     152K+
                   </Title>
-                  <Text type="secondary">Credentials Verified</Text>
+                  <Text type="secondary">Chứng chỉ đã xác thực</Text>
                 </div>
               </Col>
               <Col xs={12} sm={6}>
@@ -536,7 +531,7 @@ const AboutHelp: React.FC = () => {
                   <Title level={2} style={{ color: "#722ed1", margin: 0 }}>
                     127
                   </Title>
-                  <Text type="secondary">Partner Institutions</Text>
+                  <Text type="secondary">Tổ chức đối tác</Text>
                 </div>
               </Col>
               <Col xs={12} sm={6}>
@@ -544,7 +539,7 @@ const AboutHelp: React.FC = () => {
                   <Title level={2} style={{ color: "#722ed1", margin: 0 }}>
                     500+
                   </Title>
-                  <Text type="secondary">Trusted Organizations</Text>
+                  <Text type="secondary">Tổ chức tin cậy</Text>
                 </div>
               </Col>
               <Col xs={12} sm={6}>
@@ -552,7 +547,7 @@ const AboutHelp: React.FC = () => {
                   <Title level={2} style={{ color: "#722ed1", margin: 0 }}>
                     2.3s
                   </Title>
-                  <Text type="secondary">Average Response Time</Text>
+                  <Text type="secondary">Thời gian phản hồi trung bình</Text>
                 </div>
               </Col>
             </Row>
@@ -567,10 +562,10 @@ const AboutHelp: React.FC = () => {
       {/* Page Header */}
       <div className="page-header">
         <Title level={2} style={{ margin: 0, color: "#ffffff" }}>
-          Help & Support Center
+          Trung tâm trợ giúp & Hỗ trợ
         </Title>
         <Text type="secondary" style={{ fontSize: 16 }}>
-          Everything you need to know about credential verification
+          Tất cả những gì bạn cần biết về xác thực chứng chỉ
         </Text>
       </div>
 

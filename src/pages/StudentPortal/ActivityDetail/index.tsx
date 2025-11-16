@@ -1,32 +1,25 @@
-import React from "react";
-import { useParams, useNavigate, useLocation } from "react-router-dom";
-import {
-  Card,
-  Descriptions,
-  Button,
-  Space,
-  Typography,
-  Tag,
-  Row,
-  Col,
-  Avatar,
-  Divider,
-} from "antd";
 import {
   ArrowLeftOutlined,
-  CalendarOutlined,
-  ClockCircleOutlined,
-  UserOutlined,
   BookOutlined,
-  EnvironmentOutlined,
-  TeamOutlined,
+  CalendarOutlined,
   CheckCircleOutlined,
+  ClockCircleOutlined,
   CloseCircleOutlined,
   ExclamationCircleOutlined,
-  LinkOutlined,
-  BarChartOutlined,
 } from "@ant-design/icons";
+import {
+  Button,
+  Card,
+  Col,
+  Descriptions,
+  Row,
+  Space,
+  Tag,
+  Typography,
+} from "antd";
 import dayjs from "dayjs";
+import React from "react";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import "./ActivityDetail.scss";
 
 const { Title, Text } = Typography;
@@ -158,9 +151,9 @@ const ActivityDetail: React.FC = () => {
       <div className="activity-detail">
         <Card>
           <div style={{ textAlign: "center", padding: "48px 0" }}>
-            <Title level={3}>Activity Not Found</Title>
+            <Title level={3}>Không tìm thấy hoạt động</Title>
             <Text type="secondary">
-              The requested activity could not be found.
+              Hoạt động được yêu cầu không thể tìm thấy.
             </Text>
             <br />
             <Button
@@ -169,7 +162,7 @@ const ActivityDetail: React.FC = () => {
               onClick={() => navigate("/student-portal/timetable")}
               style={{ marginTop: 16 }}
             >
-              Back to Timetable
+              Quay lại thời khóa biểu
             </Button>
           </div>
         </Card>
@@ -182,23 +175,23 @@ const ActivityDetail: React.FC = () => {
       case "attended":
         return (
           <Tag color="success" icon={<CheckCircleOutlined />}>
-            Attended
+            Đã tham gia
           </Tag>
         );
       case "absent":
         return (
           <Tag color="error" icon={<CloseCircleOutlined />}>
-            Absent
+            Vắng mặt
           </Tag>
         );
       case "not_yet":
         return (
           <Tag color="warning" icon={<ExclamationCircleOutlined />}>
-            Not Yet
+            Chưa có
           </Tag>
         );
       default:
-        return <Tag color="default">Unknown</Tag>;
+        return <Tag color="default">Không xác định</Tag>;
     }
   };
 
@@ -231,11 +224,11 @@ const ActivityDetail: React.FC = () => {
           onClick={() => navigate("/student-portal/timetable")}
           style={{ marginBottom: 16 }}
         >
-          Back to Timetable
+          Quay lại thời khóa biểu
         </Button>
 
         <Title level={2} style={{ margin: 0, color: "#1890ff" }}>
-          Activity Detail
+          Chi tiết hoạt động
         </Title>
       </div>
 
@@ -243,8 +236,8 @@ const ActivityDetail: React.FC = () => {
         {/* Main Information */}
         <Col xs={24}>
           <Card className="main-info-card">
-            <Descriptions title="Class Information" column={2} bordered>
-              <Descriptions.Item label="Date" span={2}>
+            <Descriptions title="Thông tin lớp học" column={2} bordered>
+              <Descriptions.Item label="Ngày" span={2}>
                 <Space>
                   <CalendarOutlined />
                   <Text strong>
@@ -253,7 +246,7 @@ const ActivityDetail: React.FC = () => {
                 </Space>
               </Descriptions.Item>
 
-              <Descriptions.Item label="Slot" span={2}>
+              <Descriptions.Item label="Ca học" span={2}>
                 <Space>
                   <ClockCircleOutlined />
                   <Text>
@@ -262,7 +255,7 @@ const ActivityDetail: React.FC = () => {
                 </Space>
               </Descriptions.Item>
 
-              <Descriptions.Item label="Student Group" span={2}>
+              <Descriptions.Item label="Nhóm sinh viên" span={2}>
                 <Button
                   type="link"
                   style={{ padding: 0, color: "#1890ff" }}
@@ -272,7 +265,7 @@ const ActivityDetail: React.FC = () => {
                 </Button>
               </Descriptions.Item>
 
-              <Descriptions.Item label="Instructor" span={2}>
+              <Descriptions.Item label="Giảng viên" span={2}>
                 <Button
                   type="link"
                   style={{ padding: 0, color: "#1890ff" }}
@@ -283,7 +276,7 @@ const ActivityDetail: React.FC = () => {
                 </Button>
               </Descriptions.Item>
 
-              <Descriptions.Item label="Course" span={2}>
+              <Descriptions.Item label="Môn học" span={2}>
                 <Space>
                   <BookOutlined />
                   <Text strong>
@@ -292,15 +285,15 @@ const ActivityDetail: React.FC = () => {
                 </Space>
               </Descriptions.Item>
 
-              <Descriptions.Item label="Course Session Number" span={2}>
+              <Descriptions.Item label="Số buổi học" span={2}>
                 <Tag color="blue">{activityData.sessionNumber}</Tag>
               </Descriptions.Item>
 
-              <Descriptions.Item label="Attendance" span={2}>
+              <Descriptions.Item label="Điểm danh" span={2}>
                 {getAttendanceTag(activityData.attendance)}
               </Descriptions.Item>
 
-              <Descriptions.Item label="Record Time" span={2}>
+              <Descriptions.Item label="Thời gian ghi nhận" span={2}>
                 <Text>
                   {dayjs(activityData.recordTime).format("DD/MM/YYYY HH:mm:ss")}
                 </Text>

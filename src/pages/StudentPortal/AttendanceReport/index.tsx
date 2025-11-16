@@ -331,19 +331,19 @@ const AttendanceReport: React.FC = () => {
       case "Present":
         return (
           <Tag color="success" icon={<CheckCircleOutlined />}>
-            Present
+            Có mặt
           </Tag>
         );
       case "Absent":
         return (
           <Tag color="error" icon={<CloseCircleOutlined />}>
-            Absent
+            Vắng mặt
           </Tag>
         );
       case "Future":
         return (
           <Tag color="default" icon={<ExclamationCircleOutlined />}>
-            Future
+            Sắp tới
           </Tag>
         );
       default:
@@ -376,7 +376,7 @@ const AttendanceReport: React.FC = () => {
 
   const columns: ColumnsType<AttendanceRecord> = [
     {
-      title: "NO.",
+      title: "STT",
       dataIndex: "no",
       key: "no",
       width: 60,
@@ -384,7 +384,7 @@ const AttendanceReport: React.FC = () => {
       render: (no: number) => <Text strong>{no}</Text>,
     },
     {
-      title: "DATE",
+      title: "NGÀY",
       dataIndex: "date",
       key: "date",
       width: 150,
@@ -392,7 +392,7 @@ const AttendanceReport: React.FC = () => {
       render: (date: string) => getDateTag(date),
     },
     {
-      title: "SLOT",
+      title: "CA HỌC",
       dataIndex: "slot",
       key: "slot",
       width: 120,
@@ -401,7 +401,7 @@ const AttendanceReport: React.FC = () => {
         getSlotTag(slot, record.slotTime),
     },
     {
-      title: "ROOM",
+      title: "PHÒNG",
       dataIndex: "room",
       key: "room",
       width: 100,
@@ -409,7 +409,7 @@ const AttendanceReport: React.FC = () => {
       render: (room: string) => <Text strong>{room}</Text>,
     },
     {
-      title: "LECTURER",
+      title: "GIẢNG VIÊN",
       dataIndex: "lecturer",
       key: "lecturer",
       width: 120,
@@ -417,7 +417,7 @@ const AttendanceReport: React.FC = () => {
       render: (lecturer: string) => <Text>{lecturer}</Text>,
     },
     {
-      title: "GROUP NAME",
+      title: "NHÓM",
       dataIndex: "groupName",
       key: "groupName",
       width: 140,
@@ -425,7 +425,7 @@ const AttendanceReport: React.FC = () => {
       render: (groupName: string) => <Text>{groupName}</Text>,
     },
     {
-      title: "ATTENDANCE STATUS",
+      title: "TRẠNG THÁI",
       dataIndex: "status",
       key: "status",
       width: 160,
@@ -433,7 +433,7 @@ const AttendanceReport: React.FC = () => {
       render: (status: string) => getStatusTag(status),
     },
     {
-      title: "LECTURER'S COMMENT",
+      title: "NHẬN XÉT CỦA GIẢNG VIÊN",
       dataIndex: "lecturerComment",
       key: "lecturerComment",
       align: "center",
@@ -467,7 +467,7 @@ const AttendanceReport: React.FC = () => {
     <div className="attendance-report">
       <div className="page-header">
         <Title level={2} style={{ margin: 0, color: "#FFFFFF" }}>
-          View Attendance for Nghiêm Văn Hoàng (SE170117)
+          Xem điểm danh cho Nghiêm Văn Hoàng (SE170117)
         </Title>
       </div>
 
@@ -529,8 +529,8 @@ const AttendanceReport: React.FC = () => {
               {/* Summary */}
               <div className="attendance-summary">
                 <Text strong style={{ color: "#ff4d4f", fontSize: 16 }}>
-                  ABSENT: {absentPercentage}% ABSENT SO FAR ({absentSessions}{" "}
-                  ABSENT ON {completedSessions} TOTAL).
+                  VẮNG MẶT: {absentPercentage}% VẮNG MẶT TỔNG CỘNG ({absentSessions}{" "}
+                  VẮNG MẶT TRONG TỔNG SỐ {completedSessions} BUỔI HỌC).
                 </Text>
               </div>
             </Card>

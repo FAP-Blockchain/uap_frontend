@@ -1,19 +1,19 @@
 import React from "react";
-import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import {
-  Card,
-  Descriptions,
+  Avatar,
   Button,
+  Card,
+  Col,
+  Descriptions,
+  Row,
   Space,
   Typography,
-  Avatar,
-  Row,
-  Col,
 } from "antd";
 import {
   ArrowLeftOutlined,
-  UserOutlined,
   MailOutlined,
+  UserOutlined,
 } from "@ant-design/icons";
 import "./InstructorDetail.scss";
 
@@ -51,7 +51,7 @@ const InstructorDetail: React.FC = () => {
         phone: "+84 123 456 789",
         department: "Political Education Department",
         position: "Senior Lecturer",
-        image: "", // Empty like in the original image
+        image: "",
         bio: "Dr. Duy has over 15 years of experience in political education and Ho Chi Minh ideology research.",
         courses: [
           "HCM202 - Ho Chi Minh Ideology",
@@ -104,9 +104,9 @@ const InstructorDetail: React.FC = () => {
       <div className="instructor-detail">
         <Card>
           <div style={{ textAlign: "center", padding: "48px 0" }}>
-            <Title level={3}>Instructor Not Found</Title>
+            <Title level={3}>Không tìm thấy giảng viên</Title>
             <Text type="secondary">
-              The requested instructor could not be found.
+              Không thể tìm thấy giảng viên được yêu cầu.
             </Text>
             <br />
             <Button
@@ -115,7 +115,7 @@ const InstructorDetail: React.FC = () => {
               onClick={() => navigate(-1)}
               style={{ marginTop: 16 }}
             >
-              Go Back
+              Quay lại
             </Button>
           </div>
         </Card>
@@ -125,7 +125,7 @@ const InstructorDetail: React.FC = () => {
 
   const handleBackClick = () => {
     if (fromActivity) {
-      navigate(-1); // Go back to activity detail
+      navigate(-1);
     } else {
       navigate("/student-portal/timetable");
     }
@@ -140,11 +140,11 @@ const InstructorDetail: React.FC = () => {
           onClick={handleBackClick}
           style={{ marginBottom: 16 }}
         >
-          {fromActivity ? "Back to Activity" : "Back to Timetable"}
+          {fromActivity ? "Quay lại hoạt động" : "Quay lại thời khóa biểu"}
         </Button>
 
         <Title level={2} style={{ margin: 0, color: "#1a94fc" }}>
-          User Detail
+          Chi tiết người dùng
         </Title>
       </div>
 
@@ -166,7 +166,7 @@ const InstructorDetail: React.FC = () => {
                       {instructorData.fullName}
                     </Title>
                     <Text className="profile-position">
-                      {instructorData.position || "Instructor"}
+                      {instructorData.position || "Giảng viên"}
                     </Text>
                   </div>
                 </div>
@@ -180,11 +180,11 @@ const InstructorDetail: React.FC = () => {
                 layout="horizontal"
                 labelStyle={{ width: "200px" }}
               >
-                <Descriptions.Item label="Login">
+                <Descriptions.Item label="Tên đăng nhập">
                   <Text strong>{instructorData.login}</Text>
                 </Descriptions.Item>
 
-                <Descriptions.Item label="Full Name">
+                <Descriptions.Item label="Họ và tên">
                   <Text strong>{instructorData.fullName}</Text>
                 </Descriptions.Item>
 

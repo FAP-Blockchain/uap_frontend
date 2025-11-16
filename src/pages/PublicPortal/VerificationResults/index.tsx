@@ -126,14 +126,14 @@ const VerificationResults: React.FC = () => {
         <Card>
           <Result
             status="404"
-            title="No Verification Data"
-            subTitle="Please go back to the verification portal to verify a credential."
+            title="Không có dữ liệu xác thực"
+            subTitle="Vui lòng quay lại cổng xác thực để xác thực chứng chỉ."
             extra={
               <Button
                 type="primary"
                 onClick={() => navigate("/public-portal/verify")}
               >
-                Start Verification
+                Bắt đầu xác thực
               </Button>
             }
           />
@@ -168,23 +168,23 @@ const VerificationResults: React.FC = () => {
       case "active":
         return (
           <Tag color="success" icon={<CheckCircleOutlined />}>
-            Active
+            Hoạt động
           </Tag>
         );
       case "revoked":
         return (
           <Tag color="error" icon={<CloseCircleOutlined />}>
-            Revoked
+            Đã thu hồi
           </Tag>
         );
       case "expired":
         return (
           <Tag color="warning" icon={<ExclamationCircleOutlined />}>
-            Expired
+            Hết hạn
           </Tag>
         );
       default:
-        return <Tag color="default">Unknown</Tag>;
+        return <Tag color="default">Không xác định</Tag>;
     }
   };
 
@@ -206,7 +206,7 @@ const VerificationResults: React.FC = () => {
       color: "green",
       children: (
         <div>
-          <Text strong>Verification Initiated</Text>
+          <Text strong>Bắt đầu xác thực</Text>
           <br />
           <Text type="secondary">
             {dayjs(resultData.timestamp).format("YYYY-MM-DD HH:mm:ss")}
@@ -220,12 +220,12 @@ const VerificationResults: React.FC = () => {
         : "red",
       children: (
         <div>
-          <Text strong>Blockchain Verification</Text>
+          <Text strong>Xác thực Blockchain</Text>
           <br />
           <Text type="secondary">
             {resultData.verificationDetails.blockchainVerified
-              ? "✅ Verified on blockchain"
-              : "❌ Not found on blockchain"}
+              ? "✅ Đã xác thực trên blockchain"
+              : "❌ Không tìm thấy trên blockchain"}
           </Text>
         </div>
       ),
@@ -236,12 +236,12 @@ const VerificationResults: React.FC = () => {
         : "red",
       children: (
         <div>
-          <Text strong>Institution Verification</Text>
+          <Text strong>Xác thực tổ chức</Text>
           <br />
           <Text type="secondary">
             {resultData.verificationDetails.institutionVerified
-              ? "✅ Confirmed by institution"
-              : "❌ Institution not verified"}
+              ? "✅ Đã xác nhận bởi tổ chức"
+              : "❌ Tổ chức chưa được xác thực"}
           </Text>
         </div>
       ),
@@ -250,12 +250,12 @@ const VerificationResults: React.FC = () => {
       color: resultData.success ? "green" : "red",
       children: (
         <div>
-          <Text strong>Final Result</Text>
+          <Text strong>Kết quả cuối cùng</Text>
           <br />
           <Text type="secondary">
             {resultData.success
-              ? "✅ Verification completed successfully"
-              : "❌ Verification failed"}
+              ? "✅ Xác thực hoàn tất thành công"
+              : "❌ Xác thực thất bại"}
           </Text>
         </div>
       ),
@@ -273,15 +273,15 @@ const VerificationResults: React.FC = () => {
           title={
             <Title level={2} style={{ margin: 0 }}>
               {resultData.success
-                ? "Credential Verified Successfully!"
-                : "Verification Failed"}
+                ? "Chứng chỉ đã được xác thực thành công!"
+                : "Xác thực thất bại"}
             </Title>
           }
           subTitle={
             <Text style={{ fontSize: 16 }}>
               {resultData.success
-                ? "The credential has been successfully verified against blockchain records."
-                : "The credential could not be verified or does not exist in our records."}
+                ? "Chứng chỉ đã được xác thực thành công với hồ sơ blockchain."
+                : "Chứng chỉ không thể được xác thực hoặc không tồn tại trong hồ sơ của chúng tôi."}
             </Text>
           }
           extra={
@@ -290,7 +290,7 @@ const VerificationResults: React.FC = () => {
                 type="primary"
                 onClick={() => navigate("/public-portal/verify")}
               >
-                Verify Another Credential
+                Xác thực chứng chỉ khác
               </Button>
               {resultData.success && (
                 <>
@@ -298,9 +298,9 @@ const VerificationResults: React.FC = () => {
                     icon={<DownloadOutlined />}
                     onClick={handleDownloadReport}
                   >
-                    Download Report
+                    Tải báo cáo
                   </Button>
-                  <Button icon={<PrinterOutlined />}>Print Results</Button>
+                  <Button icon={<PrinterOutlined />}>In kết quả</Button>
                 </>
               )}
             </Space>
@@ -312,9 +312,9 @@ const VerificationResults: React.FC = () => {
         <Row gutter={[24, 24]}>
           {/* Credential Details */}
           <Col xs={24} lg={16}>
-            <Card title=" Credential Information" className="detail-card">
+            <Card title=" Thông tin chứng chỉ" className="detail-card">
               <Descriptions column={2} bordered>
-                <Descriptions.Item label="Credential Type" span={2}>
+                <Descriptions.Item label="Loại chứng chỉ" span={2}>
                   <Space>
                     {getCredentialIcon(resultData.credentialInfo.type)}
                     <Tag
@@ -332,25 +332,25 @@ const VerificationResults: React.FC = () => {
                   </Space>
                 </Descriptions.Item>
 
-                <Descriptions.Item label="Title" span={2}>
+                <Descriptions.Item label="Tiêu đề" span={2}>
                   <Text strong>{resultData.credentialInfo.title}</Text>
                 </Descriptions.Item>
 
-                <Descriptions.Item label="Institution">
+                <Descriptions.Item label="Tổ chức">
                   {resultData.credentialInfo.institution}
                 </Descriptions.Item>
-                <Descriptions.Item label="Status">
+                <Descriptions.Item label="Trạng thái">
                   {getStatusTag(resultData.credentialInfo.status)}
                 </Descriptions.Item>
 
-                <Descriptions.Item label="Student Name">
+                <Descriptions.Item label="Tên sinh viên">
                   {resultData.credentialInfo.studentName}
                 </Descriptions.Item>
-                <Descriptions.Item label="Student ID">
+                <Descriptions.Item label="Mã sinh viên">
                   {resultData.credentialInfo.studentId}
                 </Descriptions.Item>
 
-                <Descriptions.Item label="Issue Date">
+                <Descriptions.Item label="Ngày cấp">
                   <Space>
                     <CalendarOutlined />
                     {dayjs(resultData.credentialInfo.issueDate).format(
@@ -365,7 +365,7 @@ const VerificationResults: React.FC = () => {
                 )}
 
                 {resultData.credentialInfo.major && (
-                  <Descriptions.Item label="Major" span={2}>
+                  <Descriptions.Item label="Chuyên ngành" span={2}>
                     {resultData.credentialInfo.major}
                   </Descriptions.Item>
                 )}
@@ -374,19 +374,19 @@ const VerificationResults: React.FC = () => {
               <Divider />
 
               {/* Blockchain Details */}
-              <Title level={5}>Blockchain Verification Details</Title>
+              <Title level={5}>Chi tiết xác thực Blockchain</Title>
               <Descriptions column={1} size="small">
-                <Descriptions.Item label="Blockchain Hash">
+                <Descriptions.Item label="Mã hash Blockchain">
                   <Text code copyable>
                     {resultData.credentialInfo.blockchainHash}
                   </Text>
                 </Descriptions.Item>
-                <Descriptions.Item label="Transaction Hash">
+                <Descriptions.Item label="Mã hash giao dịch">
                   <Text code copyable>
                     {resultData.credentialInfo.transactionHash}
                   </Text>
                 </Descriptions.Item>
-                <Descriptions.Item label="Block Number">
+                <Descriptions.Item label="Số khối">
                   {resultData.credentialInfo.blockNumber.toLocaleString()}
                 </Descriptions.Item>
               </Descriptions>
@@ -399,7 +399,7 @@ const VerificationResults: React.FC = () => {
               {/* Verification Score */}
               <Card>
                 <Statistic
-                  title="Verification Score"
+                  title="Điểm xác thực"
                   value={resultData.verificationDetails.verificationScore}
                   suffix="%"
                   valueStyle={{
@@ -412,14 +412,13 @@ const VerificationResults: React.FC = () => {
                 />
                 <div style={{ marginTop: 16 }}>
                   <Text type="secondary">
-                    Based on blockchain verification, institution validation,
-                    and tamper-proof analysis
+                    Dựa trên xác thực blockchain, xác nhận tổ chức và phân tích chống giả mạo
                   </Text>
                 </div>
               </Card>
 
               {/* Verification Checklist */}
-              <Card title="✅ Verification Checklist">
+              <Card title="✅ Danh sách kiểm tra xác thực">
                 <Space direction="vertical" style={{ width: "100%" }}>
                   <div className="check-item">
                     {resultData.verificationDetails.blockchainVerified ? (
@@ -427,7 +426,7 @@ const VerificationResults: React.FC = () => {
                     ) : (
                       <CloseCircleOutlined style={{ color: "#ff4d4f" }} />
                     )}
-                    <Text style={{ marginLeft: 8 }}>Blockchain Verified</Text>
+                    <Text style={{ marginLeft: 8 }}>Đã xác thực Blockchain</Text>
                   </div>
                   <div className="check-item">
                     {resultData.verificationDetails.institutionVerified ? (
@@ -435,7 +434,7 @@ const VerificationResults: React.FC = () => {
                     ) : (
                       <CloseCircleOutlined style={{ color: "#ff4d4f" }} />
                     )}
-                    <Text style={{ marginLeft: 8 }}>Institution Confirmed</Text>
+                    <Text style={{ marginLeft: 8 }}>Đã xác nhận tổ chức</Text>
                   </div>
                   <div className="check-item">
                     {resultData.verificationDetails.tamperProof ? (
@@ -443,20 +442,20 @@ const VerificationResults: React.FC = () => {
                     ) : (
                       <CloseCircleOutlined style={{ color: "#ff4d4f" }} />
                     )}
-                    <Text style={{ marginLeft: 8 }}>Tamper-Proof</Text>
+                    <Text style={{ marginLeft: 8 }}>Chống giả mạo</Text>
                   </div>
                 </Space>
               </Card>
 
               {/* Quick Actions */}
-              <Card title="Quick Actions">
+              <Card title="Thao tác nhanh">
                 <Space direction="vertical" style={{ width: "100%" }}>
                   <Button
                     block
                     icon={<ShareAltOutlined />}
                     onClick={() => setShowQRModal(true)}
                   >
-                    Share Verification
+                    Chia sẻ xác thực
                   </Button>
                   <Button
                     block
@@ -465,14 +464,14 @@ const VerificationResults: React.FC = () => {
                       navigator.clipboard.writeText(window.location.href);
                     }}
                   >
-                    Copy Result Link
+                    Sao chép liên kết kết quả
                   </Button>
                   <Button
                     block
                     icon={<DownloadOutlined />}
                     onClick={handleDownloadReport}
                   >
-                    Download Report
+                    Tải báo cáo
                   </Button>
                 </Space>
               </Card>
@@ -481,7 +480,7 @@ const VerificationResults: React.FC = () => {
 
           {/* Verification Timeline */}
           <Col xs={24}>
-            <Card title="📅 Verification Timeline">
+            <Card title="📅 Dòng thời gian xác thực">
               <Timeline items={verificationTimeline} />
             </Card>
           </Col>
@@ -490,25 +489,24 @@ const VerificationResults: React.FC = () => {
         <Row gutter={[24, 24]}>
           <Col xs={24}>
             <Alert
-              message="Verification Failed"
+              message="Xác thực thất bại"
               description={
                 <div>
                   <p>
-                    The credential with ID{" "}
-                    <Text code>{resultData.credentialId}</Text> could not be
-                    verified for the following reasons:
+                    Chứng chỉ với ID{" "}
+                    <Text code>{resultData.credentialId}</Text> không thể được
+                    xác thực vì các lý do sau:
                   </p>
                   <ul>
-                    <li>Credential not found in blockchain records</li>
-                    <li>Invalid credential format or ID</li>
-                    <li>Credential may have been revoked or expired</li>
+                    <li>Chứng chỉ không tìm thấy trong hồ sơ blockchain</li>
+                    <li>Định dạng chứng chỉ hoặc ID không hợp lệ</li>
+                    <li>Chứng chỉ có thể đã bị thu hồi hoặc hết hạn</li>
                     <li>
-                      Institution not participating in our verification network
+                      Tổ chức không tham gia mạng xác thực của chúng tôi
                     </li>
                   </ul>
                   <p>
-                    Please double-check the credential ID or contact the issuing
-                    institution for assistance.
+                    Vui lòng kiểm tra lại ID chứng chỉ hoặc liên hệ với tổ chức cấp để được hỗ trợ.
                   </p>
                 </div>
               }
@@ -519,7 +517,7 @@ const VerificationResults: React.FC = () => {
                   type="primary"
                   onClick={() => navigate("/public-portal/verify")}
                 >
-                  Try Again
+                  Thử lại
                 </Button>
               }
             />
@@ -529,12 +527,12 @@ const VerificationResults: React.FC = () => {
 
       {/* Share Modal */}
       <Modal
-        title="Share Verification Results"
+        title="Chia sẻ kết quả xác thực"
         open={showQRModal}
         onCancel={() => setShowQRModal(false)}
         footer={[
           <Button key="close" onClick={() => setShowQRModal(false)}>
-            Close
+            Đóng
           </Button>,
         ]}
       >
@@ -543,7 +541,7 @@ const VerificationResults: React.FC = () => {
           <br />
           <br />
           <Text type="secondary">
-            Scan this QR code to view the verification results
+            Quét mã QR này để xem kết quả xác thực
           </Text>
         </div>
       </Modal>

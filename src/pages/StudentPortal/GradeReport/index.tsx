@@ -1,24 +1,24 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useEffect, useState } from "react";
 import {
+  Alert,
   Card,
-  Table,
-  Typography,
-  Tag,
-  Row,
   Col,
   Collapse,
-  Spin,
-  Alert,
   Empty,
   message,
+  Row,
+  Spin,
+  Table,
+  Tag,
+  Typography,
 } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../../redux/store";
 import GradeServices from "../../../services/grade/api.service";
 import StudentServices from "../../../services/student/api.service";
-import type { SemesterDto } from "../../../Types/Semester";
-import type { ComponentGradeDto, SubjectGradeDto } from "../../../Types/Grade";
+import type { SemesterDto } from "../../../types/Semester";
+import type { ComponentGradeDto, SubjectGradeDto } from "../../../types/Grade";
 import "./GradeReport.scss";
 
 const { Title, Text } = Typography;
@@ -47,7 +47,9 @@ const GradeReport: React.FC = () => {
   );
   const [gradeData, setGradeData] = useState<GradeRecord[]>([]);
   const [isLoadingSemesters, setIsLoadingSemesters] = useState(false);
-  const [isLoadingSubjects, setIsLoadingSubjects] = useState<Record<string, boolean>>({});
+  const [isLoadingSubjects, setIsLoadingSubjects] = useState<
+    Record<string, boolean>
+  >({});
   const [isLoadingStudent, setIsLoadingStudent] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [studentId, setStudentId] = useState<string | null>(null);
@@ -65,11 +67,16 @@ const GradeReport: React.FC = () => {
         const student = await StudentServices.getCurrentStudentProfile();
         setStudentId(student.id);
         console.log("Loaded studentId from /api/Students/me:", student.id);
-      } catch (err: any) {
+      } catch (err) {
         const errorMessage =
-          err.response?.data?.message ||
-          err.message ||
-          "Failed to load student profile";
+          (
+            err as {
+              response?: { data?: { message?: string } };
+              message?: string;
+            }
+          ).response?.data?.message ||
+          (err as { message?: string }).message ||
+          "Không thể tải hồ sơ sinh viên";
         setError(errorMessage);
         message.error(errorMessage);
       } finally {
@@ -92,11 +99,16 @@ const GradeReport: React.FC = () => {
           isDescending: true,
         });
         setSemesters(response.data);
-      } catch (err: any) {
+      } catch (err) {
         const errorMessage =
-          err.response?.data?.message ||
-          err.message ||
-          "Failed to load semesters";
+          (
+            err as {
+              response?: { data?: { message?: string } };
+              message?: string;
+            }
+          ).response?.data?.message ||
+          (err as { message?: string }).message ||
+          "Không thể tải danh sách học kỳ";
         setError(errorMessage);
         message.error(errorMessage);
       } finally {
@@ -128,31 +140,41 @@ const GradeReport: React.FC = () => {
         setIsLoadingSubjects((prev) => ({ ...prev, [semesterId]: true }));
         setError(null);
         try {
-          console.log("Loading subjects for semester:", semesterId, "studentId:", studentId);
+          console.log(
+            "Loading subjects for semester:",
+            semesterId,
+            "studentId:",
+            studentId
+          );
           const response = await GradeServices.getStudentGrades(studentId, {
             SemesterId: semesterId,
           });
-          
+
           console.log("API response:", response);
-          
+
           // Extract subjects from the grades response
           const subjects = response.subjects || [];
           console.log("Extracted subjects:", subjects);
-          
+
           setSubjectsBySemester((prev) => ({
             ...prev,
             [semesterId]: subjects,
           }));
-          
+
           if (subjects.length === 0) {
-            message.info("No subjects found for this semester");
+            message.info("Không tìm thấy môn học nào cho học kỳ này");
           }
-        } catch (err: any) {
+        } catch (err) {
           console.error("Error loading subjects:", err);
           const errorMessage =
-            err.response?.data?.message ||
-            err.message ||
-            "Failed to load subjects";
+            (
+              err as {
+                response?: { data?: { message?: string } };
+                message?: string;
+              }
+            ).response?.data?.message ||
+            (err as { message?: string }).message ||
+            "Không thể tải danh sách môn học";
           setError(errorMessage);
           message.error(errorMessage);
         } finally {
@@ -162,6 +184,7 @@ const GradeReport: React.FC = () => {
 
       loadSubjects();
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeSemesterKey, studentId]);
 
   // Load grades when subject is selected
@@ -227,7 +250,7 @@ const GradeReport: React.FC = () => {
 
       records.push({
         gradeCategory: "",
-        gradeItem: "Total",
+        gradeItem: "Tổng",
         weight: `${categoryWeight}%`,
         value: categoryTotal.toFixed(2),
         isTotal: true,
@@ -237,8 +260,8 @@ const GradeReport: React.FC = () => {
     // Add course total
     if (subjectGrade.averageScore !== null) {
       records.push({
-        gradeCategory: "COURSE TOTAL",
-        gradeItem: "AVERAGE",
+        gradeCategory: "TỔNG KẾT MÔN HỌC",
+        gradeItem: "ĐIỂM TRUNG BÌNH",
         weight: "",
         value: subjectGrade.averageScore.toFixed(2),
         isCourseTotal: true,
@@ -246,7 +269,7 @@ const GradeReport: React.FC = () => {
 
       records.push({
         gradeCategory: "",
-        gradeItem: "STATUS",
+        gradeItem: "TRẠNG THÁI",
         weight: "",
         value: subjectGrade.finalLetterGrade || "N/A",
         isCourseTotal: true,
@@ -262,12 +285,12 @@ const GradeReport: React.FC = () => {
 
   const columns: ColumnsType<GradeRecord> = [
     {
-      title: "GRADE CATEGORY",
+      title: "LOẠI ĐIỂM",
       dataIndex: "gradeCategory",
       key: "gradeCategory",
       width: 200,
       render: (category: string, record: GradeRecord) => {
-        if (record.isCourseTotal && category === "COURSE TOTAL") {
+        if (record.isCourseTotal && category === "TỔNG KẾT MÔN HỌC") {
           return (
             <Text strong style={{ color: "#1a94fc", fontSize: 14 }}>
               {category}
@@ -278,7 +301,7 @@ const GradeReport: React.FC = () => {
       },
     },
     {
-      title: "GRADE ITEM",
+      title: "HẠNG MỤC ĐIỂM",
       dataIndex: "gradeItem",
       key: "gradeItem",
       width: 200,
@@ -288,7 +311,8 @@ const GradeReport: React.FC = () => {
             <Text
               strong
               style={{
-                color: record.gradeItem === "STATUS" ? "#52c41a" : "#1a94fc",
+                color:
+                  record.gradeItem === "TRẠNG THÁI" ? "#52c41a" : "#1a94fc",
                 fontSize: 14,
               }}
             >
@@ -307,7 +331,7 @@ const GradeReport: React.FC = () => {
       },
     },
     {
-      title: "WEIGHT",
+      title: "TRỌNG SỐ",
       dataIndex: "weight",
       key: "weight",
       width: 120,
@@ -315,14 +339,14 @@ const GradeReport: React.FC = () => {
       render: (weight: string) => (weight ? <Text>{weight}</Text> : null),
     },
     {
-      title: "VALUE",
+      title: "GIÁ TRỊ",
       dataIndex: "value",
       key: "value",
       width: 120,
       align: "center",
       render: (value: number | string, record: GradeRecord) => {
         if (record.isCourseTotal) {
-          if (record.gradeItem === "STATUS") {
+          if (record.gradeItem === "TRẠNG THÁI") {
             return (
               <Tag color="success" style={{ fontSize: 12, fontWeight: 600 }}>
                 {value}
@@ -349,7 +373,7 @@ const GradeReport: React.FC = () => {
       },
     },
     {
-      title: "COMMENT",
+      title: "NHẬN XÉT",
       dataIndex: "comment",
       key: "comment",
       align: "center",
@@ -375,16 +399,23 @@ const GradeReport: React.FC = () => {
       <div className="grade-report">
         <div className="page-header">
           <Title level={2} style={{ margin: 0, color: "white" }}>
-            Grade Report
+            Báo cáo điểm
           </Title>
         </div>
         <Card>
           {isLoadingStudent ? (
-            <Spin size="large" style={{ display: "block", textAlign: "center", padding: "40px 0" }} />
+            <Spin
+              size="large"
+              style={{
+                display: "block",
+                textAlign: "center",
+                padding: "40px 0",
+              }}
+            />
           ) : (
             <Alert
-              message="Authentication Required"
-              description="Please login to view your grade report."
+              message="Yêu cầu xác thực"
+              description="Vui lòng đăng nhập để xem báo cáo điểm của bạn."
               type="warning"
               showIcon
             />
@@ -398,13 +429,13 @@ const GradeReport: React.FC = () => {
     <div className="grade-report">
       <div className="page-header">
         <Title level={2} style={{ margin: 0, color: "white" }}>
-          Grade Report for {userProfile?.fullName || "Student"}
+          Báo cáo điểm cho {userProfile?.fullName || "Sinh viên"}
         </Title>
       </div>
 
       {error && (
         <Alert
-          message="Error"
+          message="Lỗi"
           description={error}
           type="error"
           showIcon
@@ -425,16 +456,24 @@ const GradeReport: React.FC = () => {
                 ghost
               >
                 {semesters.map((semester) => {
-                  const semesterSubjects = subjectsBySemester[semester.id] || [];
+                  const semesterSubjects =
+                    subjectsBySemester[semester.id] || [];
                   const isLoading = isLoadingSubjects[semester.id] || false;
-                  
+
                   return (
                     <Panel header={semester.name} key={semester.id}>
                       {isLoading ? (
-                        <Spin size="small" style={{ display: "block", textAlign: "center", padding: "20px 0" }} />
+                        <Spin
+                          size="small"
+                          style={{
+                            display: "block",
+                            textAlign: "center",
+                            padding: "20px 0",
+                          }}
+                        />
                       ) : semesterSubjects.length === 0 ? (
                         <Empty
-                          description="No subjects"
+                          description="Không có môn học"
                           image={Empty.PRESENTED_IMAGE_SIMPLE}
                           style={{ padding: "20px 0" }}
                         />
@@ -443,9 +482,13 @@ const GradeReport: React.FC = () => {
                           <div
                             key={subject.subjectId}
                             className={`course-item ${
-                              selectedSubjectId === subject.subjectId ? "active" : ""
+                              selectedSubjectId === subject.subjectId
+                                ? "active"
+                                : ""
                             }`}
-                            onClick={() => handleSubjectClick(subject.subjectId)}
+                            onClick={() =>
+                              handleSubjectClick(subject.subjectId)
+                            }
                           >
                             <Text strong className="course-code">
                               {subject.subjectCode}
@@ -455,7 +498,8 @@ const GradeReport: React.FC = () => {
                             </Text>
                             {subject.averageScore !== null && (
                               <Text type="secondary" style={{ fontSize: 11 }}>
-                                {subject.averageScore.toFixed(2)} ({subject.finalLetterGrade || "N/A"})
+                                {subject.averageScore.toFixed(2)} (
+                                {subject.finalLetterGrade || "N/A"})
                               </Text>
                             )}
                           </div>
@@ -475,7 +519,7 @@ const GradeReport: React.FC = () => {
             {!selectedSubjectId ? (
               <Card className="grade-table-card">
                 <Empty
-                  description="Select a subject to view grades"
+                  description="Chọn một môn học để xem điểm"
                   image={Empty.PRESENTED_IMAGE_SIMPLE}
                 />
               </Card>
@@ -485,11 +529,11 @@ const GradeReport: React.FC = () => {
                 title={
                   selectedSubject
                     ? `${selectedSubject.subjectCode} - ${selectedSubject.subjectName} (${selectedSubject.semesterName})`
-                    : "Grade Report"
+                    : "Báo cáo điểm"
                 }
               >
                 {gradeData.length === 0 ? (
-                  <Empty description="No grades available" />
+                  <Empty description="Không có dữ liệu điểm" />
                 ) : (
                   <Table
                     columns={columns}
@@ -505,10 +549,13 @@ const GradeReport: React.FC = () => {
                     rowClassName={(record) => {
                       if (
                         record.isCourseTotal &&
-                        record.gradeCategory === "COURSE TOTAL"
+                        record.gradeCategory === "TỔNG KẾT MÔN HỌC"
                       )
                         return "course-total-row";
-                      if (record.isCourseTotal && record.gradeItem === "STATUS")
+                      if (
+                        record.isCourseTotal &&
+                        record.gradeItem === "TRẠNG THÁI"
+                      )
                         return "status-row";
                       if (record.isTotal) return "total-row";
                       return "";

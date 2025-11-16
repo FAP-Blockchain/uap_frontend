@@ -46,7 +46,7 @@ const VerificationPortal: React.FC = () => {
     // Simulate verification delay
     setTimeout(() => {
       setIsVerifying(false);
-      message.success("Verification completed successfully!");
+      message.success("Xác thực hoàn tất thành công!");
       // Navigate to results with mock data
       navigate("/public-portal/results", {
         state: {
@@ -76,7 +76,7 @@ const VerificationPortal: React.FC = () => {
   // Manual ID verification
   const handleManualVerification = () => {
     if (!credentialId.trim()) {
-      message.error("Please enter a valid credential ID");
+      message.error("Vui lòng nhập ID chứng chỉ hợp lệ");
       return;
     }
 
@@ -100,12 +100,12 @@ const VerificationPortal: React.FC = () => {
         "image/png",
       ].includes(file.type);
       if (!isValidType) {
-        message.error("You can only upload PDF, JPG or PNG files!");
+        message.error("Bạn chỉ có thể tải lên file PDF, JPG hoặc PNG!");
         return false;
       }
       const isLt10M = file.size / 1024 / 1024 < 10;
       if (!isLt10M) {
-        message.error("File must be smaller than 10MB!");
+        message.error("File phải nhỏ hơn 10MB!");
         return false;
       }
 
@@ -119,7 +119,7 @@ const VerificationPortal: React.FC = () => {
 
   const handleFileVerification = () => {
     if (!uploadedFile) {
-      message.error("Please upload a file first");
+      message.error("Vui lòng tải lên file trước");
       return;
     }
 
@@ -138,7 +138,7 @@ const VerificationPortal: React.FC = () => {
       label: (
         <span>
           <QrcodeOutlined />
-          QR Code Scanner
+          Quét mã QR
         </span>
       ),
       children: (
@@ -148,11 +148,10 @@ const VerificationPortal: React.FC = () => {
               level={3}
               style={{ textAlign: "center", margin: "0 0 16px" }}
             >
-              Scan QR Code
+              Quét mã QR
             </Title>
             <Paragraph style={{ textAlign: "center", color: "#8c8c8c" }}>
-              Use your camera to scan the QR code from the credential document
-              or digital display
+              Sử dụng camera để quét mã QR từ tài liệu chứng chỉ hoặc màn hình kỹ thuật số
             </Paragraph>
           </div>
 
@@ -165,7 +164,7 @@ const VerificationPortal: React.FC = () => {
                     level={4}
                     style={{ margin: "16px 0", color: "#722ed1" }}
                   >
-                    Scanning QR Code...
+                    Đang quét mã QR...
                   </Title>
                   <Progress percent={66} status="active" showInfo={false} />
                 </div>
@@ -179,13 +178,13 @@ const VerificationPortal: React.FC = () => {
                   level={4}
                   style={{ margin: "0 0 16px", color: "#595959" }}
                 >
-                  Ready to Scan
+                  Sẵn sàng quét
                 </Title>
                 <Text
                   type="secondary"
                   style={{ display: "block", marginBottom: 32 }}
                 >
-                  Position the QR code within the frame to start verification
+                  Đặt mã QR trong khung để bắt đầu xác thực
                 </Text>
                 <Button
                   type="primary"
@@ -198,15 +197,15 @@ const VerificationPortal: React.FC = () => {
                     border: "none",
                   }}
                 >
-                  Start Camera Scan
+                  Bắt đầu quét camera
                 </Button>
               </div>
             )}
           </div>
 
           <Alert
-            message="Privacy Notice"
-            description="Camera access is used only for QR code scanning and no images are stored."
+            message="Thông báo bảo mật"
+            description="Quyền truy cập camera chỉ được sử dụng để quét mã QR và không lưu trữ hình ảnh."
             type="info"
             showIcon
             style={{ marginTop: 24 }}
@@ -219,7 +218,7 @@ const VerificationPortal: React.FC = () => {
       label: (
         <span>
           <SearchOutlined />
-          Manual Input
+          Nhập thủ công
         </span>
       ),
       children: (
@@ -229,21 +228,20 @@ const VerificationPortal: React.FC = () => {
               level={3}
               style={{ textAlign: "center", margin: "0 0 16px" }}
             >
-              Enter Credential ID
+              Nhập ID chứng chỉ
             </Title>
             <Paragraph style={{ textAlign: "center", color: "#8c8c8c" }}>
-              Manually enter the credential ID or blockchain hash to verify
-              authenticity
+              Nhập thủ công ID chứng chỉ hoặc mã hash blockchain để xác thực tính xác thực
             </Paragraph>
           </div>
 
           <Form layout="vertical" style={{ maxWidth: 600, margin: "0 auto" }}>
             <Form.Item
-              label="Credential ID / Blockchain Hash"
-              extra="Enter the unique identifier found on the credential document"
+              label="ID chứng chỉ / Mã hash Blockchain"
+              extra="Nhập mã định danh duy nhất được tìm thấy trên tài liệu chứng chỉ"
             >
               <TextArea
-                placeholder="deg_001 or 0x1a2b3c4d5e6f7890abcdef..."
+                placeholder="deg_001 hoặc 0x1a2b3c4d5e6f7890abcdef..."
                 rows={3}
                 value={credentialId}
                 onChange={(e) => setCredentialId(e.target.value)}
@@ -260,7 +258,7 @@ const VerificationPortal: React.FC = () => {
                 loading={isVerifying}
                 disabled={!credentialId.trim()}
               >
-                Verify Credential
+                Xác thực chứng chỉ
               </Button>
             </Form.Item>
           </Form>
@@ -269,15 +267,15 @@ const VerificationPortal: React.FC = () => {
 
           <div className="examples-section">
             <Title level={5} style={{ color: "#1990FF" }}>
-              Example Formats:
+              Định dạng ví dụ:
             </Title>
             <Space direction="vertical" style={{ width: "100%" }}>
               <div className="example-item">
-                <Text strong>Credential ID:</Text>
+                <Text strong>ID chứng chỉ:</Text>
                 <Text code>deg_001, cert_002, trans_003</Text>
               </div>
               <div className="example-item">
-                <Text strong>Blockchain Hash:</Text>
+                <Text strong>Mã hash Blockchain:</Text>
                 <Text code>0x1a2b3c4d5e6f7890abcdef...</Text>
               </div>
             </Space>
@@ -290,7 +288,7 @@ const VerificationPortal: React.FC = () => {
       label: (
         <span>
           <FileTextOutlined />
-          File Upload
+          Tải lên file
         </span>
       ),
       children: (
@@ -300,10 +298,10 @@ const VerificationPortal: React.FC = () => {
               level={3}
               style={{ textAlign: "center", margin: "0 0 16px" }}
             >
-              Upload Credential File
+              Tải lên file chứng chỉ
             </Title>
             <Paragraph style={{ textAlign: "center", color: "#8c8c8c" }}>
-              Upload a digital copy of the credential for verification analysis
+              Tải lên bản sao kỹ thuật số của chứng chỉ để phân tích xác thực
             </Paragraph>
           </div>
 
@@ -316,18 +314,17 @@ const VerificationPortal: React.FC = () => {
                 <UploadOutlined style={{ color: "#1990FF" }} />
               </p>
               <p className="ant-upload-text">
-                Click or drag credential file to this area to upload
+                Nhấp hoặc kéo file chứng chỉ vào khu vực này để tải lên
               </p>
               <p className="ant-upload-hint">
-                Support PDF, JPG, PNG files up to 10MB. Ensure the credential
-                contains QR codes or verification information.
+                Hỗ trợ file PDF, JPG, PNG tối đa 10MB. Đảm bảo chứng chỉ có mã QR hoặc thông tin xác thực.
               </p>
             </Upload.Dragger>
 
             {uploadedFile && (
               <div className="uploaded-file-info">
                 <Alert
-                  message="File Ready for Verification"
+                  message="File sẵn sàng để xác thực"
                   description={`${uploadedFile.name} (${(
                     uploadedFile.size /
                     1024 /
@@ -346,15 +343,15 @@ const VerificationPortal: React.FC = () => {
                   loading={isVerifying}
                   style={{ marginTop: 16, width: "100%" }}
                 >
-                  Analyze & Verify File
+                  Phân tích & Xác thực file
                 </Button>
               </div>
             )}
           </div>
 
           <Alert
-            message="File Processing"
-            description="Our AI system will extract verification data from uploaded files and cross-reference with blockchain records."
+            message="Xử lý file"
+            description="Hệ thống AI của chúng tôi sẽ trích xuất dữ liệu xác thực từ các file đã tải lên và đối chiếu với hồ sơ blockchain."
             type="info"
             showIcon
             style={{ marginTop: 24 }}
@@ -369,17 +366,17 @@ const VerificationPortal: React.FC = () => {
       {/* Page Header */}
       <div className="page-header">
         <Title level={2} style={{ margin: 0, color: "#ffffff" }}>
-          Credential Verification Portal
+          Cổng xác thực chứng chỉ
         </Title>
         <Text type="secondary" style={{ fontSize: 16 }}>
-          Choose your preferred method to verify academic credentials instantly
+          Chọn phương thức ưa thích của bạn để xác thực chứng chỉ học thuật ngay lập tức
         </Text>
       </div>
 
       {isVerifying && (
         <Alert
-          message="Verification in Progress"
-          description="Please wait while we verify the credential against blockchain records..."
+          message="Đang xác thực"
+          description="Vui lòng đợi trong khi chúng tôi xác thực chứng chỉ với hồ sơ blockchain..."
           type="info"
           showIcon
           icon={<LoadingOutlined />}
@@ -406,10 +403,9 @@ const VerificationPortal: React.FC = () => {
             <QrcodeOutlined
               style={{ fontSize: 32, color: "#52c41a", marginBottom: 16 }}
             />
-            <Title level={4}>QR Code Method</Title>
+            <Title level={4}>Phương thức QR Code</Title>
             <Text type="secondary">
-              Fastest and most secure method. Simply scan the QR code from the
-              credential.
+              Phương thức nhanh nhất và an toàn nhất. Chỉ cần quét mã QR từ chứng chỉ.
             </Text>
           </Card>
         </Col>
@@ -418,9 +414,9 @@ const VerificationPortal: React.FC = () => {
             <SearchOutlined
               style={{ fontSize: 32, color: "#1890ff", marginBottom: 16 }}
             />
-            <Title level={4}>Manual Entry</Title>
+            <Title level={4}>Nhập thủ công</Title>
             <Text type="secondary">
-              Enter credential ID manually when QR codes are not available.
+              Nhập ID chứng chỉ thủ công khi mã QR không có sẵn.
             </Text>
           </Card>
         </Col>
@@ -429,10 +425,9 @@ const VerificationPortal: React.FC = () => {
             <FileTextOutlined
               style={{ fontSize: 32, color: "#722ed1", marginBottom: 16 }}
             />
-            <Title level={4}>File Analysis</Title>
+            <Title level={4}>Phân tích file</Title>
             <Text type="secondary">
-              Upload digital files for automated credential detection and
-              verification.
+              Tải lên file kỹ thuật số để tự động phát hiện và xác thực chứng chỉ.
             </Text>
           </Card>
         </Col>

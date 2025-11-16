@@ -127,13 +127,13 @@ const ForgotPassword: React.FC = () => {
       setEmail(values.email);
       setCurrentStep(1);
       setCountdown(60);
-      toast.success("Verification code has been sent to your email!");
+      toast.success("Mã xác thực đã được gửi đến email của bạn!");
     } catch (err: unknown) {
       const error = err as AxiosError<{ message?: string }>;
       const errorMessage =
         error.response?.data?.message ||
         error.message ||
-        "Failed to send verification code. Please try again!";
+        "Gửi mã xác thực thất bại. Vui lòng thử lại!";
       toast.error(errorMessage);
     } finally {
       setIsLoading(false);
@@ -150,7 +150,7 @@ const ForgotPassword: React.FC = () => {
         newPassword: values.newPassword,
         confirmPassword: values.confirmPassword,
       });
-      toast.success("Password reset successfully! Redirecting to login...");
+      toast.success("Đặt lại mật khẩu thành công! Đang chuyển đến trang đăng nhập...");
       setTimeout(() => {
         navigate("/login");
       }, 2000);
@@ -159,7 +159,7 @@ const ForgotPassword: React.FC = () => {
       const errorMessage =
         error.response?.data?.message ||
         error.message ||
-        "Failed to reset password. Please check your code and try again!";
+        "Đặt lại mật khẩu thất bại. Vui lòng kiểm tra mã và thử lại!";
       toast.error(errorMessage);
     } finally {
       setIsLoading(false);
@@ -181,13 +181,13 @@ const ForgotPassword: React.FC = () => {
       // Reset focus to first input
       const firstInput = document.getElementById("otp-input-0");
       firstInput?.focus();
-      toast.success("Verification code has been resent!");
+      toast.success("Mã xác thực đã được gửi lại!");
     } catch (err: unknown) {
       const error = err as AxiosError<{ message?: string }>;
       const errorMessage =
         error.response?.data?.message ||
         error.message ||
-        "Failed to resend code. Please try again!";
+        "Gửi lại mã thất bại. Vui lòng thử lại!";
       toast.error(errorMessage);
     } finally {
       setIsLoading(false);
@@ -207,10 +207,10 @@ const ForgotPassword: React.FC = () => {
                 </div>
               </div>
               <Title level={1} className="forgot-password-title">
-                Forgot password?
+                Quên mật khẩu?
               </Title>
               <Text className="forgot-password-subtitle">
-                No worries, we'll send you reset instructions.
+                Đừng lo, chúng tôi sẽ gửi hướng dẫn đặt lại cho bạn.
               </Text>
 
               <Form
@@ -224,13 +224,13 @@ const ForgotPassword: React.FC = () => {
                   label="Email"
                   name="email"
                   rules={[
-                    { required: true, message: "Please enter your email!" },
-                    { type: "email", message: "Please enter a valid email!" },
+                    { required: true, message: "Vui lòng nhập email!" },
+                    { type: "email", message: "Vui lòng nhập email hợp lệ!" },
                   ]}
                 >
                   <Input
                     prefix={<MailOutlined className="site-form-item-icon" />}
-                    placeholder="Enter your email"
+                    placeholder="Nhập email của bạn"
                     disabled={isLoading}
                   />
                 </Form.Item>
@@ -243,13 +243,13 @@ const ForgotPassword: React.FC = () => {
                     loading={isLoading}
                     className="forgot-password-button"
                   >
-                    Reset password
+                    Đặt lại mật khẩu
                   </Button>
                 </Form.Item>
 
                 <div className="forgot-password-links">
                   <Link to="/login" className="back-to-login">
-                    ← Back to log in
+                    ← Quay lại đăng nhập
                   </Link>
                 </div>
               </Form>
@@ -265,10 +265,10 @@ const ForgotPassword: React.FC = () => {
                 </div>
               </div>
               <Title level={1} className="forgot-password-title">
-                Password reset
+                Đặt lại mật khẩu
               </Title>
               <Text className="forgot-password-subtitle">
-                We sent a code to <strong>{email}</strong>
+                Chúng tôi đã gửi mã đến <strong>{email}</strong>
               </Text>
 
               <div className="otp-input-wrapper">
@@ -306,11 +306,11 @@ const ForgotPassword: React.FC = () => {
                       if (otpCode.length === 6) {
                         setCurrentStep(2);
                       } else {
-                        toast.error("Please enter the complete 6-digit code");
+                        toast.error("Vui lòng nhập đầy đủ mã 6 chữ số");
                       }
                     }}
                   >
-                    Continue
+                    Tiếp tục
                   </Button>
                 </Form.Item>
               </Form>
@@ -319,19 +319,19 @@ const ForgotPassword: React.FC = () => {
                 <div className="resend-code-section">
                   {countdown > 0 ? (
                     <Text className="resend-countdown">
-                      Didn't receive the email?{" "}
+                      Không nhận được email?{" "}
                       <span className="countdown-number">{countdown}s</span>
                     </Text>
                   ) : (
                     <Text className="resend-text">
-                      Didn't receive the email?
+                      Không nhận được email?
                       <Button
                         type="link"
                         onClick={handleResendOtp}
                         disabled={isLoading}
                         className="resend-link"
                       >
-                        Click to resend
+                        Nhấn để gửi lại
                       </Button>
                     </Text>
                   )}
@@ -346,7 +346,7 @@ const ForgotPassword: React.FC = () => {
                     fontWeight: 400,
                   }}
                 >
-                  ← Back to log in
+                  ← Quay lại đăng nhập
                 </Link>
               </div>
             </>
@@ -361,10 +361,10 @@ const ForgotPassword: React.FC = () => {
                 </div>
               </div>
               <Title level={1} className="forgot-password-title">
-                Set new password
+                Đặt mật khẩu mới
               </Title>
               <Text className="forgot-password-subtitle">
-                Must be at least 8 characters
+                Phải có ít nhất 8 ký tự
               </Text>
 
               <Form
@@ -378,19 +378,19 @@ const ForgotPassword: React.FC = () => {
                 className="forgot-password-form"
               >
                 <Form.Item
-                  label="Password"
+                  label="Mật khẩu"
                   name="newPassword"
                   rules={[
-                    { required: true, message: "Please enter new password!" },
+                    { required: true, message: "Vui lòng nhập mật khẩu mới!" },
                     {
                       min: 8,
-                      message: "Password must be at least 8 characters!",
+                      message: "Mật khẩu phải có ít nhất 8 ký tự!",
                     },
                   ]}
                 >
                   <Input.Password
                     prefix={<LockOutlined className="site-form-item-icon" />}
-                    placeholder="Enter new password"
+                    placeholder="Nhập mật khẩu mới"
                     disabled={isLoading}
                     onChange={(e) => {
                       setPasswordStrength(
@@ -416,18 +416,18 @@ const ForgotPassword: React.FC = () => {
                 </div>
 
                 <Form.Item
-                  label="Confirm password"
+                  label="Xác nhận mật khẩu"
                   name="confirmPassword"
                   dependencies={["newPassword"]}
                   rules={[
-                    { required: true, message: "Please confirm password!" },
+                    { required: true, message: "Vui lòng xác nhận mật khẩu!" },
                     ({ getFieldValue }) => ({
                       validator(_, value) {
                         if (!value || getFieldValue("newPassword") === value) {
                           return Promise.resolve();
                         }
                         return Promise.reject(
-                          new Error("Passwords do not match!")
+                          new Error("Mật khẩu không khớp!")
                         );
                       },
                     }),
@@ -435,7 +435,7 @@ const ForgotPassword: React.FC = () => {
                 >
                   <Input.Password
                     prefix={<LockOutlined className="site-form-item-icon" />}
-                    placeholder="Re-enter new password"
+                    placeholder="Nhập lại mật khẩu mới"
                     disabled={isLoading}
                   />
                 </Form.Item>
@@ -448,13 +448,13 @@ const ForgotPassword: React.FC = () => {
                     loading={isLoading}
                     className="forgot-password-button"
                   >
-                    Reset password
+                    Đặt lại mật khẩu
                   </Button>
                 </Form.Item>
 
                 <div className="forgot-password-links">
                   <Link to="/login" className="back-to-login">
-                    ← Back to log in
+                    ← Quay lại đăng nhập
                   </Link>
                 </div>
               </Form>

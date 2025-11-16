@@ -3,16 +3,16 @@ import type {
   GetSemestersRequest,
   PagedSemestersResponse,
   SemesterDto,
-} from "../../Types/Semester";
+} from "../../types/Semester";
 import type {
   GetSubjectsRequest,
   PagedSubjectsResponse,
   SubjectDto,
-} from "../../Types/Subject";
+} from "../../types/Subject";
 import type {
   GetStudentGradesRequest,
   StudentGradeTranscriptDto,
-} from "../../Types/Grade";
+} from "../../types/Grade";
 
 class GradeServices {
   /**

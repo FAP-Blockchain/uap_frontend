@@ -1,26 +1,26 @@
 import { useState } from "react";
-import { Outlet, useNavigate, useLocation } from "react-router-dom";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import {
+  Avatar,
+  Button,
+  Dropdown,
   Layout,
   Menu,
-  Avatar,
-  Dropdown,
-  Button,
   Space,
   Typography,
   theme,
 } from "antd";
 import {
-  HomeOutlined,
+  BarChartOutlined,
+  CalendarOutlined,
+  FileSearchOutlined,
   FileTextOutlined,
+  HomeOutlined,
+  LogoutOutlined,
+  MenuOutlined,
+  SettingOutlined,
   ShareAltOutlined,
   UserOutlined,
-  LogoutOutlined,
-  SettingOutlined,
-  MenuOutlined,
-  CalendarOutlined,
-  BarChartOutlined,
-  FileSearchOutlined,
 } from "@ant-design/icons";
 import { PiStudentFill } from "react-icons/pi";
 import "./index.scss";
@@ -50,43 +50,43 @@ function StudentPortal() {
     {
       key: "",
       icon: <HomeOutlined />,
-      label: "Dashboard",
+      label: "Bảng điều khiển",
       onClick: () => navigate("/student-portal"),
     },
     {
       key: "credentials",
       icon: <FileTextOutlined />,
-      label: "My Credentials",
+      label: "Chứng chỉ của tôi",
       onClick: () => navigate("/student-portal/credentials"),
     },
     {
       key: "timetable",
       icon: <CalendarOutlined />,
-      label: "Weekly Timetable",
+      label: "Thời khóa biểu",
       onClick: () => navigate("/student-portal/timetable"),
     },
     {
       key: "attendance-report",
       icon: <FileSearchOutlined />,
-      label: "Attendance Report",
+      label: "Báo cáo điểm danh",
       onClick: () => navigate("/student-portal/attendance-report"),
     },
     {
       key: "grade-report",
       icon: <BarChartOutlined />,
-      label: "Grade Report",
+      label: "Báo cáo điểm",
       onClick: () => navigate("/student-portal/grade-report"),
     },
     {
       key: "share",
       icon: <ShareAltOutlined />,
-      label: "Share Portal",
+      label: "Cổng chia sẻ",
       onClick: () => navigate("/student-portal/share"),
     },
     {
       key: "profile",
       icon: <UserOutlined />,
-      label: "Profile",
+      label: "Hồ sơ",
       onClick: () => navigate("/student-portal/profile"),
     },
   ];
@@ -96,13 +96,13 @@ function StudentPortal() {
     {
       key: "profile",
       icon: <UserOutlined />,
-      label: "Profile Settings",
+      label: "Cài đặt hồ sơ",
       onClick: () => navigate("/student-portal/profile"),
     },
     {
       key: "settings",
       icon: <SettingOutlined />,
-      label: "Account Settings",
+      label: "Cài đặt tài khoản",
     },
     {
       type: "divider" as const,
@@ -110,7 +110,7 @@ function StudentPortal() {
     {
       key: "logout",
       icon: <LogoutOutlined />,
-      label: "Logout",
+      label: "Đăng xuất",
       danger: true,
     },
   ];
@@ -144,7 +144,7 @@ function StudentPortal() {
               </span>
               {!collapsed && (
                 <Title level={4} className="logo-text">
-                  Student Portal
+                  Cổng sinh viên
                 </Title>
               )}
             </div>
