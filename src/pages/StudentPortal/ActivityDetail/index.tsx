@@ -1,32 +1,25 @@
-import React from "react";
-import { useParams, useNavigate, useLocation } from "react-router-dom";
-import {
-  Card,
-  Descriptions,
-  Button,
-  Space,
-  Typography,
-  Tag,
-  Row,
-  Col,
-  Avatar,
-  Divider,
-} from "antd";
 import {
   ArrowLeftOutlined,
-  CalendarOutlined,
-  ClockCircleOutlined,
-  UserOutlined,
   BookOutlined,
-  EnvironmentOutlined,
-  TeamOutlined,
+  CalendarOutlined,
   CheckCircleOutlined,
+  ClockCircleOutlined,
   CloseCircleOutlined,
   ExclamationCircleOutlined,
-  LinkOutlined,
-  BarChartOutlined,
 } from "@ant-design/icons";
+import {
+  Button,
+  Card,
+  Col,
+  Descriptions,
+  Row,
+  Space,
+  Tag,
+  Typography,
+} from "antd";
 import dayjs from "dayjs";
+import React from "react";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import "./ActivityDetail.scss";
 
 const { Title, Text } = Typography;

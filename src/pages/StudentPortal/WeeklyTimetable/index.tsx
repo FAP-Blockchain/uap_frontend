@@ -1,19 +1,20 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  Card,
-  Table,
-  Typography,
-  Tag,
+  Badge,
   Button,
-  Space,
-  Select,
+  Card,
+  Col,
   DatePicker,
   Row,
-  Col,
-  Badge,
+  Select,
+  Space,
+  Table,
+  Tag,
   Tooltip,
+  Typography,
 } from "antd";
+import type { ColumnsType } from "antd/es/table";
 import {
   CalendarOutlined,
   CheckCircleOutlined,
@@ -21,7 +22,6 @@ import {
   ExclamationCircleOutlined,
   ReloadOutlined,
 } from "@ant-design/icons";
-import type { ColumnsType } from "antd/es/table";
 import dayjs from "dayjs";
 import weekOfYear from "dayjs/plugin/weekOfYear";
 import "./WeeklyTimetable.scss";
@@ -127,19 +127,19 @@ const WeeklyTimetable: React.FC = () => {
       case "attended":
         return (
           <Tag color="success" icon={<CheckCircleOutlined />}>
-            Attended
+            Đã tham gia
           </Tag>
         );
       case "absent":
         return (
           <Tag color="error" icon={<CloseCircleOutlined />}>
-            Absent
+            Vắng mặt
           </Tag>
         );
       case "not_yet":
         return (
           <Tag color="warning" icon={<ExclamationCircleOutlined />}>
-            Not Yet
+            Chưa có
           </Tag>
         );
       default:
@@ -176,7 +176,7 @@ const WeeklyTimetable: React.FC = () => {
       >
         <div className="course-code">
           <Text strong>{classInfo.courseCode}</Text>
-          <Tooltip title="View Details">
+          <Tooltip title="Xem chi tiết">
             <Button
               type="link"
               size="small"
@@ -185,13 +185,13 @@ const WeeklyTimetable: React.FC = () => {
                 handleViewDetails();
               }}
             >
-              View Materials
+              Xem tài liệu
             </Button>
           </Tooltip>
         </div>
         <div className="course-info">
           <Text style={{ fontSize: 12 }}>
-            at {classInfo.room} - {classInfo.building}
+            tại {classInfo.room} - {classInfo.building}
           </Text>
         </div>
         <div className="attendance-status">
@@ -208,13 +208,13 @@ const WeeklyTimetable: React.FC = () => {
 
   const columns: ColumnsType<TimetableSlot> = [
     {
-      title: "Time Slot",
+      title: "Ca học",
       dataIndex: "slot",
       key: "slot",
       width: 100,
       render: (slot: number, record: TimetableSlot) => (
         <div className="time-slot-header">
-          <div className="slot-number">Slot {slot}</div>
+          <div className="slot-number">Ca {slot}</div>
           <div className="slot-time">{record.time}</div>
         </div>
       ),
@@ -223,7 +223,7 @@ const WeeklyTimetable: React.FC = () => {
       title: (
         <div className="day-header">
           <CalendarOutlined />
-          <span>MON</span>
+          <span>T2</span>
           <div className="date-number">22/09</div>
         </div>
       ),
@@ -236,7 +236,7 @@ const WeeklyTimetable: React.FC = () => {
       title: (
         <div className="day-header">
           <CalendarOutlined />
-          <span>TUE</span>
+          <span>T3</span>
           <div className="date-number">23/09</div>
         </div>
       ),
@@ -249,7 +249,7 @@ const WeeklyTimetable: React.FC = () => {
       title: (
         <div className="day-header">
           <CalendarOutlined />
-          <span>WED</span>
+          <span>T4</span>
           <div className="date-number">24/09</div>
         </div>
       ),
@@ -262,7 +262,7 @@ const WeeklyTimetable: React.FC = () => {
       title: (
         <div className="day-header">
           <CalendarOutlined />
-          <span>THU</span>
+          <span>T5</span>
           <div className="date-number">25/09</div>
         </div>
       ),
@@ -275,7 +275,7 @@ const WeeklyTimetable: React.FC = () => {
       title: (
         <div className="day-header">
           <CalendarOutlined />
-          <span>FRI</span>
+          <span>T6</span>
           <div className="date-number">26/09</div>
         </div>
       ),
@@ -288,7 +288,7 @@ const WeeklyTimetable: React.FC = () => {
       title: (
         <div className="day-header">
           <CalendarOutlined />
-          <span>SAT</span>
+          <span>T7</span>
           <div className="date-number">27/09</div>
         </div>
       ),
@@ -301,7 +301,7 @@ const WeeklyTimetable: React.FC = () => {
       title: (
         <div className="day-header">
           <CalendarOutlined />
-          <span>SUN</span>
+          <span>CN</span>
           <div className="date-number">28/09</div>
         </div>
       ),
@@ -330,21 +330,21 @@ const WeeklyTimetable: React.FC = () => {
             <Col>
               <Space>
                 <Button type="primary" onClick={() => handleWeekChange("prev")}>
-                  ← Previous Week
+                  ← Tuần trước
                 </Button>
                 <Button onClick={() => handleWeekChange("next")}>
-                  Next Week →
+                  Tuần sau →
                 </Button>
               </Space>
             </Col>
             <Col>
               <div className="week-info">
                 <Title level={4} style={{ margin: 0 }}>
-                  Week: {selectedWeek.format("DD/MM")} -{" "}
+                  Tuần: {selectedWeek.format("DD/MM")} -{" "}
                   {selectedWeek.add(6, "day").format("DD/MM/YYYY")}
                 </Title>
                 <Text type="secondary">
-                  Semester: Fall 2025 • Week {selectedWeek.week()}
+                  Học kỳ: Fall 2025 • Tuần {selectedWeek.week()}
                 </Text>
               </div>
             </Col>
@@ -356,7 +356,7 @@ const WeeklyTimetable: React.FC = () => {
                     onClick={() => setSelectedWeek(dayjs())}
                     className="current-week-btn"
                   >
-                    Current Week
+                    Tuần hiện tại
                   </Button>
                   <div className="date-select-group">
                     <Select
@@ -369,10 +369,12 @@ const WeeklyTimetable: React.FC = () => {
                     </Select>
                     <DatePicker.WeekPicker
                       value={selectedWeek}
-                      onChange={(date) => date && setSelectedWeek(date)}
+                      onChange={(date: dayjs.Dayjs | null) =>
+                        date && setSelectedWeek(date)
+                      }
                       className="week-picker"
                       format="YYYY-wo"
-                      placeholder="Select Week"
+                      placeholder="Chọn tuần"
                       allowClear={false}
                     />
                   </div>
@@ -400,16 +402,16 @@ const WeeklyTimetable: React.FC = () => {
       <Card style={{ marginTop: 24 }}>
         <Row gutter={[16, 8]} align="middle">
           <Col>
-            <Text strong>Legend:</Text>
+            <Text strong>Chú thích:</Text>
           </Col>
           <Col>
             <Space>
               <Badge
                 color="#52c41a"
-                text="Attended - Student has attended this class"
+                text="Đã tham gia - Sinh viên đã tham gia lớp học này"
               />
-              <Badge color="#ff4d4f" text="Absent - Student was absent" />
-              <Badge color="#faad14" text="Not Yet - Class not started yet" />
+              <Badge color="#ff4d4f" text="Vắng mặt - Sinh viên đã vắng mặt" />
+              <Badge color="#faad14" text="Chưa có - Lớp học chưa bắt đầu" />
             </Space>
           </Col>
         </Row>
