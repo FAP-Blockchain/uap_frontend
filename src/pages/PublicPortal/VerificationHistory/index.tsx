@@ -141,9 +141,9 @@ const VerificationHistory: React.FC = () => {
 
   const getMethodTag = (method: string) => {
     const config = {
-      qr: { color: "green", text: "QR Scan" },
-      manual: { color: "blue", text: "Manual" },
-      file: { color: "purple", text: "File Upload" },
+      qr: { color: "green", text: "Quét QR" },
+      manual: { color: "blue", text: "Thủ công" },
+      file: { color: "purple", text: "Tải file" },
     };
     const { color, text } = config[method as keyof typeof config] || {
       color: "default",
@@ -157,19 +157,19 @@ const VerificationHistory: React.FC = () => {
       case "success":
         return (
           <Tag color="success" icon={<CheckCircleOutlined />}>
-            Verified
+            Đã xác thực
           </Tag>
         );
       case "failed":
         return (
           <Tag color="error" icon={<CloseCircleOutlined />}>
-            Failed
+            Thất bại
           </Tag>
         );
       case "pending":
         return (
           <Tag color="warning" icon={<ExclamationCircleOutlined />}>
-            Pending
+            Đang chờ
           </Tag>
         );
       default:
@@ -189,13 +189,13 @@ const VerificationHistory: React.FC = () => {
 
   const handleDeleteRecord = (id: string) => {
     Modal.confirm({
-      title: "Delete Verification Record",
-      content: "Are you sure you want to delete this verification record?",
-      okText: "Delete",
+      title: "Xóa bản ghi xác thực",
+      content: "Bạn có chắc chắn muốn xóa bản ghi xác thực này không?",
+      okText: "Xóa",
       okType: "danger",
-      cancelText: "Cancel",
+      cancelText: "Hủy",
       onOk() {
-        message.success("Verification record deleted successfully");
+        message.success("Xóa bản ghi xác thực thành công");
       },
     });
   };
@@ -210,12 +210,12 @@ const VerificationHistory: React.FC = () => {
     document.body.appendChild(element);
     element.click();
     document.body.removeChild(element);
-    message.success("History exported successfully");
+    message.success("Xuất lịch sử thành công");
   };
 
   const columns: TableColumnsType<HistoryRecord> = [
     {
-      title: "Credential",
+      title: "Chứng chỉ",
       dataIndex: "credentialTitle",
       key: "credentialTitle",
       render: (text: string, record: HistoryRecord) => (
@@ -230,7 +230,7 @@ const VerificationHistory: React.FC = () => {
       ellipsis: true,
     },
     {
-      title: "Student",
+      title: "Sinh viên",
       dataIndex: "studentName",
       key: "studentName",
       render: (text: string, record: HistoryRecord) => (
@@ -244,32 +244,32 @@ const VerificationHistory: React.FC = () => {
       ),
     },
     {
-      title: "Method",
+      title: "Phương thức",
       dataIndex: "verificationMethod",
       key: "verificationMethod",
       render: (method: string) => getMethodTag(method),
       filters: [
-        { text: "QR Scan", value: "qr" },
-        { text: "Manual", value: "manual" },
-        { text: "File Upload", value: "file" },
+        { text: "Quét QR", value: "qr" },
+        { text: "Thủ công", value: "manual" },
+        { text: "Tải file", value: "file" },
       ],
       onFilter: (value: any, record: HistoryRecord) =>
         record.verificationMethod === value,
     },
     {
-      title: "Result",
+      title: "Kết quả",
       dataIndex: "result",
       key: "result",
       render: (result: string) => getResultTag(result),
       filters: [
-        { text: "Verified", value: "success" },
-        { text: "Failed", value: "failed" },
-        { text: "Pending", value: "pending" },
+        { text: "Đã xác thực", value: "success" },
+        { text: "Thất bại", value: "failed" },
+        { text: "Đang chờ", value: "pending" },
       ],
       onFilter: (value: any, record: HistoryRecord) => record.result === value,
     },
     {
-      title: "Timestamp",
+      title: "Thời gian",
       dataIndex: "timestamp",
       key: "timestamp",
       render: (timestamp: string) => (
@@ -286,29 +286,29 @@ const VerificationHistory: React.FC = () => {
       defaultSortOrder: "descend",
     },
     {
-      title: "Verifier",
+      title: "Người xác thực",
       dataIndex: "verifierInfo",
       key: "verifierInfo",
       render: (text: string) => (
         <Text type="secondary" style={{ fontSize: 12 }}>
-          {text || "Anonymous"}
+          {text || "Ẩn danh"}
         </Text>
       ),
       ellipsis: true,
     },
     {
-      title: "Actions",
+      title: "Thao tác",
       key: "actions",
       render: (_: any, record: HistoryRecord) => (
         <Space size="small">
-          <Tooltip title="View Details">
+          <Tooltip title="Xem chi tiết">
             <Button
               type="link"
               icon={<EyeOutlined />}
               onClick={() => handleViewDetails(record)}
             />
           </Tooltip>
-          <Tooltip title="Delete Record">
+          <Tooltip title="Xóa bản ghi">
             <Button
               type="link"
               danger
@@ -353,10 +353,10 @@ const VerificationHistory: React.FC = () => {
       {/* Page Header */}
       <div className="page-header">
         <Title level={2} style={{ margin: 0, color: "#ffffff" }}>
-          Verification History
+          Lịch sử xác thực
         </Title>
         <Text type="secondary" style={{ fontSize: 16 }}>
-          Track and manage all credential verification activities
+          Theo dõi và quản lý tất cả hoạt động xác thực chứng chỉ
         </Text>
       </div>
 
@@ -365,7 +365,7 @@ const VerificationHistory: React.FC = () => {
         <Col xs={12} sm={6}>
           <Card>
             <Statistic
-              title="Total Verifications"
+              title="Tổng số xác thực"
               value={stats.totalVerifications}
               prefix={
                 <SafetyCertificateOutlined style={{ color: "#1890ff" }} />
@@ -376,7 +376,7 @@ const VerificationHistory: React.FC = () => {
         <Col xs={12} sm={6}>
           <Card>
             <Statistic
-              title="Successful"
+              title="Thành công"
               value={stats.successfulVerifications}
               prefix={<CheckCircleOutlined style={{ color: "#52c41a" }} />}
               valueStyle={{ color: "#52c41a" }}
@@ -386,7 +386,7 @@ const VerificationHistory: React.FC = () => {
         <Col xs={12} sm={6}>
           <Card>
             <Statistic
-              title="Failed"
+              title="Thất bại"
               value={stats.failedVerifications}
               prefix={<CloseCircleOutlined style={{ color: "#ff4d4f" }} />}
               valueStyle={{ color: "#ff4d4f" }}
@@ -396,7 +396,7 @@ const VerificationHistory: React.FC = () => {
         <Col xs={12} sm={6}>
           <Card>
             <Statistic
-              title="Success Rate"
+              title="Tỷ lệ thành công"
               value={stats.successRate}
               suffix="%"
               prefix={<BarChartOutlined style={{ color: "#722ed1" }} />}
@@ -411,7 +411,7 @@ const VerificationHistory: React.FC = () => {
         <Row gutter={[16, 16]} align="middle">
           <Col xs={24} md={8}>
             <Search
-              placeholder="Search by credential, student, or institution..."
+              placeholder="Tìm kiếm theo chứng chỉ, sinh viên hoặc tổ chức..."
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
               allowClear
@@ -419,28 +419,28 @@ const VerificationHistory: React.FC = () => {
           </Col>
           <Col xs={12} md={4}>
             <Select
-              placeholder="Method"
+              placeholder="Phương thức"
               value={filterMethod}
               onChange={setFilterMethod}
               allowClear
               style={{ width: "100%" }}
             >
-              <Option value="qr">QR Scan</Option>
-              <Option value="manual">Manual</Option>
-              <Option value="file">File Upload</Option>
+              <Option value="qr">Quét QR</Option>
+              <Option value="manual">Thủ công</Option>
+              <Option value="file">Tải file</Option>
             </Select>
           </Col>
           <Col xs={12} md={4}>
             <Select
-              placeholder="Result"
+              placeholder="Kết quả"
               value={filterResult}
               onChange={setFilterResult}
               allowClear
               style={{ width: "100%" }}
             >
-              <Option value="success">Verified</Option>
-              <Option value="failed">Failed</Option>
-              <Option value="pending">Pending</Option>
+              <Option value="success">Đã xác thực</Option>
+              <Option value="failed">Thất bại</Option>
+              <Option value="pending">Đang chờ</Option>
             </Select>
           </Col>
           <Col xs={24} md={6}>
@@ -448,7 +448,7 @@ const VerificationHistory: React.FC = () => {
               value={dateRange}
               onChange={setDateRange}
               style={{ width: "100%" }}
-              placeholder={["Start Date", "End Date"]}
+              placeholder={["Ngày bắt đầu", "Ngày kết thúc"]}
             />
           </Col>
           <Col xs={24} md={2}>
@@ -462,7 +462,7 @@ const VerificationHistory: React.FC = () => {
                   setDateRange(null);
                 }}
               >
-                Clear
+                Xóa
               </Button>
             </Space>
           </Col>
@@ -474,14 +474,14 @@ const VerificationHistory: React.FC = () => {
               icon={<BarChartOutlined />}
               onClick={() => setShowAnalytics(true)}
             >
-              Analytics
+              Phân tích
             </Button>
             <Button
               type="primary"
               icon={<DownloadOutlined />}
               onClick={handleExportHistory}
             >
-              Export History
+              Xuất lịch sử
             </Button>
           </Space>
         </Row>
@@ -500,7 +500,7 @@ const VerificationHistory: React.FC = () => {
             showSizeChanger: true,
             showQuickJumper: true,
             showTotal: (total, range) =>
-              `${range[0]}-${range[1]} of ${total} records`,
+              `${range[0]}-${range[1]} trong tổng số ${total} bản ghi`,
           }}
           scroll={{ x: 1000 }}
           size="middle"
@@ -509,13 +509,13 @@ const VerificationHistory: React.FC = () => {
 
       {/* Analytics Modal */}
       <Modal
-        title="📈 Verification Analytics"
+        title="📈 Phân tích xác thực"
         open={showAnalytics}
         onCancel={() => setShowAnalytics(false)}
         width={800}
         footer={[
           <Button key="close" onClick={() => setShowAnalytics(false)}>
-            Close
+            Đóng
           </Button>,
         ]}
       >
@@ -523,9 +523,9 @@ const VerificationHistory: React.FC = () => {
           <Col xs={24} md={12}>
             <Card size="small">
               <Statistic
-                title="Peak Verification Hour"
+                title="Giờ xác thực cao điểm"
                 value="14:00"
-                suffix="(34 verifications)"
+                suffix="(34 lần xác thực)"
                 prefix={<CalendarOutlined />}
               />
             </Card>
@@ -533,7 +533,7 @@ const VerificationHistory: React.FC = () => {
           <Col xs={24} md={12}>
             <Card size="small">
               <Statistic
-                title="Most Verified Institution"
+                title="Tổ chức được xác thực nhiều nhất"
                 value="FPT University"
                 suffix="(45%)"
                 prefix={<SafetyCertificateOutlined />}
@@ -542,15 +542,14 @@ const VerificationHistory: React.FC = () => {
           </Col>
           <Col xs={24}>
             <Card size="small">
-              <Title level={5}>Recent Trends</Title>
+              <Title level={5}>Xu hướng gần đây</Title>
               <Text type="secondary">
-                • QR Code scanning is the most popular method (60% of
-                verifications)
+                • Quét mã QR là phương thức phổ biến nhất (60% số lần xác thực)
                 <br />
-                • Success rate has improved by 12% this month
+                • Tỷ lệ thành công đã tăng 12% trong tháng này
                 <br />
-                • File upload verifications have increased by 25%
-                <br />• Peak verification times: 9-11 AM and 2-4 PM
+                • Xác thực bằng tải file đã tăng 25%
+                <br />• Giờ xác thực cao điểm: 9-11 giờ sáng và 2-4 giờ chiều
               </Text>
             </Card>
           </Col>
