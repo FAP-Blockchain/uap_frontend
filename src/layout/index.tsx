@@ -20,7 +20,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({
   children,
   breadcrumbItems,
 }) => {
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(true);
   const location = useLocation();
   const pathname = location.pathname;
 
