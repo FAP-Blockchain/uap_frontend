@@ -102,17 +102,9 @@ const Login: React.FC = () => {
       console.error("Login error:", error);
 
       // Extract error message from API response
-      const errorMessage =
-        (
-          error as {
-            response?: { data?: { message?: string } };
-            message?: string;
-          }
-        )?.response?.data?.message ||
-        (error as { message?: string })?.message ||
-        "Đăng nhập thất bại! Vui lòng kiểm tra thông tin đăng nhập.";
+     
 
-      toast.error(errorMessage);
+      toast.error('Đăng nhập thất bại! Vui lòng kiểm tra thông tin đăng nhập.');
       setIsLoading(false);
       setIsNavigating(false);
     }
