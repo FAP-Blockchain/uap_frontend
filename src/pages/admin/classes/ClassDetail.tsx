@@ -78,7 +78,10 @@ const ClassDetail: React.FC = () => {
     setEnrollmentsLoading(true);
     try {
       const data = await fetchEnrollmentsByClassApi(id);
-      setEnrollments(data);
+      const pendingEnrollments = data.filter(
+        (item) => item.status?.toLowerCase() === "pending"
+      );
+      setEnrollments(pendingEnrollments);
     } catch {
       toast.error("Không thể tải danh sách đơn đăng ký");
     } finally {
