@@ -1,577 +1,321 @@
-import { useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
-  Avatar,
+  Alert,
+  Badge,
   Button,
   Card,
   Col,
-  Descriptions,
   Divider,
-  message,
-  Modal,
-  QRCode,
+  Empty,
   Row,
   Space,
-  Statistic,
+  Spin,
   Tag,
-  Timeline,
+  Tooltip,
   Typography,
+  message,
 } from "antd";
 import {
   ArrowLeftOutlined,
   CalendarOutlined,
-  CheckCircleOutlined,
-  ClockCircleOutlined,
-  CopyOutlined,
+  CloudDownloadOutlined,
   DownloadOutlined,
-  EyeOutlined,
+  LinkOutlined,
   QrcodeOutlined,
   SafetyCertificateOutlined,
-  ShareAltOutlined,
-  BookOutlined,
-  TrophyOutlined,
-  FileTextOutlined,
-  LinkOutlined,
 } from "@ant-design/icons";
 import dayjs from "dayjs";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
+import CredentialServices from "../../../services/credential/api.service";
+import type { StudentCredentialDto } from "../../../types/Credential";
 import "./CredentialDetail.scss";
 
 const { Title, Text, Paragraph } = Typography;
 
-interface CredentialDetailData {
-  id: string;
-  type: "degree" | "transcript" | "certificate";
-  title: string;
-  institution: string;
-  issueDate: string;
-  status: "active" | "pending" | "revoked";
-  gpa?: string;
-  major?: string;
-  achievements?: string[];
-  blockchainHash?: string;
-  transactionHash?: string;
-  blockNumber?: number;
-  verificationCount: number;
-  description?: string;
-  validUntil?: string;
-  issuer: {
-    name: string;
-    department?: string;
-    contact?: string;
-  };
-  verification: {
-    method: string;
-    algorithm: string;
-    timestamp: string;
-  };
-}
+const certificateLabels: Record<string, string> = {
+  SubjectCompletion: "Chứng chỉ hoàn thành môn học",
+  SemesterCompletion: "Chứng chỉ hoàn thành học kỳ",
+  RoadmapCompletion: "Chứng chỉ hoàn thành lộ trình",
+};
 
 const CredentialDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [credential, setCredential] = useState<StudentCredentialDto | null>(
+    null
+  );
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const certificateRef = useRef<HTMLDivElement>(null);
 
-  const [qrModalVisible, setQrModalVisible] = useState(false);
-  const [shareModalVisible, setShareModalVisible] = useState(false);
+  useEffect(() => {
+    const fetchDetail = async () => {
+      if (!id) {
+        setError("Thiếu mã chứng chỉ");
+        setIsLoading(false);
+        return;
+      }
 
-  // Mock data based on credential ID
-  const getCredentialData = (
-    credentialId: string
-  ): CredentialDetailData | null => {
-    const mockData: Record<string, CredentialDetailData> = {
-      deg_001: {
-        id: "deg_001",
-        type: "degree",
-        title: "Bachelor of Software Engineering",
-        institution: "FPT University",
-        issueDate: "2024-06-15",
-        status: "active",
-        gpa: "3.85",
-        major: "Software Engineering",
-        achievements: [
-          "Magna Cum Laude",
-          "Dean's List - 6 semesters",
-          "Outstanding Student Award 2024",
-          "Best Capstone Project",
-        ],
-        blockchainHash: "0x1a2b3c4d5e6f7890abcdef1234567890abcdef12",
-        transactionHash: "0xabcdef1234567890abcdef1234567890abcdef12",
-        blockNumber: 18567234,
-        verificationCount: 15,
-        description:
-          "Four-year undergraduate program specializing in software development, algorithms, and system design.",
-        validUntil: "2029-06-15",
-        issuer: {
-          name: "FPT University",
-          department: "School of Engineering",
-          contact: "registrar@fpt.edu.vn",
-        },
-        verification: {
-          method: "Digital Signature",
-          algorithm: "RSA-256",
-          timestamp: "2024-06-15T10:30:00Z",
-        },
-      },
-      cert_001: {
-        id: "cert_001",
-        type: "certificate",
-        title: "AWS Cloud Practitioner",
-        institution: "Amazon Web Services",
-        issueDate: "2024-03-22",
-        status: "active",
-        achievements: ["Score: 880/1000", "Certification Level: Foundational"],
-        blockchainHash: "0x5e6f7g8h9i0j1k2l3m4n5o6p7q8r9s0t1u2v3w4x",
-        transactionHash: "0x9i0j1k2l3m4n5o6p7q8r9s0t1u2v3w4x5y6z7a8b",
-        blockNumber: 18234567,
-        verificationCount: 8,
-        description:
-          "Cloud computing fundamentals certification covering AWS core services, pricing, and security.",
-        validUntil: "2027-03-22",
-        issuer: {
-          name: "Amazon Web Services",
-          department: "Training and Certification",
-          contact: "aws-certification@amazon.com",
-        },
-        verification: {
-          method: "Digital Certificate",
-          algorithm: "SHA-256",
-          timestamp: "2024-03-22T14:45:00Z",
-        },
-      },
-      trans_001: {
-        id: "trans_001",
-        type: "transcript",
-        title: "Academic Transcript - Fall 2023",
-        institution: "FPT University",
-        issueDate: "2024-01-10",
-        status: "active",
-        gpa: "3.75",
-        major: "Software Engineering",
-        blockchainHash: "0x9i0j1k2l3m4n5o6p7q8r9s0t1u2v3w4x5y6z7a8b",
-        transactionHash: "0x1k2l3m4n5o6p7q8r9s0t1u2v3w4x5y6z7a8b9c0d",
-        blockNumber: 17890123,
-        verificationCount: 12,
-        description:
-          "Official academic transcript for Fall 2023 semester including all courses and grades.",
-        issuer: {
-          name: "FPT University",
-          department: "Registrar Office",
-          contact: "transcript@fpt.edu.vn",
-        },
-        verification: {
-          method: "Institutional Seal",
-          algorithm: "ECDSA",
-          timestamp: "2024-01-10T09:15:00Z",
-        },
-      },
+      setIsLoading(true);
+      setError(null);
+      try {
+        const data = await CredentialServices.getMyCredentials();
+        const found = data.find(
+          (item) => item.id === id || item.credentialId === id
+        );
+        if (!found) {
+          setError("Không tìm thấy chứng chỉ này trong tài khoản của bạn");
+        } else {
+          setCredential(found);
+        }
+      } catch (err) {
+        const messageText =
+          (
+            err as {
+              response?: { data?: { message?: string } };
+              message?: string;
+            }
+          )?.response?.data?.message ||
+          (err as { message?: string }).message ||
+          "Không thể tải dữ liệu chứng chỉ";
+        setError(messageText);
+      } finally {
+        setIsLoading(false);
+      }
     };
 
-    return mockData[credentialId || ""] || null;
+    void fetchDetail();
+  }, [id]);
+
+  const certificateTitle = useMemo(() => {
+    if (!credential) return "";
+    return (
+      credential.subjectName ||
+      credential.roadmapName ||
+      certificateLabels[credential.certificateType] ||
+      credential.certificateType
+    );
+  }, [credential]);
+
+  const formattedIssuedDate = credential?.issuedDate
+    ? dayjs(credential.issuedDate).format("DD MMMM, YYYY")
+    : "—";
+
+  const handleCopyLink = async () => {
+    if (!credential?.shareableUrl) return;
+    try {
+      await navigator.clipboard.writeText(credential.shareableUrl);
+      void message.success("Đã sao chép liên kết xác thực");
+    } catch {
+      void message.error("Không thể sao chép liên kết");
+    }
   };
 
-  const credentialData = getCredentialData(id || "");
+  const handleDownloadCertificate = async () => {
+    if (!certificateRef.current || !credential) return;
+    const canvas = await html2canvas(certificateRef.current, { scale: 2 });
+    const imgData = canvas.toDataURL("image/png");
+    const pdf = new jsPDF({ orientation: "landscape", unit: "pt", format: "a4" });
+    const width = pdf.internal.pageSize.getWidth();
+    const height = (canvas.height * width) / canvas.width;
+    pdf.addImage(imgData, "PNG", 0, 0, width, height);
+    pdf.save(`${credential.credentialId}.pdf`);
+  };
 
-  if (!credentialData) {
+  if (isLoading) {
     return (
-      <div className="credential-detail">
-        <Card>
-          <div style={{ textAlign: "center", padding: "48px 0" }}>
-            <Title level={3}>Không tìm thấy chứng chỉ</Title>
-            <Text type="secondary">
-              Chứng chỉ được yêu cầu không thể tìm thấy.
-            </Text>
-            <br />
-            <Button
-              type="primary"
-              icon={<ArrowLeftOutlined />}
-              onClick={() => navigate("/student-portal/credentials")}
-              style={{ marginTop: 16 }}
-            >
-              Quay lại chứng chỉ
-            </Button>
-          </div>
-        </Card>
+      <div className="credential-detail loading-state">
+        <Spin size="large" />
       </div>
     );
   }
 
-  const getCredentialIcon = (type: string) => {
-    switch (type) {
-      case "degree":
-        return <TrophyOutlined style={{ color: "#52c41a", fontSize: 32 }} />;
-      case "certificate":
-        return (
-          <SafetyCertificateOutlined
-            style={{ color: "#1890ff", fontSize: 32 }}
-          />
-        );
-      case "transcript":
-        return <BookOutlined style={{ color: "#722ed1", fontSize: 32 }} />;
-      default:
-        return <FileTextOutlined style={{ color: "#8c8c8c", fontSize: 32 }} />;
-    }
-  };
+  if (error) {
+    return (
+      <div className="credential-detail">
+        <Alert
+          type="error"
+          message="Không thể tải chứng chỉ"
+          description={error}
+          showIcon
+          action={
+            <Button type="primary" onClick={() => navigate(-1)}>
+              Quay lại
+            </Button>
+          }
+        />
+      </div>
+    );
+  }
 
-  const getStatusTag = (status: string) => {
-    switch (status) {
-      case "active":
-        return (
-          <Tag color="success" icon={<CheckCircleOutlined />}>
-            Hoạt động
-          </Tag>
-        );
-      case "pending":
-        return (
-          <Tag color="warning" icon={<ClockCircleOutlined />}>
-            Đang chờ
-          </Tag>
-        );
-      case "revoked":
-        return <Tag color="error">Đã thu hồi</Tag>;
-      default:
-        return <Tag>Không xác định</Tag>;
-    }
-  };
-
-  const verificationUrl = `${window.location.origin}/public-portal?verify=${credentialData.id}`;
-
-  const handleCopyLink = () => {
-    navigator.clipboard.writeText(verificationUrl);
-    message.success("Đã sao chép liên kết xác thực vào clipboard!");
-  };
-
-  const handleDownloadPDF = () => {
-    message.success("Đã bắt đầu tải xuống PDF!");
-  };
-
-  const handleDownloadImage = () => {
-    message.success("Đã bắt đầu tải xuống hình ảnh!");
-  };
-
-  const handleShare = (platform: string) => {
-    message.success(`Đã chia sẻ lên ${platform}!`);
-    setShareModalVisible(false);
-  };
+  if (!credential) {
+    return (
+      <div className="credential-detail">
+        <Empty description="Không tìm thấy chứng chỉ" />
+      </div>
+    );
+  }
 
   return (
     <div className="credential-detail">
-      {/* Header */}
       <div className="detail-header">
         <Button
           icon={<ArrowLeftOutlined />}
           onClick={() => navigate("/student-portal/credentials")}
-          style={{ marginBottom: 16 }}
         >
-          Quay lại chứng chỉ
+          Quay lại danh sách
         </Button>
-
-        <Row
-          justify="space-between"
-          align="middle"
-          style={{ marginBottom: 24 }}
-        >
-          <Col>
-            <Space>
-              <Avatar size={64} icon={getCredentialIcon(credentialData.type)} />
-              <div>
-                <Title level={2} style={{ margin: 0 }}>
-                  {credentialData.title}
-                </Title>
-                <Text type="secondary" style={{ fontSize: 16 }}>
-                  {credentialData.institution}
-                </Text>
-              </div>
-            </Space>
-          </Col>
-          <Col>
-            <Space>
-              <Button
-                type="primary"
-                icon={<ShareAltOutlined />}
-                onClick={() => setShareModalVisible(true)}
-              >
-                Chia sẻ
-              </Button>
-              <Button
-                icon={<QrcodeOutlined />}
-                onClick={() => setQrModalVisible(true)}
-              >
-                Mã QR
-              </Button>
-              <Button icon={<DownloadOutlined />} onClick={handleDownloadPDF}>
-                Tải xuống
-              </Button>
-            </Space>
-          </Col>
-        </Row>
       </div>
 
       <Row gutter={[24, 24]}>
-        {/* Main Information */}
-        <Col xs={24} lg={16}>
-          <Card title="Thông tin cơ bản" style={{ marginBottom: 24 }}>
-            <Descriptions column={2} bordered>
-              <Descriptions.Item label="Loại chứng chỉ">
-                <Tag
-                  color={
-                    credentialData.type === "degree"
-                      ? "green"
-                      : credentialData.type === "certificate"
-                      ? "blue"
-                      : "purple"
-                  }
-                >
-                  {credentialData.type === "degree"
-                    ? "Bằng cấp"
-                    : credentialData.type === "certificate"
-                    ? "Chứng chỉ"
-                    : "Bảng điểm"}
-                </Tag>
-              </Descriptions.Item>
-              <Descriptions.Item label="Trạng thái">
-                {getStatusTag(credentialData.status)}
-              </Descriptions.Item>
-              <Descriptions.Item label="Ngày cấp">
-                <Space>
-                  <CalendarOutlined />
-                  {dayjs(credentialData.issueDate).format("DD/MM/YYYY")}
+        <Col xs={24} lg={12}>
+          <Card className="credential-info-card" bordered={false}>
+            <Space direction="vertical" size={12} style={{ width: "100%" }}>
+              <Space>
+                <SafetyCertificateOutlined style={{ fontSize: 32, color: "#1a94fc" }} />
+                <div>
+                  <Text type="secondary">
+                    {certificateLabels[credential.certificateType] || "Chứng chỉ"}
+                  </Text>
+                  <Title level={3} style={{ margin: 0 }} className="info-title">
+                    {certificateTitle}
+                  </Title>
+                </div>
+              </Space>
+
+              <Paragraph type="secondary" style={{ marginBottom: 0 }} className="info-description">
+                Chứng chỉ điện tử được xác thực bởi UAP Blockchain, đảm bảo tính toàn vẹn và có thể
+                chia sẻ cho nhà tuyển dụng trong mọi bối cảnh.
+              </Paragraph>
+
+              <Divider className="card-divider" />
+
+              <Space direction="vertical" size={12} className="info-grid">
+                <div className="info-row">
+                  <span>Họ và tên</span>
+                  <span className="strong-text">{credential.studentName || "—"}</span>
+                </div>
+                <div className="info-row">
+                  <span>Mã chứng chỉ</span>
+                  <Tag color="blue">{credential.credentialId}</Tag>
+                </div>
+                <div className="info-row">
+                  <span>Ngày cấp</span>
+                  <span>
+                    <CalendarOutlined style={{ marginRight: 6 }} />
+                    {formattedIssuedDate}
+                  </span>
+                </div>
+                {credential.completionDate && (
+                  <div className="info-row">
+                    <span>Ngày hoàn thành</span>
+                    <span>{dayjs(credential.completionDate).format("DD/MM/YYYY")}</span>
+                  </div>
+                )}
+                {credential.letterGrade && (
+                  <div className="info-row">
+                    <span>Điểm trung bình</span>
+                    <Tag color="gold">{credential.letterGrade}</Tag>
+                  </div>
+                )}
+                <div className="info-row">
+                  <span>Trạng thái</span>
+                  <Tag color={credential.status === "Issued" ? "green" : "orange"}>
+                    {credential.status}
+                  </Tag>
+                </div>
+                {credential.semesterName && (
+                  <div className="info-row">
+                    <span>Học kỳ</span>
+                    <span>{credential.semesterName}</span>
+                  </div>
+                )}
+                {credential.verificationHash && (
+                  <div className="info-row">
+                    <span>Hash xác thực</span>
+                    <Tooltip title={credential.verificationHash}>
+                      <Text code>{credential.verificationHash.slice(0, 12)}...</Text>
+                    </Tooltip>
+                  </div>
+                )}
+              </Space>
+
+              <Divider className="card-divider" />
+
+              <Space direction="vertical" size={12}>
+                <Text strong>Tuỳ chọn</Text>
+                <Space wrap>
+                  <Button icon={<DownloadOutlined />} onClick={handleDownloadCertificate}>
+                    Tải PDF
+                  </Button>
+                  {credential.shareableUrl && (
+                    <Button icon={<LinkOutlined />} onClick={handleCopyLink}>
+                      Sao chép liên kết
+                    </Button>
+                  )}
+                  <Button icon={<QrcodeOutlined />}>Mã QR</Button>
                 </Space>
-              </Descriptions.Item>
-              {credentialData.validUntil && (
-                <Descriptions.Item label="Có hiệu lực đến">
-                  <Space>
-                    <CalendarOutlined />
-                    {dayjs(credentialData.validUntil).format("DD/MM/YYYY")}
-                  </Space>
-                </Descriptions.Item>
-              )}
-              {credentialData.gpa && (
-                <Descriptions.Item label="GPA">
-                  <Tag color="gold">{credentialData.gpa}</Tag>
-                </Descriptions.Item>
-              )}
-              {credentialData.major && (
-                <Descriptions.Item label="Chuyên ngành">
-                  {credentialData.major}
-                </Descriptions.Item>
-              )}
-            </Descriptions>
-
-            {credentialData.description && (
-              <>
-                <Divider />
-                <Title level={5}>Mô tả</Title>
-                <Paragraph>{credentialData.description}</Paragraph>
-              </>
-            )}
-
-            {credentialData.achievements &&
-              credentialData.achievements.length > 0 && (
-                <>
-                  <Divider />
-                  <Title level={5}>Thành tích & Danh hiệu</Title>
-                  <Timeline
-                    items={credentialData.achievements.map((achievement) => ({
-                      dot: <CheckCircleOutlined style={{ color: "#52c41a" }} />,
-                      children: achievement,
-                    }))}
-                  />
-                </>
-              )}
-          </Card>
-
-          {/* Issuer Information */}
-          <Card title="Thông tin người cấp">
-            <Descriptions column={1} bordered>
-              <Descriptions.Item label="Tổ chức">
-                {credentialData.issuer.name}
-              </Descriptions.Item>
-              {credentialData.issuer.department && (
-                <Descriptions.Item label="Khoa/Bộ phận">
-                  {credentialData.issuer.department}
-                </Descriptions.Item>
-              )}
-              {credentialData.issuer.contact && (
-                <Descriptions.Item label="Liên hệ">
-                  {credentialData.issuer.contact}
-                </Descriptions.Item>
-              )}
-            </Descriptions>
+              </Space>
+            </Space>
           </Card>
         </Col>
 
-        {/* Sidebar */}
-        <Col xs={24} lg={8}>
-          {/* Verification Stats */}
-          <Card style={{ marginBottom: 24 }}>
-            <Row gutter={16}>
-              <Col span={12}>
-                <Statistic
-                  title="Lần xác thực"
-                  value={credentialData.verificationCount}
-                  prefix={<EyeOutlined />}
+        <Col xs={24} lg={12}>
+          <Card bordered={false} className="certificate-preview-card">
+            <div className="certificate-preview" ref={certificateRef}>
+              <div className="certificate-header">
+                <div className="issuer-block">
+                  <Text className="issuer-name">UAP Blockchain</Text>
+                  <Text className="certificate-type">
+                    {certificateLabels[credential.certificateType] || "Chứng chỉ"}
+                  </Text>
+                </div>
+                <Badge
+                  count="Đã xác thực on-chain"
+                  style={{ backgroundColor: "#1a94fc" }}
                 />
-              </Col>
-              <Col span={12}>
-                <Statistic
-                  title="Bảo mật"
-                  value="100"
-                  prefix={<SafetyCertificateOutlined />}
-                  suffix="%"
-                />
-              </Col>
-            </Row>
-          </Card>
-
-          {/* Blockchain Information */}
-          <Card title="Xác thực Blockchain" style={{ marginBottom: 24 }}>
-            <Space direction="vertical" style={{ width: "100%" }}>
-              <div>
-                <Text strong>Mã hash Blockchain:</Text>
-                <br />
-                <Text code copyable style={{ fontSize: 11 }}>
-                  {credentialData.blockchainHash}
-                </Text>
               </div>
 
-              <div>
-                <Text strong>Giao dịch:</Text>
-                <br />
-                <Text code copyable style={{ fontSize: 11 }}>
-                  {credentialData.transactionHash}
-                </Text>
+              <div className="certificate-body">
+                <Text className="caption">CHỨNG NHẬN RẰNG</Text>
+                <Title level={1} className="recipient">
+                  {credential.studentName || "—"}
+                </Title>
+                <Paragraph className="description">đã hoàn thành chương trình học</Paragraph>
+                <Title level={2} className="program">
+                  {certificateTitle}
+                </Title>
+                <Paragraph className="details">
+                  Cấp ngày {formattedIssuedDate} · Mã sinh viên {credential.studentCode}
+                </Paragraph>
               </div>
 
-              <div>
-                <Text strong>Số khối:</Text>
-                <br />
-                <Text>{credentialData.blockNumber?.toLocaleString()}</Text>
+              <div className="certificate-footer">
+                <div className="signature-block">
+                  <div className="signature" />
+                  <Text>Phòng Đào tạo</Text>
+                </div>
+                <div className="seal">FAP</div>
               </div>
+            </div>
 
-              <Divider />
-
-              <div>
-                <Text strong>Phương thức xác thực:</Text>
-                <br />
-                <Text>{credentialData.verification.method}</Text>
-              </div>
-
-              <div>
-                <Text strong>Thuật toán:</Text>
-                <br />
-                <Text>{credentialData.verification.algorithm}</Text>
-              </div>
-
-              <div>
-                <Text strong>Xác thực lúc:</Text>
-                <br />
-                <Text>
-                  {dayjs(credentialData.verification.timestamp).format(
-                    "DD/MM/YYYY HH:mm"
-                  )}
-                </Text>
-              </div>
-            </Space>
-          </Card>
-
-          {/* Quick Actions */}
-          <Card title="Thao tác nhanh">
-            <Space direction="vertical" style={{ width: "100%" }}>
-              <Button block icon={<LinkOutlined />} onClick={handleCopyLink}>
-                Sao chép liên kết xác thực
-              </Button>
+            <div className="certificate-actions">
               <Button
-                block
-                icon={<DownloadOutlined />}
-                onClick={handleDownloadImage}
+                type="primary"
+                icon={<CloudDownloadOutlined />}
+                onClick={handleDownloadCertificate}
               >
-                Tải xuống dưới dạng hình ảnh
+                Tải chứng chỉ PDF
               </Button>
-              <Button
-                block
-                icon={<ShareAltOutlined />}
-                onClick={() => setShareModalVisible(true)}
-              >
-                Chia sẻ chứng chỉ
-              </Button>
-            </Space>
+              <Text type="secondary">
+                * File PDF được xuất giống như mẫu chứng chỉ đang hiển thị.
+              </Text>
+            </div>
           </Card>
         </Col>
       </Row>
-
-      {/* QR Code Modal */}
-      <Modal
-        title="Mã QR để xác thực"
-        open={qrModalVisible}
-        onCancel={() => setQrModalVisible(false)}
-        footer={[
-          <Button key="close" onClick={() => setQrModalVisible(false)}>
-            Đóng
-          </Button>,
-          <Button
-            key="download"
-            type="primary"
-            onClick={() => message.success("Đã tải xuống mã QR!")}
-          >
-            Tải xuống mã QR
-          </Button>,
-        ]}
-      >
-        <div style={{ textAlign: "center", padding: "20px 0" }}>
-          <QRCode value={verificationUrl} size={200} />
-          <br />
-          <br />
-          <Text type="secondary">
-            Quét mã QR này để xác thực chứng chỉ
-          </Text>
-        </div>
-      </Modal>
-
-      {/* Share Modal */}
-      <Modal
-        title="Chia sẻ chứng chỉ"
-        open={shareModalVisible}
-        onCancel={() => setShareModalVisible(false)}
-        footer={null}
-      >
-        <div style={{ padding: "20px 0" }}>
-          <Text strong>Liên kết xác thực:</Text>
-          <div
-            style={{
-              background: "#f5f5f5",
-              padding: "12px",
-              borderRadius: "6px",
-              marginTop: "8px",
-              marginBottom: "16px",
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-            }}
-          >
-            <Text code style={{ flex: 1, margin: 0, fontSize: "12px" }}>
-              {verificationUrl}
-            </Text>
-            <Button
-              size="small"
-              icon={<CopyOutlined />}
-              onClick={handleCopyLink}
-            >
-              Sao chép
-            </Button>
-          </div>
-
-          <Divider />
-
-          <Title level={5}>Chia sẻ đến:</Title>
-          <Space wrap>
-            <Button onClick={() => handleShare("Email")}>📧 Email</Button>
-            <Button onClick={() => handleShare("LinkedIn")}>💼 LinkedIn</Button>
-            <Button onClick={() => handleShare("Twitter")}>🐦 Twitter</Button>
-            <Button onClick={() => handleShare("Facebook")}>
-              📘 Facebook
-            </Button>
-          </Space>
-        </div>
-      </Modal>
     </div>
   );
 };
