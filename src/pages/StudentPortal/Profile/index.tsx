@@ -48,6 +48,7 @@ const Profile: React.FC = () => {
     try {
       setLoading(true);
       const data = await StudentServices.getCurrentStudentProfile();
+      console.log("Student Profile Data:", data);
       setStudentData(data);
     } catch (error: unknown) {
       const err = error as {
@@ -221,7 +222,7 @@ const Profile: React.FC = () => {
                 <Tag color="gold">{studentData.gpa.toFixed(2)}</Tag>
               </Descriptions.Item>
               <Descriptions.Item label="Ngày nhập học">
-                {dayjs(studentData.enrollmentDate).format("MM/YYYY")}
+                {dayjs(studentData.enrollmentDate).format("DD/MM/YYYY")}
               </Descriptions.Item>
               <Descriptions.Item label="Tổng số lớp">
                 <Tag color="blue">{studentData.totalClasses}</Tag>
@@ -256,8 +257,8 @@ const Profile: React.FC = () => {
                   <Descriptions.Item label="Họ và tên">
                     {studentData.fullName}
                   </Descriptions.Item>
-                  <Descriptions.Item label="Email">
-                    {studentData.email}
+                  <Descriptions.Item label="Địa chỉ ví">
+                    {studentData.walletAddress || "Chưa cập nhật"}
                   </Descriptions.Item>
                   <Descriptions.Item label="Ngày nhập học">
                     {dayjs(studentData.enrollmentDate).format("DD/MM/YYYY")}

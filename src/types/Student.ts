@@ -51,6 +51,7 @@ interface ClassInfo {
 }
 
 interface StudentDetailDto {
+  walletAddress: string;
   id: string;
   studentCode: string;
   fullName: string;
