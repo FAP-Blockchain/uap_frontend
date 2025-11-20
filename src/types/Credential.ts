@@ -64,4 +64,32 @@ interface CredentialStats {
   };
 }
 
-export type { Credential, CredentialFormData, CredentialStats };
+interface StudentCredentialDto {
+  id: string;
+  credentialId: string;
+  certificateType: string;
+  studentName: string | null;
+  studentCode: string;
+  subjectName: string | null;
+  semesterName: string | null;
+  roadmapName: string | null;
+  issuedDate: string;
+  completionDate: string | null;
+  finalGrade: number | null;
+  letterGrade: string | null;
+  classification: string | null;
+  status: string;
+  fileUrl: string | null;
+  shareableUrl: string | null;
+  verificationHash: string | null;
+  viewCount: number;
+  isOnBlockchain: boolean;
+  blockchainTransactionHash: string | null;
+}
+
+export type {
+  Credential,
+  CredentialFormData,
+  CredentialStats,
+  StudentCredentialDto,
+};

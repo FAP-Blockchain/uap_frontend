@@ -21,7 +21,6 @@ export default defineConfig({
           'admin-chunk': [
             './src/pages/admin/classes',
             './src/pages/admin/subjects',
-            './src/pages/admin/teachers',
             './src/pages/admin/credentials',
             './src/pages/admin/reports',
             './src/pages/admin/security',
