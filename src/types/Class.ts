@@ -85,6 +85,16 @@ export interface CreateClassRequest {
 
 export interface UpdateClassRequest extends CreateClassRequest {}
 
+export interface EligibleStudent {
+  id?: string;
+  studentId: string;
+  studentCode: string;
+  fullName: string;
+  email: string;
+  gpa?: number;
+  major?: string;
+}
+
 export interface Attendance {
   id: string;
   studentId: string;

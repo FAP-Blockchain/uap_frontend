@@ -4,6 +4,7 @@ import type {
   ClassesApiResponse,
   CreateClassRequest,
   UpdateClassRequest,
+  EligibleStudent,
 } from "../../../types/Class";
 import type { SubjectDto } from "../../../types/Subject";
 import type { TeacherOption } from "../../../types/Teacher";
@@ -110,5 +111,28 @@ export const getClassRosterApi = async (
   }
 
   return normalizeItems<StudentRoster>(response.data);
+};
+
+export const getEligibleStudentsForClassApi = async (
+  classId: string
+): Promise<EligibleStudent[]> => {
+  const response = await api.get<{
+    data?: EligibleStudent[];
+    items?: EligibleStudent[];
+    students?: EligibleStudent[];
+  }>(`/students/eligible-for-class/${classId}`);
+
+  if (Array.isArray(response.data?.students)) {
+    return response.data.students;
+  }
+
+  return normalizeItems<EligibleStudent>(response.data);
+};
+
+export const assignStudentsToClassApi = async (
+  classId: string,
+  studentIds: string[]
+): Promise<void> => {
+  await api.post(`/Classes/${classId}/students`, { studentIds });
 };
 

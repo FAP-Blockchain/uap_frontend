@@ -21,13 +21,17 @@ import {
   UserPlus,
   Inbox,
   GraduationCap,
+  PlusCircle,
 } from "lucide-react";
 import { toast } from "react-toastify";
 import {
+  assignStudentsToClassApi,
   getClassByIdApi,
   getClassRosterApi,
+  getEligibleStudentsForClassApi,
   type StudentRoster,
 } from "../../../services/admin/classes/api";
+import type { EligibleStudent } from "../../../types/Class";
 import {
   approveEnrollmentApi,
   fetchEnrollmentsByClassApi,
@@ -56,6 +60,14 @@ const ClassDetail: React.FC = () => {
     id: string | null;
   }>({ visible: false, id: null });
   const [rejectReason, setRejectReason] = useState<string>("");
+  const [isAddStudentsModalOpen, setIsAddStudentsModalOpen] =
+    useState<boolean>(false);
+  const [eligibleStudents, setEligibleStudents] = useState<EligibleStudent[]>(
+    []
+  );
+  const [eligibleLoading, setEligibleLoading] = useState<boolean>(false);
+  const [selectedStudentIds, setSelectedStudentIds] = useState<React.Key[]>([]);
+  const [assigningStudents, setAssigningStudents] = useState<boolean>(false);
 
   const loadClassDetail = useCallback(
     async (id: string, options?: { showLoading?: boolean }) => {
@@ -97,6 +109,18 @@ const ClassDetail: React.FC = () => {
     }
   }, []);
 
+  const loadEligibleStudents = useCallback(async (id: string) => {
+    setEligibleLoading(true);
+    try {
+      const data = await getEligibleStudentsForClassApi(id);
+      setEligibleStudents(data);
+    } catch {
+      toast.error("Không thể tải danh sách sinh viên đủ điều kiện");
+    } finally {
+      setEligibleLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     if (!classId) {
       toast.error("Không tìm thấy thông tin lớp học");
@@ -115,6 +139,16 @@ const ClassDetail: React.FC = () => {
     // Gọi API mỗi lần mở modal để bạn thấy request trong Network
     loadEnrollments(classId);
     setIsEnrollmentsModalOpen(true);
+  };
+
+  const handleOpenAddStudentsModal = () => {
+    if (!classId) {
+      toast.error("Không tìm thấy thông tin lớp học");
+      return;
+    }
+    loadEligibleStudents(classId);
+    setSelectedStudentIds([]);
+    setIsAddStudentsModalOpen(true);
   };
 
   const handleApprove = async (record: EnrollmentRequest) => {
@@ -179,6 +213,32 @@ const ClassDetail: React.FC = () => {
       }
     } catch {
       toast.error("Không thể từ chối đơn đăng ký");
+    }
+  };
+
+  const handleAssignStudents = async () => {
+    if (!classId) {
+      toast.error("Không tìm thấy thông tin lớp học");
+      return;
+    }
+
+    if (selectedStudentIds.length === 0) {
+      toast.error("Vui lòng chọn ít nhất một sinh viên");
+      return;
+    }
+
+    setAssigningStudents(true);
+    try {
+      const studentIds = selectedStudentIds.map((id) => String(id));
+      await assignStudentsToClassApi(classId, studentIds);
+      toast.success("Thêm sinh viên vào lớp thành công");
+      setIsAddStudentsModalOpen(false);
+      setSelectedStudentIds([]);
+      await loadClassDetail(classId, { showLoading: false });
+    } catch {
+      toast.error("Không thể thêm sinh viên vào lớp");
+    } finally {
+      setAssigningStudents(false);
     }
   };
 
@@ -273,6 +333,42 @@ const ClassDetail: React.FC = () => {
     },
   ];
 
+  const eligibleColumns: ColumnsType<EligibleStudent> = [
+    {
+      title: "Mã sinh viên",
+      dataIndex: "studentCode",
+      key: "studentCode",
+      width: 130,
+    },
+    {
+      title: "Họ và tên",
+      dataIndex: "fullName",
+      key: "fullName",
+      width: 200,
+    },
+    {
+      title: "Email",
+      dataIndex: "email",
+      key: "email",
+      width: 220,
+    },
+    {
+      title: "GPA",
+      dataIndex: "gpa",
+      key: "gpa",
+      width: 80,
+      render: (value?: number) =>
+        typeof value === "number" ? value.toFixed(2) : "-",
+    },
+    {
+      title: "Chuyên ngành",
+      dataIndex: "major",
+      key: "major",
+      width: 160,
+      render: (value?: string) => value || "-",
+    },
+  ];
+
   if (loading) {
     return (
       <div className="class-detail-loading">
@@ -300,9 +396,17 @@ const ClassDetail: React.FC = () => {
             {classCode ? `Chi tiết lớp ${classCode}` : "Chi tiết lớp học"}
           </Title>
         </div>
-        <Button type="primary" onClick={handleOpenEnrollmentsModal}>
-          Danh sách đơn
-        </Button>
+        <div className="header-actions">
+          <Button
+            icon={<PlusCircle size={16} />}
+            onClick={handleOpenAddStudentsModal}
+          >
+            Thêm học sinh
+          </Button>
+          <Button type="primary" onClick={handleOpenEnrollmentsModal}>
+            Danh sách đơn
+          </Button>
+        </div>
       </div>
 
       <Card className="class-info-card">
@@ -404,6 +508,56 @@ const ClassDetail: React.FC = () => {
           size="small"
         />
       </Card>
+
+      <Modal
+        title="Thêm sinh viên vào lớp"
+        open={isAddStudentsModalOpen}
+        onCancel={() => {
+          setIsAddStudentsModalOpen(false);
+          setSelectedStudentIds([]);
+        }}
+        width={900}
+        footer={
+          <Space>
+            <Button
+              onClick={() => {
+                setIsAddStudentsModalOpen(false);
+                setSelectedStudentIds([]);
+              }}
+            >
+              Hủy
+            </Button>
+            <Button
+              type="primary"
+              disabled={selectedStudentIds.length === 0}
+              loading={assigningStudents}
+              onClick={handleAssignStudents}
+            >
+              Thêm sinh viên
+            </Button>
+          </Space>
+        }
+      >
+        <Table
+          columns={eligibleColumns}
+          dataSource={eligibleStudents}
+          rowKey={(record) => record.studentId || record.id || record.email}
+          loading={eligibleLoading}
+          rowSelection={{
+            selectedRowKeys: selectedStudentIds,
+            onChange: (keys) => setSelectedStudentIds(keys),
+          }}
+          pagination={{
+            pageSize: 10,
+            size: "small",
+            showSizeChanger: false,
+          }}
+          locale={{
+            emptyText: "Không có sinh viên đủ điều kiện",
+          }}
+          size="small"
+        />
+      </Modal>
 
       <Modal
         title="Danh sách đơn đăng ký chờ duyệt"
