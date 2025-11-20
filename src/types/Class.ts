@@ -56,6 +56,7 @@ export interface ClassFormData {
 }
 
 export interface ClassSummary {
+  maxEnrollment: number;
   id: string;
   classCode: string;
   subjectName: string;

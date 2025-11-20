@@ -14,6 +14,7 @@ import {
   Tag,
   Tooltip,
   Popconfirm,
+  Spin,
 } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import {
@@ -25,8 +26,7 @@ import {
   CalendarOutlined,
 } from "@ant-design/icons";
 import { toast } from "react-toastify";
-import type { SubjectDto } from "../../../types/Subject";
-import type { SemesterDto } from "../../../types/Semester";
+import type { SubjectDto, SubjectFormValues } from "../../../types/Subject";
 import {
   fetchSubjectsApi,
   getSubjectByIdApi,
@@ -34,26 +34,16 @@ import {
   updateSubjectApi,
   deleteSubjectApi,
   type CreateSubjectRequest,
-  type UpdateSubjectRequest,
 } from "../../../services/admin/subjects/api";
-import { fetchSemestersApi } from "../../../services/admin/semesters/api";
 import "./index.scss";
 
 const { Search } = Input;
 const { Option } = Select;
 
-interface SubjectFormValues {
-  subjectCode: string;
-  subjectName: string;
-  credits: number;
-  semesterId: string;
-}
-
 const DEFAULT_PAGE_SIZE = 10;
 
 const SubjectsManagement: React.FC = () => {
   const [subjects, setSubjects] = useState<SubjectDto[]>([]);
-  const [semesters, setSemesters] = useState<SemesterDto[]>([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [editingSubject, setEditingSubject] = useState<SubjectDto | null>(null);
   const [form] = Form.useForm<SubjectFormValues>();
@@ -64,33 +54,26 @@ const SubjectsManagement: React.FC = () => {
     pageSize: DEFAULT_PAGE_SIZE,
     totalCount: 0,
   });
-
-  const loadSemesters = async () => {
-    try {
-      const response = await fetchSemestersApi({
-        pageNumber: 1,
-        pageSize: 200,
-      });
-      setSemesters(response.data || []);
-    } catch {
-      // Silently fail, semesters will be empty
-    }
-  };
-
-  useEffect(() => {
-    loadSemesters();
-  }, []);
+  const [prerequisiteOptions, setPrerequisiteOptions] = useState<SubjectDto[]>(
+    []
+  );
+  const [loadingPrerequisites, setLoadingPrerequisites] = useState(false);
 
   const stats = useMemo(() => {
     const total = pagination.totalCount;
     const totalCredits = subjects.reduce((sum, s) => sum + s.credits, 0);
-    const totalClasses = subjects.reduce((sum, s) => sum + s.totalClasses, 0);
-    const uniqueSemesters = new Set(subjects.map((s) => s.semesterId)).size;
+    const totalOfferings = subjects.reduce(
+      (sum, s) => sum + (s.totalOfferings || 0),
+      0
+    );
+    const uniqueDepartments = new Set(
+      subjects.map((s) => s.department || "Khác")
+    ).size;
     return {
       total,
       totalCredits,
-      totalClasses,
-      uniqueSemesters,
+      totalOfferings,
+      uniqueDepartments,
     };
   }, [pagination.totalCount, subjects]);
 
@@ -131,6 +114,24 @@ const SubjectsManagement: React.FC = () => {
     fetchData(1, pagination.pageSize, value);
   };
 
+  const loadPrerequisiteOptions = useCallback(async () => {
+    if (loadingPrerequisites) {
+      return;
+    }
+    setLoadingPrerequisites(true);
+    try {
+      const response = await fetchSubjectsApi({
+        pageNumber: 1,
+        pageSize: 500,
+      });
+      setPrerequisiteOptions(response.data || []);
+    } catch {
+      toast.error("Không thể tải danh sách môn tiên quyết");
+    } finally {
+      setLoadingPrerequisites(false);
+    }
+  }, [loadingPrerequisites]);
+
   const showModal = async (subject?: SubjectDto) => {
     if (subject) {
       try {
@@ -141,7 +142,10 @@ const SubjectsManagement: React.FC = () => {
           subjectCode: subjectDetail.subjectCode,
           subjectName: subjectDetail.subjectName,
           credits: subjectDetail.credits,
-          semesterId: subjectDetail.semesterId,
+          description: subjectDetail.description,
+          category: subjectDetail.category,
+          department: subjectDetail.department,
+          prerequisites: subjectDetail.prerequisites,
         });
       } catch {
         toast.error("Không thể tải thông tin môn học");
@@ -151,6 +155,9 @@ const SubjectsManagement: React.FC = () => {
     } else {
       setEditingSubject(null);
       form.resetFields();
+    }
+    if (!prerequisiteOptions.length) {
+      loadPrerequisiteOptions();
     }
     setIsModalVisible(true);
   };
@@ -162,7 +169,10 @@ const SubjectsManagement: React.FC = () => {
           subjectCode: values.subjectCode.trim(),
           subjectName: values.subjectName.trim(),
           credits: values.credits,
-          semesterId: values.semesterId,
+          description: values.description?.trim() || undefined,
+          category: values.category?.trim() || undefined,
+          department: values.department?.trim() || undefined,
+          prerequisites: values.prerequisites || undefined,
         };
 
         if (editingSubject) {
@@ -204,6 +214,11 @@ const SubjectsManagement: React.FC = () => {
         <div className="subject-info">
           <div className="subject-info__code">{record.subjectCode}</div>
           <div className="subject-info__name">{record.subjectName}</div>
+          {record.description && (
+            <div className="subject-info__description">
+              {record.description}
+            </div>
+          )}
         </div>
       ),
     },
@@ -220,24 +235,41 @@ const SubjectsManagement: React.FC = () => {
       ),
     },
     {
-      title: "Học kì",
-      dataIndex: "semesterName",
-      key: "semesterName",
-      width: 150,
-      render: (semesterName: string) => (
-        <Tag color="blue" className="semester-tag">
-          {semesterName}
-        </Tag>
+      title: "Tiên quyết",
+      dataIndex: "prerequisites",
+      key: "prerequisites",
+      width: 160,
+      render: (prerequisites?: string) =>
+        prerequisites ? (
+          <Tag color="orange">{prerequisites}</Tag>
+        ) : (
+          <Tag color="default">Không có</Tag>
+        ),
+    },
+    {
+      title: "Bộ môn",
+      dataIndex: "department",
+      key: "department",
+      width: 180,
+      render: (department: string | undefined, record: SubjectDto) => (
+        <div className="department-cell">
+          <div className="department-name">
+            {department || "Chưa phân loại"}
+          </div>
+          {record.category && (
+            <span className="category-pill">{record.category}</span>
+          )}
+        </div>
       ),
     },
     {
-      title: "Số lớp",
-      dataIndex: "totalClasses",
-      key: "totalClasses",
+      title: "Lớp mở",
+      dataIndex: "totalOfferings",
+      key: "totalOfferings",
       width: 100,
       align: "center",
-      render: (totalClasses: number) => (
-        <span className="classes-count">{totalClasses}</span>
+      render: (totalOfferings?: number) => (
+        <span className="classes-count">{totalOfferings ?? 0}</span>
       ),
     },
     {
@@ -291,13 +323,13 @@ const SubjectsManagement: React.FC = () => {
     },
     {
       label: "Tổng lớp học",
-      value: stats.totalClasses,
+      value: stats.totalOfferings,
       accent: "classes",
       icon: <CalendarOutlined />,
     },
     {
-      label: "Học kì",
-      value: stats.uniqueSemesters,
+      label: "Bộ môn",
+      value: stats.uniqueDepartments,
       accent: "semesters",
       icon: <CalendarOutlined />,
     },
@@ -390,11 +422,7 @@ const SubjectsManagement: React.FC = () => {
         cancelText="Hủy"
         width={600}
       >
-        <Form
-          form={form}
-          layout="vertical"
-          initialValues={{ credits: 3 }}
-        >
+        <Form form={form} layout="vertical" initialValues={{ credits: 3 }}>
           <Form.Item
             name="subjectCode"
             label="Mã môn học"
@@ -418,7 +446,11 @@ const SubjectsManagement: React.FC = () => {
                 label="Số tín chỉ"
                 rules={[
                   { required: true, message: "Vui lòng nhập số tín chỉ!" },
-                  { type: "number", min: 1, message: "Số tín chỉ phải lớn hơn 0!" },
+                  {
+                    type: "number",
+                    min: 1,
+                    message: "Số tín chỉ phải lớn hơn 0!",
+                  },
                 ]}
               >
                 <InputNumber
@@ -429,30 +461,51 @@ const SubjectsManagement: React.FC = () => {
                 />
               </Form.Item>
             </Col>
-            <Col span={12}>
-              <Form.Item
-                name="semesterId"
-                label="Học kì"
-                rules={[{ required: true, message: "Vui lòng chọn học kì!" }]}
-              >
-                <Select
-                  placeholder="Chọn học kì"
-                  showSearch
-                  optionFilterProp="label"
-                >
-                  {semesters.map((semester) => (
-                    <Option
-                      key={semester.id}
-                      value={semester.id}
-                      label={semester.name}
-                    >
-                      {semester.name}
-                    </Option>
-                  ))}
-                </Select>
-              </Form.Item>
-            </Col>
           </Row>
+
+          <Form.Item name="description" label="Mô tả">
+            <Input.TextArea rows={3} placeholder="Nhập mô tả ngắn về môn học" />
+          </Form.Item>
+
+          <Form.Item
+            name="prerequisites"
+            label="Môn tiên quyết"
+            extra="Chọn mã môn học phải hoàn thành trước (ví dụ: CS101). Bỏ trống nếu không có."
+          >
+            <Select
+              placeholder="Chọn môn tiên quyết"
+              allowClear
+              showSearch
+              optionFilterProp="label"
+              onDropdownVisibleChange={(open) => {
+                if (open && !prerequisiteOptions.length) {
+                  loadPrerequisiteOptions();
+                }
+              }}
+              notFoundContent={
+                loadingPrerequisites ? (
+                  <Spin size="small" />
+                ) : (
+                  "Không có dữ liệu"
+                )
+              }
+            >
+              {prerequisiteOptions
+                .filter(
+                  (subject) =>
+                    !editingSubject || subject.id !== editingSubject.id
+                )
+                .map((subject) => (
+                  <Option
+                    key={subject.id}
+                    value={subject.subjectCode}
+                    label={`${subject.subjectCode} - ${subject.subjectName}`}
+                  >
+                    {subject.subjectCode} - {subject.subjectName}
+                  </Option>
+                ))}
+            </Select>
+          </Form.Item>
         </Form>
       </Modal>
     </div>
@@ -460,6 +513,3 @@ const SubjectsManagement: React.FC = () => {
 };
 
 export default SubjectsManagement;
-
-
-

@@ -9,7 +9,10 @@ export interface CreateSubjectRequest {
   subjectCode: string;
   subjectName: string;
   credits: number;
-  semesterId: string;
+  description?: string;
+  category?: string;
+  department?: string;
+  prerequisites?: string;
 }
 
 export interface UpdateSubjectRequest extends CreateSubjectRequest {}
@@ -43,7 +46,6 @@ export const fetchSubjectsApi = async (
       pageNumber: params?.pageNumber,
       pageSize: params?.pageSize,
       searchTerm: params?.searchTerm,
-      semesterId: params?.semesterId,
       sortBy: params?.sortBy,
       isDescending: params?.isDescending,
     },

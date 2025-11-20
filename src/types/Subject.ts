@@ -10,7 +10,6 @@ export interface GetSubjectsRequest {
   pageNumber?: number;
   pageSize?: number;
   searchTerm?: string;
-  semesterId?: string; // UUID
   sortBy?: string; // "SubjectCode" | "SubjectName" | "Credits"
   isDescending?: boolean;
 }
@@ -21,10 +20,22 @@ export interface SubjectDto {
   id: string;
   subjectCode: string;
   subjectName: string;
+  description?: string;
   credits: number;
-  semesterId: string;
-  semesterName: string;
-  totalClasses: number;
+  category?: string;
+  department?: string;
+  prerequisites?: string;
+  totalOfferings?: number;
+}
+
+export interface SubjectFormValues {
+  subjectCode: string;
+  subjectName: string;
+  credits: number;
+  description?: string;
+  category?: string;
+  department?: string;
+  prerequisites?: string;
 }
 
 export interface PagedSubjectsResponse {
