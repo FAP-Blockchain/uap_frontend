@@ -28,8 +28,10 @@ import {
 import dayjs from "dayjs";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
+import { useSelector } from "react-redux";
 import CredentialServices from "../../../services/credential/api.service";
 import type { StudentCredentialDto } from "../../../types/Credential";
+import type { RootState } from "../../../redux/store";
 import "./CredentialDetail.scss";
 
 const { Title, Text, Paragraph } = Typography;
@@ -49,6 +51,7 @@ const CredentialDetail: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const certificateRef = useRef<HTMLDivElement>(null);
+  const userProfile = useSelector((state: RootState) => state.auth.userProfile);
 
   useEffect(() => {
     const fetchDetail = async () => {
@@ -117,7 +120,11 @@ const CredentialDetail: React.FC = () => {
     if (!certificateRef.current || !credential) return;
     const canvas = await html2canvas(certificateRef.current, { scale: 2 });
     const imgData = canvas.toDataURL("image/png");
-    const pdf = new jsPDF({ orientation: "landscape", unit: "pt", format: "a4" });
+    const pdf = new jsPDF({
+      orientation: "landscape",
+      unit: "pt",
+      format: "a4",
+    });
     const width = pdf.internal.pageSize.getWidth();
     const height = (canvas.height * width) / canvas.width;
     pdf.addImage(imgData, "PNG", 0, 0, width, height);
@@ -158,6 +165,8 @@ const CredentialDetail: React.FC = () => {
     );
   }
 
+  const displayName = credential.studentName || userProfile?.fullName || "—";
+
   return (
     <div className="credential-detail">
       <div className="detail-header">
@@ -174,10 +183,13 @@ const CredentialDetail: React.FC = () => {
           <Card className="credential-info-card" bordered={false}>
             <Space direction="vertical" size={12} style={{ width: "100%" }}>
               <Space>
-                <SafetyCertificateOutlined style={{ fontSize: 32, color: "#1a94fc" }} />
+                <SafetyCertificateOutlined
+                  style={{ fontSize: 32, color: "#1a94fc" }}
+                />
                 <div>
                   <Text type="secondary">
-                    {certificateLabels[credential.certificateType] || "Chứng chỉ"}
+                    {certificateLabels[credential.certificateType] ||
+                      "Chứng chỉ"}
                   </Text>
                   <Title level={3} style={{ margin: 0 }} className="info-title">
                     {certificateTitle}
@@ -185,9 +197,14 @@ const CredentialDetail: React.FC = () => {
                 </div>
               </Space>
 
-              <Paragraph type="secondary" style={{ marginBottom: 0 }} className="info-description">
-                Chứng chỉ điện tử được xác thực bởi UAP Blockchain, đảm bảo tính toàn vẹn và có thể
-                chia sẻ cho nhà tuyển dụng trong mọi bối cảnh.
+              <Paragraph
+                type="secondary"
+                style={{ marginBottom: 0 }}
+                className="info-description"
+              >
+                Chứng chỉ điện tử được xác thực bởi UAP Blockchain, đảm bảo tính
+                toàn vẹn và có thể chia sẻ cho nhà tuyển dụng trong mọi bối
+                cảnh.
               </Paragraph>
 
               <Divider className="card-divider" />
@@ -195,7 +212,7 @@ const CredentialDetail: React.FC = () => {
               <Space direction="vertical" size={12} className="info-grid">
                 <div className="info-row">
                   <span>Họ và tên</span>
-                  <span className="strong-text">{credential.studentName || "—"}</span>
+                  <span className="strong-text">{displayName}</span>
                 </div>
                 <div className="info-row">
                   <span>Mã chứng chỉ</span>
@@ -211,7 +228,9 @@ const CredentialDetail: React.FC = () => {
                 {credential.completionDate && (
                   <div className="info-row">
                     <span>Ngày hoàn thành</span>
-                    <span>{dayjs(credential.completionDate).format("DD/MM/YYYY")}</span>
+                    <span>
+                      {dayjs(credential.completionDate).format("DD/MM/YYYY")}
+                    </span>
                   </div>
                 )}
                 {credential.letterGrade && (
@@ -222,7 +241,9 @@ const CredentialDetail: React.FC = () => {
                 )}
                 <div className="info-row">
                   <span>Trạng thái</span>
-                  <Tag color={credential.status === "Issued" ? "green" : "orange"}>
+                  <Tag
+                    color={credential.status === "Issued" ? "green" : "orange"}
+                  >
                     {credential.status}
                   </Tag>
                 </div>
@@ -236,7 +257,9 @@ const CredentialDetail: React.FC = () => {
                   <div className="info-row">
                     <span>Hash xác thực</span>
                     <Tooltip title={credential.verificationHash}>
-                      <Text code>{credential.verificationHash.slice(0, 12)}...</Text>
+                      <Text code>
+                        {credential.verificationHash.slice(0, 12)}...
+                      </Text>
                     </Tooltip>
                   </div>
                 )}
@@ -247,7 +270,10 @@ const CredentialDetail: React.FC = () => {
               <Space direction="vertical" size={12}>
                 <Text strong>Tuỳ chọn</Text>
                 <Space wrap>
-                  <Button icon={<DownloadOutlined />} onClick={handleDownloadCertificate}>
+                  <Button
+                    icon={<DownloadOutlined />}
+                    onClick={handleDownloadCertificate}
+                  >
                     Tải PDF
                   </Button>
                   {credential.shareableUrl && (
@@ -269,7 +295,8 @@ const CredentialDetail: React.FC = () => {
                 <div className="issuer-block">
                   <Text className="issuer-name">UAP Blockchain</Text>
                   <Text className="certificate-type">
-                    {certificateLabels[credential.certificateType] || "Chứng chỉ"}
+                    {certificateLabels[credential.certificateType] ||
+                      "Chứng chỉ"}
                   </Text>
                 </div>
                 <Badge
@@ -281,14 +308,17 @@ const CredentialDetail: React.FC = () => {
               <div className="certificate-body">
                 <Text className="caption">CHỨNG NHẬN RẰNG</Text>
                 <Title level={1} className="recipient">
-                  {credential.studentName || "—"}
+                  {displayName}
                 </Title>
-                <Paragraph className="description">đã hoàn thành chương trình học</Paragraph>
+                <Paragraph className="description">
+                  đã hoàn thành chương trình học
+                </Paragraph>
                 <Title level={2} className="program">
                   {certificateTitle}
                 </Title>
                 <Paragraph className="details">
-                  Cấp ngày {formattedIssuedDate} · Mã sinh viên {credential.studentCode}
+                  Cấp ngày {formattedIssuedDate} · Mã sinh viên{" "}
+                  {credential.studentCode}
                 </Paragraph>
               </div>
 
