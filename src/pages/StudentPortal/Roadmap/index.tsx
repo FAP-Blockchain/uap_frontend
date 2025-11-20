@@ -1,20 +1,18 @@
 import {
+  CalendarOutlined,
+  PlusOutlined,
+  StarOutlined,
+} from "@ant-design/icons";
+import {
   Button,
   Card,
-  Col,
   Collapse,
-  Row,
   Space,
   Statistic,
   Table,
   Tag,
   Typography,
 } from "antd";
-import {
-  CalendarOutlined,
-  StarOutlined,
-  PlusOutlined,
-} from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 import dayjs from "dayjs";
 import React, { useMemo } from "react";
