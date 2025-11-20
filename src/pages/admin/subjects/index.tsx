@@ -114,6 +114,21 @@ const SubjectsManagement: React.FC = () => {
     fetchData(1, pagination.pageSize, value);
   };
 
+  const modalTitle = (
+    <div className="subject-modal__title">
+      <div className="subject-modal__title-icon">
+        <BookOutlined />
+      </div>
+      <div className="subject-modal__title-text">
+        <h3>{editingSubject ? "Cập nhật môn học" : "Thêm môn học mới"}</h3>
+        <p>
+          Nhập thông tin chính xác để đảm bảo chương trình đào tạo được quản lý
+          đồng bộ.
+        </p>
+      </div>
+    </div>
+  );
+
   const loadPrerequisiteOptions = useCallback(async () => {
     if (loadingPrerequisites) {
       return;
@@ -414,57 +429,77 @@ const SubjectsManagement: React.FC = () => {
       </Card>
 
       <Modal
-        title={editingSubject ? "Chỉnh sửa môn học" : "Thêm môn học mới"}
+        title={modalTitle}
         open={isModalVisible}
         onOk={handleOk}
         onCancel={() => setIsModalVisible(false)}
         okText={editingSubject ? "Cập nhật" : "Tạo"}
         cancelText="Hủy"
-        width={600}
+        width={640}
+        rootClassName="subject-modal"
+        className="subject-modal"
+        centered
+        bodyStyle={{ maxHeight: "75vh", overflowY: "auto" }}
       >
-        <Form form={form} layout="vertical" initialValues={{ credits: 3 }}>
-          <Form.Item
-            name="subjectCode"
-            label="Mã môn học"
-            rules={[{ required: true, message: "Vui lòng nhập mã môn học!" }]}
-          >
-            <Input placeholder="VD: AI401, BC202..." />
-          </Form.Item>
+        <Form
+          form={form}
+          layout="vertical"
+          initialValues={{ credits: 3 }}
+          className="subject-modal__form"
+        >
+          <div className="subject-modal__grid">
+            <Form.Item
+              name="subjectCode"
+              label="Mã môn học"
+              rules={[{ required: true, message: "Vui lòng nhập mã môn học!" }]}
+            >
+              <Input placeholder="VD: AI401, BC202..." size="large" />
+            </Form.Item>
 
-          <Form.Item
-            name="subjectName"
-            label="Tên môn học"
-            rules={[{ required: true, message: "Vui lòng nhập tên môn học!" }]}
-          >
-            <Input placeholder="Nhập tên môn học" />
-          </Form.Item>
+            <Form.Item
+              name="subjectName"
+              label="Tên môn học"
+              rules={[
+                { required: true, message: "Vui lòng nhập tên môn học!" },
+              ]}
+            >
+              <Input placeholder="Nhập tên môn học" size="large" />
+            </Form.Item>
+          </div>
 
-          <Row gutter={16}>
-            <Col span={12}>
-              <Form.Item
-                name="credits"
-                label="Số tín chỉ"
-                rules={[
-                  { required: true, message: "Vui lòng nhập số tín chỉ!" },
-                  {
-                    type: "number",
-                    min: 1,
-                    message: "Số tín chỉ phải lớn hơn 0!",
-                  },
-                ]}
-              >
-                <InputNumber
-                  min={1}
-                  max={10}
-                  placeholder="Nhập số tín chỉ"
-                  style={{ width: "100%" }}
-                />
-              </Form.Item>
-            </Col>
-          </Row>
+          <div className="subject-modal__grid">
+            <Form.Item
+              name="credits"
+              label="Số tín chỉ"
+              rules={[
+                { required: true, message: "Vui lòng nhập số tín chỉ!" },
+                {
+                  type: "number",
+                  min: 1,
+                  message: "Số tín chỉ phải lớn hơn 0!",
+                },
+              ]}
+            >
+              <InputNumber
+                min={1}
+                max={10}
+                placeholder="Nhập số tín chỉ"
+                style={{ width: "100%" }}
+                size="large"
+              />
+            </Form.Item>
+
+          
+          </div>
+
+         
 
           <Form.Item name="description" label="Mô tả">
-            <Input.TextArea rows={3} placeholder="Nhập mô tả ngắn về môn học" />
+            <Input.TextArea
+              rows={3}
+              placeholder="Nhập mô tả ngắn về môn học"
+              autoSize={{ minRows: 3, maxRows: 4 }}
+            />
           </Form.Item>
 
           <Form.Item
@@ -477,6 +512,7 @@ const SubjectsManagement: React.FC = () => {
               allowClear
               showSearch
               optionFilterProp="label"
+              size="large"
               onDropdownVisibleChange={(open) => {
                 if (open && !prerequisiteOptions.length) {
                   loadPrerequisiteOptions();
@@ -489,6 +525,7 @@ const SubjectsManagement: React.FC = () => {
                   "Không có dữ liệu"
                 )
               }
+              className="subject-modal__select"
             >
               {prerequisiteOptions
                 .filter(
@@ -501,7 +538,10 @@ const SubjectsManagement: React.FC = () => {
                     value={subject.subjectCode}
                     label={`${subject.subjectCode} - ${subject.subjectName}`}
                   >
-                    {subject.subjectCode} - {subject.subjectName}
+                    <div className="subject-modal__option">
+                      <span className="code">{subject.subjectCode}</span>
+                      <span className="name">{subject.subjectName}</span>
+                    </div>
                   </Option>
                 ))}
             </Select>
