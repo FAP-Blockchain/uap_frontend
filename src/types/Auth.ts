@@ -48,6 +48,7 @@ export interface RegisterUserRequest {
   // Student fields (optional)
   studentCode?: string;
   enrollmentDate?: string; // ISO date string
+  curriculumId?: number;
   // Teacher fields (optional)
   teacherCode?: string;
   hireDate?: string; // ISO date string
@@ -102,6 +103,7 @@ export interface RegisterUserResponse {
   enrollmentDate?: string;
   hireDate?: string;
   specialization?: string;
+  curriculumId?: number;
 }
 
 export interface BulkRegisterResponse {

@@ -1,0 +1,467 @@
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import {
+  Button,
+  Card,
+  Descriptions,
+  Form,
+  Input,
+  DatePicker,
+  Space,
+  Tag,
+  Typography,
+  Spin,
+  Modal,
+  Row,
+  Col,
+} from "antd";
+import type { Dayjs } from "dayjs";
+import dayjs from "dayjs";
+import {
+  ArrowLeft,
+  Calendar as CalendarIcon,
+  Clock,
+  CheckCircle,
+  XCircle,
+  BookOpen,
+} from "lucide-react";
+import { toast } from "react-toastify";
+import {
+  activeSemesterApi,
+  closeSemesterApi,
+  getSemesterByIdApi,
+  updateSemesterApi,
+} from "../../../services/admin/semesters/api";
+import type { SemesterDto } from "../../../types/Semester";
+import "./SemesterDetail.scss";
+
+const { RangePicker } = DatePicker;
+const { Title, Text } = Typography;
+
+type SemesterFormValues = {
+  name: string;
+  dateRange: [Dayjs, Dayjs];
+};
+
+type StatusAction = "activate" | "close" | null;
+
+const SemesterDetail: React.FC = () => {
+  const { semesterId } = useParams<{ semesterId: string }>();
+  const navigate = useNavigate();
+  const [semester, setSemester] = useState<SemesterDto | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [isEditing, setIsEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [statusAction, setStatusAction] = useState<StatusAction>(null);
+  const [form] = Form.useForm<SemesterFormValues>();
+
+  const setFormValues = useCallback(
+    (info: SemesterDto) => {
+      form.setFieldsValue({
+        name: info.name,
+        dateRange: [dayjs(info.startDate), dayjs(info.endDate)],
+      });
+    },
+    [form]
+  );
+
+  const loadSemester = useCallback(
+    async (id: string, options?: { showLoading?: boolean }) => {
+      const shouldShowLoading = options?.showLoading ?? true;
+      if (shouldShowLoading) {
+        setLoading(true);
+      }
+      try {
+        const data = await getSemesterByIdApi(id);
+        setSemester(data);
+        setFormValues(data);
+      } catch {
+        toast.error("Không thể tải thông tin học kì");
+        navigate("/admin/semesters");
+      } finally {
+        if (shouldShowLoading) {
+          setLoading(false);
+        }
+      }
+    },
+    [navigate, setFormValues]
+  );
+
+  useEffect(() => {
+    if (!semesterId) {
+      toast.error("Không tìm thấy học kì");
+      navigate("/admin/semesters");
+      return;
+    }
+
+    loadSemester(semesterId);
+  }, [semesterId, loadSemester, navigate]);
+
+  const handleStartEdit = () => {
+    if (!semester) {
+      return;
+    }
+    setFormValues(semester);
+    setIsEditing(true);
+  };
+
+  const handleCancelEdit = () => {
+    if (semester) {
+      setFormValues(semester);
+    } else {
+      form.resetFields();
+    }
+    setIsEditing(false);
+  };
+
+  const handleSubmit = async (values: SemesterFormValues) => {
+    if (!semester || !semesterId) {
+      return;
+    }
+
+    const [startDate, endDate] = values.dateRange;
+    if (!startDate || !endDate) {
+      toast.error("Vui lòng chọn thời gian học kì");
+      return;
+    }
+
+    if (endDate.isBefore(startDate)) {
+      toast.error("Ngày kết thúc phải sau ngày bắt đầu");
+      return;
+    }
+
+    const payload = {
+      name: values.name.trim(),
+      startDate: startDate.toISOString(),
+      endDate: endDate.toISOString(),
+    };
+
+    setIsSaving(true);
+    try {
+      await updateSemesterApi(semesterId, payload);
+      toast.success("Cập nhật học kì thành công");
+      setIsEditing(false);
+      await loadSemester(semesterId, { showLoading: false });
+    } catch {
+      toast.error("Không thể cập nhật học kì");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const performStatusChange = async (action: Exclude<StatusAction, null>) => {
+    if (!semesterId) {
+      return;
+    }
+    setStatusAction(action);
+    try {
+      if (action === "activate") {
+        await activeSemesterApi(semesterId);
+        toast.success("Đã kích hoạt học kì");
+      } else {
+        await closeSemesterApi(semesterId);
+        toast.success("Đã đóng học kì");
+      }
+      await loadSemester(semesterId, { showLoading: false });
+    } catch {
+      toast.error("Không thể cập nhật trạng thái học kì");
+    } finally {
+      setStatusAction(null);
+    }
+  };
+
+  const confirmStatusChange = (action: Exclude<StatusAction, null>) => {
+    if (!semester) {
+      return;
+    }
+
+    if (action === "activate" && (semester.isActive || semester.isClosed)) {
+      toast.warning("Học kì hiện không thể kích hoạt");
+      return;
+    }
+
+    if (action === "close" && semester.isClosed) {
+      toast.warning("Học kì đã được đóng");
+      return;
+    }
+
+    const messages =
+      action === "activate"
+        ? {
+            title: "Kích hoạt học kì",
+            content: "Bạn có chắc muốn kích hoạt học kì này?",
+            okText: "Kích hoạt",
+          }
+        : {
+            title: "Đóng học kì",
+            content:
+              "Bạn có chắc muốn đóng học kì này? Hành động này không thể hoàn tác.",
+            okText: "Đóng học kì",
+          };
+
+    Modal.confirm({
+      ...messages,
+      cancelText: "Hủy",
+      onOk: () => performStatusChange(action),
+    });
+  };
+
+  const statusInfo = useMemo(() => {
+    if (!semester) {
+      return null;
+    }
+    if (semester.isClosed) {
+      return {
+        color: "default" as const,
+        label: "Đã đóng",
+        icon: <XCircle size={16} />,
+      };
+    }
+    if (semester.isActive) {
+      return {
+        color: "success" as const,
+        label: "Đang hoạt động",
+        icon: <CheckCircle size={16} />,
+      };
+    }
+    return {
+      color: "warning" as const,
+      label: "Chưa kích hoạt",
+      icon: <Clock size={16} />,
+    };
+  }, [semester]);
+
+  const durationText = useMemo(() => {
+    if (!semester) {
+      return "-";
+    }
+    const start = dayjs(semester.startDate);
+    const end = dayjs(semester.endDate);
+    const days = end.diff(start, "day");
+    if (!Number.isFinite(days)) {
+      return "-";
+    }
+    return `${days} ngày`;
+  }, [semester]);
+
+  if (loading) {
+    return (
+      <div className="semester-detail-loading">
+        <Spin size="large" />
+      </div>
+    );
+  }
+
+  if (!semester) {
+    return null;
+  }
+
+  return (
+    <div className="semester-detail">
+      <div className="semester-detail-header">
+        <div className="header-left">
+          <Button
+            icon={<ArrowLeft size={16} />}
+            onClick={() => navigate("/admin/semesters")}
+            className="back-button"
+          >
+            Quay lại
+          </Button>
+          <Title level={2} className="page-title">
+            Chi tiết học kì
+          </Title>
+        </div>
+        <div className="header-actions">
+          <Space size="small">
+            <Button
+              type="primary"
+              ghost
+              onClick={() => confirmStatusChange("activate")}
+              disabled={semester.isActive || semester.isClosed}
+              loading={statusAction === "activate"}
+            >
+              Kích hoạt
+            </Button>
+            <Button
+              danger
+              onClick={() => confirmStatusChange("close")}
+              disabled={semester.isClosed}
+              loading={statusAction === "close"}
+            >
+              Đóng học kì
+            </Button>
+            {isEditing ? (
+              <>
+                <Button onClick={handleCancelEdit} disabled={isSaving}>
+                  Hủy
+                </Button>
+                <Button
+                  type="primary"
+                  onClick={() => form.submit()}
+                  loading={isSaving}
+                >
+                  Lưu thay đổi
+                </Button>
+              </>
+            ) : (
+              <Button type="default" onClick={handleStartEdit}>
+                Chỉnh sửa
+              </Button>
+            )}
+          </Space>
+        </div>
+      </div>
+
+      <Row gutter={16} className="semester-overview-row">
+        <Col xs={24} md={16}>
+          <Card className={`semester-info-card${isEditing ? " editing" : ""}`}>
+            <div className="semester-info-header">
+              <div className="icon-wrapper">
+                <CalendarIcon size={24} />
+              </div>
+              <div>
+                <Title level={3} className="semester-name">
+                  {semester.name}
+                </Title>
+                <Text className="semester-duration">
+                  <Clock size={14} /> {durationText}
+                </Text>
+              </div>
+            </div>
+
+            {isEditing ? (
+              <Form
+                form={form}
+                layout="vertical"
+                className="semester-edit-form"
+                onFinish={handleSubmit}
+              >
+                <Form.Item
+                  name="name"
+                  label="Tên học kì"
+                  rules={[{ required: true, message: "Vui lòng nhập tên học kì!" }]}
+                >
+                  <Input placeholder="Nhập tên học kì" size="large" />
+                </Form.Item>
+                <Form.Item
+                  name="dateRange"
+                  label="Thời gian học kì"
+                  rules={[{ required: true, message: "Vui lòng chọn thời gian học kì!" }]}
+                >
+                  <RangePicker
+                    size="large"
+                    format="DD/MM/YYYY"
+                    style={{ width: "100%" }}
+                    placeholder={["Ngày bắt đầu", "Ngày kết thúc"]}
+                  />
+                </Form.Item>
+              </Form>
+            ) : (
+              <Descriptions
+                bordered
+                column={{ xxl: 2, xl: 2, lg: 2, md: 1, sm: 1, xs: 1 }}
+                className="semester-descriptions"
+              >
+                <Descriptions.Item
+                  label={
+                    <span>
+                      <CalendarIcon size={16} /> Ngày bắt đầu
+                    </span>
+                  }
+                >
+                  {dayjs(semester.startDate).format("DD/MM/YYYY")}
+                </Descriptions.Item>
+                <Descriptions.Item
+                  label={
+                    <span>
+                      <CalendarIcon size={16} /> Ngày kết thúc
+                    </span>
+                  }
+                >
+                  {dayjs(semester.endDate).format("DD/MM/YYYY")}
+                </Descriptions.Item>
+                <Descriptions.Item
+                  label={
+                    <span>
+                      <BookOpen size={16} /> Tổng môn học
+                    </span>
+                  }
+                >
+                  {semester.totalSubjects}
+                </Descriptions.Item>
+                <Descriptions.Item
+                  label={
+                    <span>
+                      <CheckCircle size={16} /> Trạng thái
+                    </span>
+                  }
+                >
+                  {statusInfo ? (
+                    <Tag
+                      color={statusInfo.color}
+                      icon={statusInfo.icon}
+                      className="status-tag"
+                    >
+                      {statusInfo.label}
+                    </Tag>
+                  ) : (
+                    "-"
+                  )}
+                </Descriptions.Item>
+              </Descriptions>
+            )}
+          </Card>
+        </Col>
+        <Col xs={24} md={8}>
+          <Card className="semester-stats-card">
+            <Title level={4}>Thông tin nhanh</Title>
+            <div className="stats-list">
+              <div className="stat-item">
+                <div className="stat-icon status">
+                  {statusInfo?.icon ?? <Clock size={16} />}
+                </div>
+                <div className="stat-content">
+                  <span className="stat-label">Trạng thái</span>
+                  <span className="stat-value">{statusInfo?.label ?? "-"}</span>
+                </div>
+              </div>
+              <div className="stat-item">
+                <div className="stat-icon subjects">
+                  <BookOpen size={16} />
+                </div>
+                <div className="stat-content">
+                  <span className="stat-label">Tổng môn học</span>
+                  <span className="stat-value">{semester.totalSubjects}</span>
+                </div>
+              </div>
+              <div className="stat-item">
+                <div className="stat-icon calendar">
+                  <CalendarIcon size={16} />
+                </div>
+                <div className="stat-content">
+                  <span className="stat-label">Bắt đầu</span>
+                  <span className="stat-value">
+                    {dayjs(semester.startDate).format("DD/MM/YYYY")}
+                  </span>
+                </div>
+              </div>
+              <div className="stat-item">
+                <div className="stat-icon calendar">
+                  <CalendarIcon size={16} />
+                </div>
+                <div className="stat-content">
+                  <span className="stat-label">Kết thúc</span>
+                  <span className="stat-value">
+                    {dayjs(semester.endDate).format("DD/MM/YYYY")}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </Card>
+        </Col>
+      </Row>
+    </div>
+  );
+};
+
+export default SemesterDetail;

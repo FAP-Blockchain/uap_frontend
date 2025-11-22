@@ -334,9 +334,22 @@
         }
 
         .semester-name {
+          border: none;
+          background: transparent;
+          padding: 0;
+          margin: 0;
+          width: 100%;
+          text-align: left;
+          cursor: pointer;
           display: flex;
           align-items: center;
           gap: 12px;
+
+          &:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(26, 148, 252, 0.2);
+            border-radius: 12px;
+          }
 
           .semester-icon-wrapper {
             width: 40px;
@@ -718,9 +731,22 @@
       }
 
       .semester-name {
+        border: none;
+        background: transparent;
+        padding: 0;
+        margin: 0;
+        width: 100%;
+        text-align: left;
+        cursor: pointer;
         display: flex;
         align-items: center;
         gap: 12px;
+
+        &:focus {
+          outline: none;
+          box-shadow: 0 0 0 2px rgba(255, 107, 53, 0.2);
+          border-radius: 8px;
+        }
 
         .semester-icon-wrapper {
           width: 40px;

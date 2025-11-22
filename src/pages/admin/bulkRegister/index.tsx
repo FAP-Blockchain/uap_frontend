@@ -23,7 +23,7 @@ import {
 import type { UploadFile } from "antd";
 import dayjs from "dayjs";
 import * as XLSX from "xlsx";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -35,6 +35,8 @@ import type {
   RegisterUserRequest,
   RegisterUserResponse,
 } from "../../../types/Auth";
+import type { CurriculumListItem } from "../../../types/Curriculum";
+import { fetchCurriculumsApi } from "../../../services/admin/curriculums/api";
 import "./index.scss";
 
 const { Title, Text } = Typography;
@@ -48,9 +50,13 @@ const BulkRegister: React.FC = () => {
   const [users, setUsers] = useState<UserFormData[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<BulkRegisterResponse | null>(null);
+  const [curriculums, setCurriculums] = useState<CurriculumListItem[]>([]);
+  const [curriculumsLoading, setCurriculumsLoading] = useState(false);
+  const [curriculumError, setCurriculumError] = useState<string | null>(null);
   const [form] = Form.useForm();
   const navigate = useNavigate();
   const { isAdmin, userProfile } = useRoleAccess();
+  const isAdminUser = isAdmin();
   const isAuthenticated = useSelector(
     (state: RootState) => state.auth.isAuthenticated
   );
@@ -66,13 +72,141 @@ const BulkRegister: React.FC = () => {
       return;
     }
 
-    if (!isAdmin()) {
+    if (!isAdminUser) {
       toast.error("Only Admin users can bulk register users");
       setTimeout(() => {
         navigate(-1); // Go back to previous page
       }, 2000);
     }
-  }, [isAuthenticated, accessToken, isAdmin, navigate]);
+  }, [isAuthenticated, accessToken, isAdminUser, navigate]);
+
+  useEffect(() => {
+    if (!isAuthenticated || !accessToken || !isAdminUser) {
+      return;
+    }
+
+    let isMounted = true;
+
+    const loadCurriculums = async () => {
+      setCurriculumsLoading(true);
+      try {
+        const data = await fetchCurriculumsApi();
+        if (isMounted) {
+          setCurriculums(data);
+          setCurriculumError(null);
+        }
+      } catch (error) {
+        console.error("Failed to load curriculums:", error);
+        if (isMounted) {
+          setCurriculumError("Failed to load curriculums. Please try again later.");
+          message.error("Failed to load curriculum list");
+        }
+      } finally {
+        if (isMounted) {
+          setCurriculumsLoading(false);
+        }
+      }
+    };
+
+    loadCurriculums();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [isAuthenticated, accessToken, isAdminUser]);
+
+  const curriculumMap = useMemo(() => {
+    const map = new Map<number, CurriculumListItem>();
+    curriculums.forEach((curriculum) => {
+      map.set(curriculum.id, curriculum);
+    });
+    return map;
+  }, [curriculums]);
+
+  const curriculumCodeMap = useMemo(() => {
+    const map = new Map<string, CurriculumListItem>();
+    curriculums.forEach((curriculum) => {
+      if (curriculum.code) {
+        map.set(curriculum.code.toLowerCase(), curriculum);
+      }
+    });
+    return map;
+  }, [curriculums]);
+
+  const curriculumOptions = useMemo(
+    () =>
+      curriculums.map((curriculum) => ({
+        label: `${curriculum.code} - ${curriculum.name}`,
+        value: curriculum.id,
+      })),
+    [curriculums]
+  );
+
+  const getCurriculumLabel = useCallback(
+    (curriculumId?: number) => {
+      if (!curriculumId) {
+        return "-";
+      }
+      const curriculum = curriculumMap.get(curriculumId);
+      if (curriculum) {
+        return `${curriculum.code} - ${curriculum.name}`;
+      }
+      return `#${curriculumId}`;
+    },
+    [curriculumMap]
+  );
+
+  const resolveCurriculumId = useCallback(
+    (value?: string | number | null) => {
+      if (value === undefined || value === null || value === "") {
+        return undefined;
+      }
+
+      if (typeof value === "number" && !Number.isNaN(value)) {
+        return value;
+      }
+
+      const numeric = Number(value);
+      if (!Number.isNaN(numeric) && numeric > 0) {
+        return numeric;
+      }
+
+      if (typeof value === "string") {
+        const normalized = value.trim().toLowerCase();
+        if (!normalized) {
+          return undefined;
+        }
+
+        const byCode = curriculumCodeMap.get(normalized);
+        if (byCode) {
+          return byCode.id;
+        }
+
+        const byName = curriculums.find(
+          (curriculum) => curriculum.name.toLowerCase() === normalized
+        );
+        return byName?.id;
+      }
+
+      return undefined;
+    },
+    [curriculums, curriculumCodeMap]
+  );
+
+  const pickCurriculumValue = useCallback((record: Record<string, any>) => {
+    return (
+      record.CurriculumId ??
+      record.curriculumId ??
+      record.CurriculumID ??
+      record["Curriculum ID"] ??
+      record["curriculum id"] ??
+      record.CurriculumCode ??
+      record.curriculumCode ??
+      record["Curriculum Code"] ??
+      record.curriculum ??
+      record.Curriculum
+    );
+  }, []);
 
   const handleAddUser = (values: any) => {
     const newUser: UserFormData = {
@@ -87,6 +221,12 @@ const BulkRegister: React.FC = () => {
       if (values.studentCode) newUser.studentCode = values.studentCode;
       if (values.enrollmentDate) {
         newUser.enrollmentDate = dayjs(values.enrollmentDate).toISOString();
+      }
+      if (values.curriculumId) {
+        const resolvedId = Number(values.curriculumId);
+        if (!Number.isNaN(resolvedId)) {
+          newUser.curriculumId = resolvedId;
+        }
       }
       if (values.phoneNumber) newUser.phoneNumber = values.phoneNumber;
     } else if (values.roleName === "Teacher") {
@@ -152,6 +292,7 @@ const BulkRegister: React.FC = () => {
               enrollmentDate: originalUser?.enrollmentDate || result.enrollmentDate,
               hireDate: originalUser?.hireDate || result.hireDate,
               specialization: originalUser?.specialization || result.specialization,
+              curriculumId: originalUser?.curriculumId ?? result.curriculumId,
             };
           });
           
@@ -226,6 +367,7 @@ const BulkRegister: React.FC = () => {
             enrollmentDate: originalUser?.enrollmentDate || result.enrollmentDate,
             hireDate: originalUser?.hireDate || result.hireDate,
             specialization: originalUser?.specialization || result.specialization,
+            curriculumId: originalUser?.curriculumId ?? result.curriculumId,
           };
         });
         
@@ -284,6 +426,16 @@ const BulkRegister: React.FC = () => {
       render: (role: string) => (
         <Tag color={role === "Student" ? "blue" : "green"}>{role}</Tag>
       ),
+    },
+    {
+      title: "Curriculum",
+      dataIndex: "curriculumId",
+      key: "curriculumId",
+      width: 200,
+      render: (_: any, record: UserFormData) =>
+        record.roleName === "Student"
+          ? getCurriculumLabel(record.curriculumId)
+          : "-",
     },
     {
       title: "Code",
@@ -353,6 +505,16 @@ const BulkRegister: React.FC = () => {
       dataIndex: "roleName",
       key: "roleName",
       width: 100,
+    },
+    {
+      title: "Curriculum",
+      dataIndex: "curriculumId",
+      key: "curriculumId",
+      width: 200,
+      render: (_: any, record: RegisterUserResponse) =>
+        record.roleName === "Student"
+          ? getCurriculumLabel(record.curriculumId)
+          : "-",
     },
     {
       title: "Code",
@@ -451,7 +613,7 @@ const BulkRegister: React.FC = () => {
   }
 
   // Show error if not admin
-  if (!isAdmin()) {
+  if (!isAdminUser) {
     return (
       <div className="bulk-register-container">
         <Card>
@@ -486,6 +648,16 @@ const BulkRegister: React.FC = () => {
           showIcon
           style={{ marginBottom: 24 }}
         />
+
+        {curriculumError && (
+          <Alert
+            message="Curriculum list unavailable"
+            description={curriculumError}
+            type="error"
+            showIcon
+            style={{ marginBottom: 24 }}
+          />
+        )}
 
         <Tabs
           defaultActiveKey="manual"
@@ -565,6 +737,30 @@ const BulkRegister: React.FC = () => {
                               <Form.Item label="Enrollment Date" name="enrollmentDate">
                                 <DatePicker style={{ width: "100%" }} />
                               </Form.Item>
+                              <Form.Item
+                                label="Curriculum"
+                                name="curriculumId"
+                                rules={[
+                                  {
+                                    required: true,
+                                    message: "Please select a curriculum!",
+                                  },
+                                ]}
+                                extra={curriculumError || undefined}
+                              >
+                                <Select
+                                  placeholder={
+                                    curriculumsLoading
+                                      ? "Loading curriculums..."
+                                      : "Select curriculum"
+                                  }
+                                  loading={curriculumsLoading}
+                                  options={curriculumOptions}
+                                  showSearch
+                                  optionFilterProp="label"
+                                  disabled={!curriculums.length}
+                                />
+                              </Form.Item>
                               <Form.Item label="Phone Number" name="phoneNumber">
                                 <Input placeholder="Enter phone number" />
                               </Form.Item>
@@ -608,7 +804,7 @@ const BulkRegister: React.FC = () => {
                     pagination={false}
                     size="small"
                     rowKey={(r) => r.key!}
-                    scroll={{ x: 1200 }}
+                    scroll={{ x: 1400 }}
                   />
 
                   <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -658,6 +854,7 @@ const BulkRegister: React.FC = () => {
                     <ul>
                       <li><strong>Required columns:</strong> Email, FullName, Password, Role</li>
                       <li><strong>Student optional columns:</strong> StudentCode, EnrollmentDate</li>
+                      <li><strong>Student required column:</strong> CurriculumCode (or CurriculumId) to map the student to an existing curriculum</li>
                       <li><strong>Teacher optional columns:</strong> TeacherCode, HireDate, Specialization, PhoneNumber</li>
                       <li><strong>Role values:</strong> "Student" or "Teacher"</li>
                       <li><strong>Date formats supported:</strong> YYYY-MM-DD, MM/DD/YYYY, DD-MM-YYYY (e.g., 2024-01-15, 1/15/2024, 15-01-2024)</li>
@@ -668,9 +865,9 @@ const BulkRegister: React.FC = () => {
                         type="link" 
                         onClick={() => {
                           // Download sample CSV template
-                          const csvContent = "Email,FullName,Password,Role,StudentCode,EnrollmentDate,TeacherCode,HireDate,Specialization,PhoneNumber\n" +
-                            "student1@example.com,John Doe,password123,Student,SE001,2024-01-15,,,\n" +
-                            "teacher1@example.com,Jane Smith,password123,Teacher,,,TE001,2024-01-15,Computer Science,0123456789";
+                          const csvContent = "Email,FullName,Password,Role,StudentCode,EnrollmentDate,TeacherCode,HireDate,Specialization,PhoneNumber,CurriculumCode\n" +
+                            "student1@example.com,John Doe,password123,Student,SE001,2024-01-15,,,,0944056171,CURR-IT01\n" +
+                            "teacher1@example.com,Jane Smith,password123,Teacher,,,TE001,2024-01-15,Computer Science,0123456789,";
                           const blob = new Blob([csvContent], { type: 'text/csv' });
                           const url = window.URL.createObjectURL(blob);
                           const a = document.createElement('a');
@@ -691,9 +888,9 @@ const BulkRegister: React.FC = () => {
                           
                           // Create header and sample data
                           const wsData = [
-                            ['Email', 'FullName', 'Password', 'Role', 'StudentCode', 'EnrollmentDate', 'TeacherCode', 'HireDate', 'Specialization', 'PhoneNumber'],
-                            ['student1@example.com', 'John Doe', 'password123', 'Student', 'SE001', '2024-01-15', '', '', '', '0944056171'],
-                            ['teacher1@example.com', 'Jane Smith', 'password123', 'Teacher', '', '', 'TE001', '2024-01-15', 'Computer Science', '0944036171']
+                            ['Email', 'FullName', 'Password', 'Role', 'StudentCode', 'EnrollmentDate', 'TeacherCode', 'HireDate', 'Specialization', 'PhoneNumber', 'CurriculumCode'],
+                            ['student1@example.com', 'John Doe', 'password123', 'Student', 'SE001', '2024-01-15', '', '', '', '0944056171', 'CURR-IT01'],
+                            ['teacher1@example.com', 'Jane Smith', 'password123', 'Teacher', '', '', 'TE001', '2024-01-15', 'Computer Science', '0944036171', '']
                           ];
                           
                           const ws = XLSX.utils.aoa_to_sheet(wsData);
@@ -709,7 +906,8 @@ const BulkRegister: React.FC = () => {
                             { wch: 12 }, // TeacherCode
                             { wch: 15 }, // HireDate
                             { wch: 20 }, // Specialization
-                            { wch: 15 }  // PhoneNumber
+                            { wch: 15 }, // PhoneNumber
+                            { wch: 18 }, // CurriculumCode
                           ];
                           
                           XLSX.utils.book_append_sheet(wb, ws, 'Users');
@@ -808,6 +1006,11 @@ const BulkRegister: React.FC = () => {
                                     if (parsedDate && !isNaN(parsedDate.getTime())) {
                                       newUser.enrollmentDate = parsedDate.toISOString();
                                     }
+                                  }
+                                  const curriculumValue = pickCurriculumValue(user);
+                                  const resolvedCurriculumId = resolveCurriculumId(curriculumValue);
+                                  if (resolvedCurriculumId) {
+                                    newUser.curriculumId = resolvedCurriculumId;
                                   }
                                   // Handle phone number for Student too
                                   if (user.PhoneNumber) {
@@ -951,6 +1154,11 @@ const BulkRegister: React.FC = () => {
                                     newUser.enrollmentDate = parsedDate.toISOString();
                                   }
                                 }
+                                const curriculumValue = pickCurriculumValue(user);
+                                const resolvedCurriculumId = resolveCurriculumId(curriculumValue);
+                                if (resolvedCurriculumId) {
+                                  newUser.curriculumId = resolvedCurriculumId;
+                                }
                                 // Handle phone number for Student
                                 if (user.PhoneNumber) {
                                   let phone = String(user.PhoneNumber).trim();
@@ -1060,7 +1268,7 @@ const BulkRegister: React.FC = () => {
                     pagination={{ pageSize: 10 }}
                     size="small"
                     rowKey={(r) => r.key!}
-                    scroll={{ x: 1200 }}
+                    scroll={{ x: 1400 }}
                   />
 
                   <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -1108,7 +1316,7 @@ const BulkRegister: React.FC = () => {
               columns={resultColumns}
               pagination={{ pageSize: 10 }}
               rowKey={(record, index) => `${record.email}-${index}`}
-              scroll={{ x: 1350 }}
+              scroll={{ x: 1550 }}
             />
           </div>
         )}

@@ -10,6 +10,9 @@ import {
   Typography,
   Modal,
   Space,
+  Form,
+  Input,
+  Select,
 } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import {
@@ -29,6 +32,9 @@ import {
   getClassByIdApi,
   getClassRosterApi,
   getEligibleStudentsForClassApi,
+  updateClassApi,
+  fetchSubjectsApi,
+  fetchTeachersApi,
   type StudentRoster,
 } from "../../../services/admin/classes/api";
 import type { EligibleStudent } from "../../../types/Class";
@@ -39,9 +45,12 @@ import {
   type EnrollmentRequest,
 } from "../../../services/admin/enrollments/api";
 import type { ClassSummary } from "../../../types/Class";
+import type { SubjectDto } from "../../../types/Subject";
+import type { TeacherOption } from "../../../types/Teacher";
 import "./ClassDetail.scss";
 
 const { Title } = Typography;
+const { Option } = Select;
 
 const ClassDetail: React.FC = () => {
   const { classCode } = useParams<{ classCode: string }>();
@@ -68,6 +77,40 @@ const ClassDetail: React.FC = () => {
   const [eligibleLoading, setEligibleLoading] = useState<boolean>(false);
   const [selectedStudentIds, setSelectedStudentIds] = useState<React.Key[]>([]);
   const [assigningStudents, setAssigningStudents] = useState<boolean>(false);
+  const [isEditing, setIsEditing] = useState<boolean>(false);
+  const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [subjects, setSubjects] = useState<SubjectDto[]>([]);
+  const [teachers, setTeachers] = useState<TeacherOption[]>([]);
+  const [form] = Form.useForm<{
+    classCode: string;
+    subjectOfferingId: string;
+    teacherId: string;
+  }>();
+
+  const setFormValuesFromClassInfo = useCallback(
+    (
+      info: ClassSummary,
+      subjectList?: SubjectDto[],
+      teacherList?: TeacherOption[]
+    ) => {
+      const subjectsData = subjectList ?? subjects;
+      const teachersData = teacherList ?? teachers;
+
+      const matchedSubject =
+        subjectsData.find((item) => item.subjectCode === info.subjectCode) ||
+        subjectsData.find((item) => item.subjectName === info.subjectName);
+      const matchedTeacher =
+        teachersData.find((item) => item.teacherCode === info.teacherCode) ||
+        teachersData.find((item) => item.fullName === info.teacherName);
+
+      form.setFieldsValue({
+        classCode: info.classCode,
+        subjectOfferingId: matchedSubject?.id ?? info.subjectOfferingId ?? info.subjectCode,
+        teacherId: matchedTeacher?.id ?? info.teacherCode,
+      });
+    },
+    [form, subjects, teachers]
+  );
 
   const loadClassDetail = useCallback(
     async (id: string, options?: { showLoading?: boolean }) => {
@@ -149,6 +192,77 @@ const ClassDetail: React.FC = () => {
     loadEligibleStudents(classId);
     setSelectedStudentIds([]);
     setIsAddStudentsModalOpen(true);
+  };
+
+  const handleStartEdit = async () => {
+    if (!classInfo) {
+      return;
+    }
+
+    let subjectsData = subjects;
+    let teachersData = teachers;
+
+    if (!subjectsData.length || !teachersData.length) {
+      try {
+        const [loadedSubjects, loadedTeachers] = await Promise.all([
+          fetchSubjectsApi(),
+          fetchTeachersApi(),
+        ]);
+        subjectsData = loadedSubjects;
+        teachersData = loadedTeachers;
+        setSubjects(loadedSubjects);
+        setTeachers(loadedTeachers);
+      } catch {
+        toast.error("Không thể tải dữ liệu môn học hoặc giảng viên");
+        return;
+      }
+    }
+
+    setFormValuesFromClassInfo(classInfo, subjectsData, teachersData);
+    setIsEditing(true);
+  };
+
+  const handleCancelEdit = () => {
+    if (classInfo) {
+      setFormValuesFromClassInfo(classInfo);
+    } else {
+      form.resetFields();
+    }
+    setIsEditing(false);
+  };
+
+  const handleSubmitEdit = async (values: {
+    classCode: string;
+    subjectOfferingId: string;
+    teacherId: string;
+  }) => {
+    if (!classInfo || !classId) {
+      return;
+    }
+
+    const payload = {
+      classCode: values.classCode.trim(),
+      subjectOfferingId: values.subjectOfferingId,
+      teacherId: values.teacherId,
+    };
+
+    setIsSaving(true);
+    try {
+      await updateClassApi(classInfo.id, payload);
+      toast.success("Cập nhật lớp học thành công");
+      setIsEditing(false);
+      await loadClassDetail(classInfo.id, { showLoading: false });
+
+      if (payload.classCode !== classInfo.classCode) {
+        navigate(`/admin/classes/${payload.classCode}?id=${classInfo.id}`, {
+          replace: true,
+        });
+      }
+    } catch {
+      toast.error("Không thể cập nhật lớp học");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleApprove = async (record: EnrollmentRequest) => {
@@ -397,9 +511,28 @@ const ClassDetail: React.FC = () => {
           </Title>
         </div>
         <div className="header-actions">
+          {isEditing ? (
+            <Space size="small">
+              <Button onClick={handleCancelEdit} disabled={isSaving}>
+                Hủy
+              </Button>
+              <Button
+                type="primary"
+                onClick={() => form.submit()}
+                loading={isSaving}
+              >
+                Lưu thay đổi
+              </Button>
+            </Space>
+          ) : (
+            <Button type="default" onClick={handleStartEdit}>
+              Chỉnh sửa
+            </Button>
+          )}
           <Button
             icon={<PlusCircle size={16} />}
             onClick={handleOpenAddStudentsModal}
+            disabled={isEditing}
           >
             Thêm học sinh
           </Button>
@@ -409,7 +542,7 @@ const ClassDetail: React.FC = () => {
         </div>
       </div>
 
-      <Card className="class-info-card">
+      <Card className={`class-info-card${isEditing ? " editing" : ""}`}>
         <div className="class-info-header">
           <div className="class-icon-wrapper">
             <GraduationCap size={24} />
@@ -424,66 +557,139 @@ const ClassDetail: React.FC = () => {
           </div>
         </div>
 
-        <Descriptions
-          bordered
-          column={{ xxl: 4, xl: 3, lg: 2, md: 2, sm: 1, xs: 1 }}
-          className="class-descriptions"
-        >
-          <Descriptions.Item
-            label={
-              <span>
-                <User size={16} /> Giảng viên
-              </span>
-            }
+        {isEditing ? (
+          <Form
+            form={form}
+            layout="vertical"
+            className="class-edit-form"
+            onFinish={handleSubmitEdit}
           >
-            {classInfo.teacherName} ({classInfo.teacherCode})
-          </Descriptions.Item>
-          <Descriptions.Item
-            label={
-              <span>
-                <Calendar size={16} /> Kỳ học
-              </span>
-            }
+            <div className="class-form-grid">
+              <Form.Item
+                name="classCode"
+                label="Mã lớp"
+                rules={[{ required: true, message: "Vui lòng nhập mã lớp!" }]}
+              >
+                <Input placeholder="Nhập mã lớp" size="large" />
+              </Form.Item>
+              <Form.Item
+                name="subjectOfferingId"
+                label="Môn học"
+                rules={[{ required: true, message: "Vui lòng chọn môn học!" }]}
+              >
+                <Select
+                  placeholder="Chọn môn học"
+                  showSearch
+                  optionFilterProp="label"
+                  optionLabelProp="label"
+                  size="large"
+                  loading={!subjects.length}
+                >
+                  {subjects.map((subject) => (
+                    <Option
+                      key={subject.id}
+                      value={subject.id}
+                      label={`${subject.subjectCode} - ${subject.subjectName}`}
+                    >
+                      <div className="class-form-option">
+                        <span className="code">{subject.subjectCode}</span>
+                        <span className="name">{subject.subjectName}</span>
+                      </div>
+                    </Option>
+                  ))}
+                </Select>
+              </Form.Item>
+              <Form.Item
+                name="teacherId"
+                label="Giảng viên"
+                rules={[{ required: true, message: "Vui lòng chọn giảng viên!" }]}
+              >
+                <Select
+                  placeholder="Chọn giảng viên"
+                  showSearch
+                  optionFilterProp="label"
+                  optionLabelProp="label"
+                  size="large"
+                  loading={!teachers.length}
+                >
+                  {teachers.map((teacher) => (
+                    <Option
+                      key={teacher.id}
+                      value={teacher.id}
+                      label={`${teacher.teacherCode} - ${teacher.fullName}`}
+                    >
+                      <div className="class-form-option">
+                        <span className="code">{teacher.teacherCode}</span>
+                        <span className="name">{teacher.fullName}</span>
+                      </div>
+                    </Option>
+                  ))}
+                </Select>
+              </Form.Item>
+            </div>
+          </Form>
+        ) : (
+          <Descriptions
+            bordered
+            column={{ xxl: 4, xl: 3, lg: 2, md: 2, sm: 1, xs: 1 }}
+            className="class-descriptions"
           >
-            <Tag color="blue">{classInfo.semesterName}</Tag>
-          </Descriptions.Item>
-          <Descriptions.Item
-            label={
-              <span>
-                <BookOpen size={16} /> Tín chỉ
-              </span>
-            }
-          >
-            {classInfo.credits}
-          </Descriptions.Item>
-          <Descriptions.Item
-            label={
-              <span>
-                <Users size={16} /> Sĩ số
-              </span>
-            }
-          >
-            {classInfo.currentEnrollment} sinh viên
-          </Descriptions.Item>
-          <Descriptions.Item
-            label={
-              <span>
-                <UserPlus size={16} /> Số học sinh tối đa
-              </span>
-            }
-          >
-            {classInfo.maxEnrollment} lượt
-          </Descriptions.Item>
-          <Descriptions.Item
-            label={
-              <span>
-                <Inbox size={16} /> Chỗ trống
-              </span>
-            }
-          >
-            {classInfo.maxEnrollment - classInfo.currentEnrollment} chỗ
-          </Descriptions.Item>
-        </Descriptions>
+            <Descriptions.Item
+              label={
+                <span>
+                  <User size={16} /> Giảng viên
+                </span>
+              }
+            >
+              {classInfo.teacherName} ({classInfo.teacherCode})
+            </Descriptions.Item>
+            <Descriptions.Item
+              label={
+                <span>
+                  <Calendar size={16} /> Kỳ học
+                </span>
+              }
+            >
+              <Tag color="blue">{classInfo.semesterName}</Tag>
+            </Descriptions.Item>
+            <Descriptions.Item
+              label={
+                <span>
+                  <BookOpen size={16} /> Tín chỉ
+                </span>
+              }
+            >
+              {classInfo.credits}
+            </Descriptions.Item>
+            <Descriptions.Item
+              label={
+                <span>
+                  <Users size={16} /> Sĩ số
+                </span>
+              }
+            >
+              {classInfo.currentEnrollment} sinh viên
+            </Descriptions.Item>
+            <Descriptions.Item
+              label={
+                <span>
+                  <UserPlus size={16} /> Số học sinh tối đa
+                </span>
+              }
+            >
+              {classInfo.maxEnrollment} lượt
+            </Descriptions.Item>
+            <Descriptions.Item
+              label={
+                <span>
+                  <Inbox size={16} /> Chỗ trống
+                </span>
+              }
+            >
+              {classInfo.maxEnrollment - classInfo.currentEnrollment} chỗ
+            </Descriptions.Item>
+          </Descriptions>
+        )}
       </Card>
 
       <Card className="students-card">

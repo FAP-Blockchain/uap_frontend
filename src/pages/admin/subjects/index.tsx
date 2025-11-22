@@ -35,6 +35,7 @@ import {
   deleteSubjectApi,
   type CreateSubjectRequest,
 } from "../../../services/admin/subjects/api";
+import { useNavigate } from "react-router-dom";
 import "./index.scss";
 
 const { Search } = Input;
@@ -43,6 +44,7 @@ const { Option } = Select;
 const DEFAULT_PAGE_SIZE = 10;
 
 const SubjectsManagement: React.FC = () => {
+  const navigate = useNavigate();
   const [subjects, setSubjects] = useState<SubjectDto[]>([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [editingSubject, setEditingSubject] = useState<SubjectDto | null>(null);
@@ -226,7 +228,12 @@ const SubjectsManagement: React.FC = () => {
       key: "subjectInfo",
       width: 250,
       render: (_, record) => (
-        <div className="subject-info">
+        <div
+          className="subject-info clickable"
+          onClick={() =>
+            navigate(`/admin/subjects/${record.subjectCode}?id=${record.id}`)
+          }
+        >
           <div className="subject-info__code">{record.subjectCode}</div>
           <div className="subject-info__name">{record.subjectName}</div>
           {record.description && (

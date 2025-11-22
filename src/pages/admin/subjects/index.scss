@@ -177,6 +177,18 @@
     }
 
     .subject-info {
+      &.clickable {
+        cursor: pointer;
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+
+        &:hover {
+          transform: translateY(-1px);
+          .subject-info__code {
+            color: #1d4ed8;
+          }
+        }
+      }
+
       .subject-info__code {
         font-size: 14px;
         font-weight: 600;

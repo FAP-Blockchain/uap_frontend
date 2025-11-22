@@ -35,6 +35,7 @@ import type { Dayjs } from "dayjs";
 import type { SemesterDto } from "../../../types/Semester";
 import dayjs from "dayjs";
 import "./index.scss";
+import { useNavigate } from "react-router-dom";
 import {
   activeSemesterApi,
   closeSemesterApi,
@@ -56,6 +57,7 @@ interface SemesterFormValues {
 const DEFAULT_PAGE_SIZE = 10;
 
 const SemestersManagement: React.FC = () => {
+  const navigate = useNavigate();
   const [semesters, setSemesters] = useState<SemesterDto[]>([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [editingSemester, setEditingSemester] = useState<SemesterDto | null>(
@@ -278,7 +280,11 @@ const SemestersManagement: React.FC = () => {
       key: "name",
       width: 200,
       render: (_, record) => (
-        <div className="semester-name">
+        <button
+          type="button"
+          className="semester-name clickable"
+          onClick={() => navigate(`/admin/semesters/${record.id}`)}
+        >
           <div className="semester-icon-wrapper">
             <CalendarOutlined className="semester-icon" />
           </div>
@@ -289,7 +295,7 @@ const SemestersManagement: React.FC = () => {
               {getDuration(record.startDate, record.endDate)}
             </div>
           </div>
-        </div>
+        </button>
       ),
     },
     {
@@ -364,6 +370,16 @@ const SemestersManagement: React.FC = () => {
       width: 200,
       render: (_, record) => (
         <Space>
+          <Tooltip title="Xem chi tiết">
+            <Button
+              type="link"
+              icon={<CalendarOutlined />}
+              size="small"
+              onClick={() => navigate(`/admin/semesters/${record.id}`)}
+            >
+              Chi tiết
+            </Button>
+          </Tooltip>
           <Tooltip title="Chỉnh sửa">
             <Button
               type="primary"
