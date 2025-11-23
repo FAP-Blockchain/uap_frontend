@@ -5,24 +5,23 @@
 
 export interface GradeComponentDto {
   id: string;
+  subjectId: string;
   name: string;
   weightPercent: number;
-  gradeCount: number;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface CreateGradeComponentRequest {
+  subjectId: string;
   name: string;
   weightPercent: number;
 }
 
-export interface UpdateGradeComponentRequest {
-  name: string;
-  weightPercent: number;
-}
+export interface UpdateGradeComponentRequest extends CreateGradeComponentRequest {}
 
-export interface GradeComponentResponse {
+export interface GradeComponentCommandResult {
   success: boolean;
-  message: string;
   gradeComponentId?: string;
   errors?: string[];
 }

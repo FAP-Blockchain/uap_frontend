@@ -240,7 +240,7 @@ const ClassesManagement: React.FC = () => {
       width: 80,
       align: "center",
       render: (_, record) => (
-        <span className="number-value">{record.totalStudents}</span>
+        <span className="number-value">{record.currentEnrollment}</span>
       ),
     },
     {
