@@ -20,10 +20,7 @@ import type { ColumnsType } from "antd/es/table";
 import {
   BookOutlined,
   CalendarOutlined,
-  CompressOutlined,
-  ExpandAltOutlined,
   PlusOutlined,
-  SearchOutlined,
   UserOutlined,
   EditOutlined,
   DeleteOutlined,
@@ -41,6 +38,7 @@ import {
 } from "../../../services/admin/classes/api";
 import type { SubjectOffering } from "../../../types/SubjectOffering";
 import { fetchSubjectOfferingsApi } from "../../../services/admin/subjectOfferings/api";
+import { fetchEnrollmentsByClassApi } from "../../../services/admin/enrollments/api";
 
 const { Search } = Input;
 const { Option } = Select;
@@ -57,10 +55,10 @@ const ClassesManagement: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [searchText, setSearchText] = useState("");
   const [semesterFilter, setSemesterFilter] = useState<string>("all");
-  const [showDetails, setShowDetails] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editingClass, setEditingClass] = useState<ClassSummary | null>(null);
+  const [pendingEnrollments, setPendingEnrollments] = useState<Record<string, number>>({});
   const [form] = Form.useForm<CreateClassRequest>();
 
   const loadInitialData = async () => {
@@ -74,6 +72,22 @@ const ClassesManagement: React.FC = () => {
       setClasses(classRes);
       setSubjectOfferings(offeringsRes);
       setTeachers(teacherRes);
+
+      // Load pending enrollments count for each class
+      const enrollmentCounts: Record<string, number> = {};
+      await Promise.all(
+        classRes.map(async (cls) => {
+          try {
+            const enrollments = await fetchEnrollmentsByClassApi(cls.id);
+            // Filter to only count Pending status on client side
+            const pendingOnly = enrollments.filter(e => e.status === "Pending");
+            enrollmentCounts[cls.id] = pendingOnly.length;
+          } catch {
+            enrollmentCounts[cls.id] = 0;
+          }
+        })
+      );
+      setPendingEnrollments(enrollmentCounts);
     } catch {
       toast.error("Không thể tải dữ liệu lớp học");
     } finally {
@@ -144,24 +158,6 @@ const ClassesManagement: React.FC = () => {
       label: "Tổng lớp học",
       value: stats.total,
       accent: "total",
-      icon: <BookOutlined />,
-    },
-    {
-      label: "Tổng sinh viên",
-      value: stats.totalStudents,
-      accent: "students",
-      icon: <UserOutlined />,
-    },
-    {
-      label: "Đăng ký",
-      value: stats.totalEnrollments,
-      accent: "enrollments",
-      icon: <CalendarOutlined />,
-    },
-    {
-      label: "Số chỗ",
-      value: stats.totalSlots,
-      accent: "slots",
       icon: <BookOutlined />,
     },
   ];
@@ -248,9 +244,20 @@ const ClassesManagement: React.FC = () => {
       key: "enrollments",
       width: 90,
       align: "center",
-      render: (_, record) => (
-        <span className="number-value">{record.totalEnrollments}</span>
-      ),
+      render: (_, record) => {
+        const pendingCount = pendingEnrollments[record.id] || 0;
+        return (
+          <span className="number-value">
+            {pendingCount > 0 ? (
+              <Tag color="orange" style={{ margin: 0 }}>
+                {pendingCount}
+              </Tag>
+            ) : (
+              <span>0</span>
+            )}
+          </span>
+        );
+      },
     },
     {
       title: "Chỗ trống",
@@ -258,7 +265,7 @@ const ClassesManagement: React.FC = () => {
       width: 90,
       align: "center",
       render: (_, record) => (
-        <span className="number-value">{record.totalSlots}</span>
+        <span className="number-value">{record.maxEnrollment - record.currentEnrollment}</span>
       ),
     },
     {
@@ -393,13 +400,6 @@ const ClassesManagement: React.FC = () => {
           </div>
           <div className="header-actions">
             <Button
-              className="toggle-details-btn"
-              icon={showDetails ? <CompressOutlined /> : <ExpandAltOutlined />}
-              onClick={() => setShowDetails((prev) => !prev)}
-            >
-              {showDetails ? "Thu gọn" : "Chi tiết"}
-            </Button>
-            <Button
               type="primary"
               icon={<PlusOutlined />}
               className="primary-action"
@@ -415,101 +415,43 @@ const ClassesManagement: React.FC = () => {
           </div>
         </div>
 
-        {!showDetails && (
-          <div className="stats-compact">
-            {statsCards.map((stat) => (
-              <div key={stat.label} className={`stat-chip ${stat.accent}`}>
-                <span className="value">{stat.value}</span>
-                <span className="label">{stat.label}</span>
-              </div>
-            ))}
-          </div>
-        )}
+        <div className="stats-compact">
+          {statsCards.map((stat) => (
+            <div key={stat.label} className={`stat-chip ${stat.accent}`}>
+              <span className="value">{stat.value}</span>
+              <span className="label">{stat.label}</span>
+            </div>
+          ))}
+        </div>
 
-        {showDetails && (
-          <div className="stats-inline">
-            {statsCards.map((stat) => (
-              <div key={stat.label} className={`stat-item ${stat.accent}`}>
-                <div className="stat-icon-wrapper">{stat.icon}</div>
-                <div className="stat-content">
-                  <span className="stat-value">{stat.value}</span>
-                  <span className="stat-label">{stat.label}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        <div className={`filters-row ${!showDetails ? "compact-layout" : ""}`}>
-          {showDetails && (
-            <Row gutter={[16, 16]} className="filter-row-expanded">
-              <Col xs={24} sm={12} md={8} lg={10}>
-                <div className="filter-field">
-                  <label>Tìm kiếm lớp học</label>
-                  <Search
-                    placeholder="Nhập mã lớp, môn học hoặc giảng viên..."
-                    allowClear
-                    value={searchText}
-                    onChange={(e) => setSearchText(e.target.value)}
-                    onSearch={(value) => setSearchText(value)}
-                    prefix={<SearchOutlined />}
-                    size="large"
-                  />
-                </div>
-              </Col>
-              <Col xs={24} sm={12} md={8} lg={6}>
-                <div className="filter-field">
-                  <label>Kỳ học</label>
-                  <Select
-                    value={semesterFilter}
-                    onChange={setSemesterFilter}
-                    size="large"
-                    className="semester-select"
-                  >
-                    <Option value="all">Tất cả</Option>
-                    {semesterOptions.map((semester) => (
-                      <Option key={semester} value={semester}>
-                        {semester}
-                      </Option>
-                    ))}
-                  </Select>
-                </div>
-              </Col>
-              <Col xs={24} sm={24} md={24} lg={8}>
-                <div className="filter-meta">
-                  <span>
-                    Hiển thị: <strong>{filteredClasses.length}</strong> /{" "}
-                    <strong>{classes.length}</strong>
-                  </span>
-                </div>
-              </Col>
-            </Row>
-          )}
-
-          {!showDetails && (
-            <Row gutter={[8, 8]} align="middle" className="filter-row-compact">
-              <Col flex="1">
-                <Select
-                  value={semesterFilter}
-                  onChange={setSemesterFilter}
-                  size="small"
-                  className="semester-select-compact"
-                >
-                  <Option value="all">Tất cả</Option>
-                  {semesterOptions.map((semester) => (
-                    <Option key={semester} value={semester}>
-                      {semester}
-                    </Option>
-                  ))}
-                </Select>
-              </Col>
-              <Col className="filter-meta-compact">
-                <span>
-                  {filteredClasses.length} / {classes.length}
-                </span>
-              </Col>
-            </Row>
-          )}
+        <div className="filters-row compact-layout">
+          <Row gutter={[12, 12]} align="middle" className="filter-row-compact">
+            <Col xs={24} sm={24} md={12} lg={14} xl={16}>
+              <Input
+                placeholder="Tìm kiếm mã lớp, môn học, giảng viên..."
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+                allowClear
+                size="middle"
+              />
+            </Col>
+            <Col xs={12} sm={12} md={6} lg={5} xl={4}>
+              <Select
+                value={semesterFilter}
+                onChange={setSemesterFilter}
+                size="middle"
+                className="semester-select-compact"
+                style={{ width: '100%' }}
+              >
+                <Option value="all">Tất cả</Option>
+                {semesterOptions.map((semester) => (
+                  <Option key={semester} value={semester}>
+                    {semester}
+                  </Option>
+                ))}
+              </Select>
+            </Col>
+          </Row>
         </div>
 
         <div className="table-section">

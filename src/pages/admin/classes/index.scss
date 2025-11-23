@@ -233,8 +233,14 @@
         flex: 1;
       }
 
+      .ant-input {
+        height: 32px;
+        border-radius: 8px;
+      }
+
       .semester-select-compact {
         .ant-select-selector {
+          height: 32px !important;
           min-height: 32px;
           border-radius: 8px;
         }

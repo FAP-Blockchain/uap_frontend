@@ -425,6 +425,12 @@ const ClassDetail: React.FC = () => {
       dataIndex: "status",
       key: "status",
       width: 120,
+      render: (status: string) => {
+        if (status === "Pending") {
+          return <Tag color="orange">Chờ duyệt</Tag>;
+        }
+        return status;
+      },
     },
     {
       title: "Thao tác",
