@@ -1,0 +1,212 @@
+@use "../../../styles/theme-variables" as *;
+
+.curriculum-management {
+  padding: 24px;
+  background: #f5f7fb;
+  min-height: calc(100vh - 64px);
+
+  .curriculum-panel {
+    border-radius: 16px;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08);
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+
+      .panel-title {
+        display: flex;
+        gap: 16px;
+        align-items: center;
+
+        .icon-wrapper {
+          width: 48px;
+          height: 48px;
+          border-radius: 12px;
+          background: linear-gradient(135deg, #1a75ff, #1555c0);
+          color: #fff;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 22px;
+          box-shadow: 0 12px 24px rgba(26, 117, 255, 0.25);
+        }
+
+        .eyebrow {
+          font-size: 12px;
+          text-transform: uppercase;
+          letter-spacing: 0.08em;
+          color: #94a3b8;
+          margin: 0;
+        }
+
+        h2 {
+          margin: 0;
+          font-size: 26px;
+          font-weight: 700;
+          color: #0f172a;
+        }
+
+        span {
+          display: block;
+          color: #64748b;
+          font-size: 14px;
+        }
+      }
+    }
+
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin-bottom: 20px;
+
+      .stat-item {
+        border-radius: 14px;
+        padding: 16px;
+        background: #fff;
+        border: 1px solid #edf2ff;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+
+        .stat-icon {
+          width: 46px;
+          height: 46px;
+          border-radius: 12px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 20px;
+        }
+
+        .stat-value {
+          font-size: 22px;
+          font-weight: 700;
+          color: #0f172a;
+          line-height: 1;
+        }
+
+        .stat-label {
+          font-size: 13px;
+          color: #64748b;
+        }
+
+        &.total .stat-icon {
+          background: #eef2ff;
+          color: #4338ca;
+        }
+
+        &.credits .stat-icon {
+          background: #fff7e6;
+          color: #d46b08;
+        }
+
+        &.subjects .stat-icon {
+          background: #fef3ff;
+          color: #a61bff;
+        }
+
+        &.students .stat-icon {
+          background: #e6fffb;
+          color: #08979c;
+        }
+      }
+    }
+
+    .filter-row {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+
+      .ant-input-affix-wrapper,
+      .ant-select {
+        flex: 1;
+        min-width: 220px;
+      }
+    }
+
+    .curriculum-info {
+      .curriculum-code {
+        font-size: 14px;
+        font-weight: 600;
+        color: #1555c0;
+        text-transform: uppercase;
+      }
+
+      .curriculum-name {
+        font-size: 16px;
+        font-weight: 600;
+        color: #0f172a;
+      }
+
+      .curriculum-description {
+        color: #64748b;
+        font-size: 13px;
+        margin-top: 4px;
+      }
+    }
+  }
+
+  .drawer-loading,
+  .modal-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 0;
+  }
+
+  .drawer-content {
+    .semester-block {
+      border: 1px solid #edf2ff;
+      border-radius: 12px;
+      padding: 12px 16px;
+      margin-bottom: 14px;
+      background: #fff;
+
+      .semester-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-weight: 600;
+        color: #0f172a;
+        margin-bottom: 10px;
+      }
+
+      .semester-body {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+
+        .subject-item {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 10px 0;
+          border-top: 1px solid #f1f5f9;
+
+          &:first-child {
+            border-top: none;
+          }
+
+          .subject-name {
+            font-weight: 600;
+            color: #0f172a;
+          }
+
+          .subject-meta {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-top: 4px;
+          }
+        }
+      }
+    }
+  }
+}
+

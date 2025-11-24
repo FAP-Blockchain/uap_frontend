@@ -5,6 +5,7 @@
  */
 
 import {
+  AppstoreOutlined,
   BellOutlined,
   BookOutlined,
   CalendarOutlined,
@@ -38,6 +39,9 @@ const SubjectDetail = lazy(
   () => import("../pages/admin/subjects/SubjectDetail")
 );
 const CredentialsManagement = lazy(() => import("../pages/admin/credentials"));
+const CurriculumManagement = lazy(
+  () => import("../pages/admin/curriculums")
+);
 const ManagerProduct = lazy(() => import("../pages/admin/products"));
 const ReportsManagement = lazy(() => import("../pages/admin/reports"));
 const SecurityManagement = lazy(() => import("../pages/admin/security"));
@@ -164,6 +168,16 @@ export const adminRoutes: RouteConfig = {
       allowedRoles: [ROLE_CODES.ADMIN, ROLE_CODES.MANAGER, ROLE_CODES.TEACHER],
       requiredPermissions: [PERMISSIONS.MANAGE_CLASSES],
       menuIndex: 3,
+      menuSection: "main",
+    },
+    {
+      path: "/admin/curriculums",
+      element: <CurriculumManagement />,
+      menuLabel: "Quản lý Khung chương trình",
+      menuIcon: <AppstoreOutlined />,
+      showInMenu: true,
+      allowedRoles: [ROLE_CODES.ADMIN, ROLE_CODES.MANAGER],
+      menuIndex: 3.5,
       menuSection: "main",
     },
     {
