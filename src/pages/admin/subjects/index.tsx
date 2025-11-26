@@ -269,14 +269,14 @@ const SubjectsManagement: React.FC = () => {
         ),
     },
     {
-      title: "Bộ môn",
+      title: "Chuyên ngành",
       dataIndex: "department",
       key: "department",
       width: 180,
       render: (department: string | undefined, record: SubjectDto) => (
         <div className="department-cell">
           <div className="department-name">
-            {department || "Chưa phân loại"}
+            {department || "Chưa có chuyên ngành"}
           </div>
           {record.category && (
             <span className="category-pill">{record.category}</span>
@@ -350,7 +350,7 @@ const SubjectsManagement: React.FC = () => {
       icon: <CalendarOutlined />,
     },
     {
-      label: "Bộ môn",
+      label: "Chuyên ngành",
       value: stats.uniqueDepartments,
       accent: "semesters",
       icon: <CalendarOutlined />,
@@ -549,6 +549,17 @@ const SubjectsManagement: React.FC = () => {
                 ))}
             </Select>
           </Form.Item>
+
+        <Form.Item
+          name="department"
+          label="Chuyên ngành"
+          extra="VD: Công nghệ thông tin, Kinh tế, Ngôn ngữ Anh..."
+        >
+          <Input
+            placeholder="Nhập chuyên ngành phụ trách môn học"
+            size="large"
+          />
+        </Form.Item>
         </Form>
       </Modal>
     </div>
