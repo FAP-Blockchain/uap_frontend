@@ -93,25 +93,15 @@ const RegisterUser: React.FC = () => {
   const fetchData = useCallback(
     async (
       pageNumber = 1,
-      pageSize = pagination.pageSize,
+      pageSize = DEFAULT_PAGE_SIZE,
       search = searchText,
       role = roleFilter
     ) => {
-      if (!search || search.trim() === "") {
-        setUsers([]);
-        setPagination({
-          pageNumber: 1,
-          pageSize,
-          totalCount: 0,
-        });
-        return;
-      }
-
       setLoading(true);
       try {
         const response = await fetchUsersApi({
           roleName: role,
-          searchTerm: search.trim(),
+          searchTerm: search && search.trim() !== "" ? search.trim() : undefined,
           page: pageNumber,
           pageSize,
         });
@@ -128,35 +118,22 @@ const RegisterUser: React.FC = () => {
         setLoading(false);
       }
     },
-    [pagination.pageSize, searchText, roleFilter]
+    [searchText, roleFilter]
   );
+
+  useEffect(() => {
+    fetchData(1, DEFAULT_PAGE_SIZE, "", roleFilter);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleSearch = (value: string) => {
     setSearchText(value);
-    if (value && value.trim() !== "") {
-      fetchData(1, pagination.pageSize, value, roleFilter);
-    } else {
-      setUsers([]);
-      setPagination({
-        pageNumber: 1,
-        pageSize: pagination.pageSize,
-        totalCount: 0,
-      });
-    }
+    fetchData(1, pagination.pageSize, value, roleFilter);
   };
 
   const handleRoleFilter = (value: string) => {
     setRoleFilter(value);
-    if (searchText && searchText.trim() !== "") {
-      fetchData(1, pagination.pageSize, searchText, value);
-    } else {
-      setUsers([]);
-      setPagination({
-        pageNumber: 1,
-        pageSize: pagination.pageSize,
-        totalCount: 0,
-      });
-    }
+    fetchData(1, pagination.pageSize, searchText, value);
   };
 
   const showModal = async (user?: UserDto) => {

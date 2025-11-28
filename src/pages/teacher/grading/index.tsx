@@ -196,10 +196,10 @@ const TeacherGrading: React.FC = () => {
 
     setLoading((prev) => ({ ...prev, [student.studentId]: true }));
     try {
-      const updateRequest = {
-        grades: gradesToUpdate,
-      };
-      await updateStudentGradesApi(updateRequest);
+        const updateRequest = {
+          grades: gradesToUpdate,
+        };
+        await updateStudentGradesApi(updateRequest);
 
       message.success(`Đã cập nhật điểm cho ${student.fullName}`);
     } catch (error) {
