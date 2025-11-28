@@ -585,7 +585,7 @@ const CurriculumManagementPage: React.FC = () => {
         extra={
           selectedCurriculum && (
             <Button type="primary" icon={<PlusOutlined />} onClick={openSubjectModal}>
-              Thêm môn học
+              Thêm môn học vào khung chương trình 
             </Button>
           )
         }
@@ -676,7 +676,7 @@ const CurriculumManagementPage: React.FC = () => {
           current={creationStep}
           items={[
             { title: "Tạo khung chương trình" },
-            { title: "Thêm môn học" },
+            { title: "Thêm môn học vào khung chương trình" },
           ]}
           style={{ marginBottom: 24 }}
         />
