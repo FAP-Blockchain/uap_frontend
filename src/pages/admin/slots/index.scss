@@ -1,0 +1,153 @@
+.admin-slots-page {
+  width: 100%;
+
+  .ant-card {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border-radius: 8px;
+  }
+
+  // Header section
+  h2 {
+    color: #262626;
+    margin-bottom: 0;
+}
+
+  // Statistics cards
+  .ant-statistic-title {
+    font-size: 14px;
+    color: #8c8c8c;
+    margin-bottom: 8px;
+  }
+
+  .ant-statistic-content {
+    font-size: 24px;
+  font-weight: 600;
+}
+
+  // Table styling
+  .custom-table {
+    .ant-table-thead > tr > th {
+      background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
+  color: white;
+  font-weight: 600;
+      font-size: 14px;
+      padding: 16px;
+      border: none;
+}
+
+    .ant-table-tbody > tr {
+      transition: all 0.3s ease;
+
+      &:hover > td {
+  background-color: #e6f7ff;
+}
+
+      > td {
+        padding: 16px;
+        border-bottom: 1px solid #f0f0f0;
+      }
+    }
+
+    .ant-table-tbody > tr:last-child > td {
+      border-bottom: none;
+    }
+}
+
+  // Button styles
+  .ant-btn {
+    border-radius: 6px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+
+    &.ant-btn-primary {
+      box-shadow: 0 2px 4px rgba(24, 144, 255, 0.2);
+
+      &:hover {
+        box-shadow: 0 4px 8px rgba(24, 144, 255, 0.3);
+        transform: translateY(-1px);
+      }
+    }
+}
+
+  // Modal styles
+  .ant-modal {
+    .ant-modal-header {
+  border-bottom: 1px solid #f0f0f0;
+      padding: 20px 24px;
+      border-radius: 8px 8px 0 0;
+}
+
+    .ant-modal-title {
+  font-weight: 600;
+      font-size: 18px;
+      color: #262626;
+    }
+
+    .ant-modal-body {
+      padding: 24px;
+}
+
+    .ant-modal-footer {
+  border-top: 1px solid #f0f0f0;
+      padding: 12px 24px;
+      border-radius: 0 0 8px 8px;
+    }
+}
+
+  // Form styles
+  .ant-form-item-label > label {
+  font-weight: 500;
+    color: #262626;
+    font-size: 14px;
+}
+
+  .ant-input,
+  .ant-picker {
+    border-radius: 6px;
+    transition: all 0.3s ease;
+
+    &:hover {
+      border-color: #40a9ff;
+    }
+
+    &:focus {
+  border-color: #1890ff;
+      box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.1);
+    }
+}
+
+  // Tag styles
+  .ant-tag {
+    border-radius: 4px;
+    padding: 4px 12px;
+    font-weight: 500;
+    border: none;
+  }
+
+  // Divider
+  .ant-divider {
+    margin: 24px 0;
+  }
+
+  // Loading spinner
+  .ant-spin-nested-loading {
+    min-height: 200px;
+  }
+
+  // Responsive adjustments
+  @media (max-width: 768px) {
+    .ant-statistic {
+      text-align: center;
+    }
+
+    .ant-table {
+      font-size: 12px;
+    }
+
+    .ant-btn {
+      font-size: 12px;
+      padding: 4px 8px;
+    }
+  }
+}
+

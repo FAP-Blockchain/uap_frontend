@@ -361,6 +361,73 @@
     .ant-form-item-label > label {
       font-weight: 500;
   }
+
+    .class-modal-steps {
+      margin-bottom: 16px;
+    }
+
+    .modal-step-content {
+      max-height: 70vh;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .schedule-step {
+      .auto-config,
+      .manual-config {
+        margin-bottom: 16px;
+      }
+
+      .weekday-pattern {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 12px;
+        margin-bottom: 16px;
+
+        .pattern-item {
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+          padding: 12px;
+          border: 1px solid #f0f0f0;
+          border-radius: 8px;
+          background: #fafafa;
+        }
+      }
+
+      .auto-actions {
+        text-align: right;
+      }
+
+      .schedule-table-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        h4 {
+          margin: 0;
+        }
+
+        p {
+          margin: 2px 0 0;
+          color: #8c8c8c;
+        }
+      }
+
+      .schedule-date {
+        font-weight: 600;
+      }
+
+      .schedule-weekday {
+        font-size: 12px;
+        color: #8c8c8c;
+        text-transform: capitalize;
+      }
+
+      .schedule-table {
+        margin-top: 12px;
+      }
+    }
 }
 
 @media (max-width: 768px) {

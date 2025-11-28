@@ -14,6 +14,7 @@ export const ROUTES = {
     DASHBOARD: "/admin/dashboard",
     STUDENTS: "/admin/students",
     CLASSES: "/admin/classes",
+    SLOTS: "/admin/slots",
     SEMESTERS: "/admin/semesters",
     ROLES: "/admin/roles",
     CREDENTIALS: "/admin/credentials",

@@ -39,9 +39,7 @@ const SubjectDetail = lazy(
   () => import("../pages/admin/subjects/SubjectDetail")
 );
 const CredentialsManagement = lazy(() => import("../pages/admin/credentials"));
-const CurriculumManagement = lazy(
-  () => import("../pages/admin/curriculums")
-);
+const CurriculumManagement = lazy(() => import("../pages/admin/curriculums"));
 const ManagerProduct = lazy(() => import("../pages/admin/products"));
 const ReportsManagement = lazy(() => import("../pages/admin/reports"));
 const SecurityManagement = lazy(() => import("../pages/admin/security"));
@@ -51,6 +49,7 @@ const SemestersManagement = lazy(() => import("../pages/admin/semesters"));
 const SemesterDetail = lazy(
   () => import("../pages/admin/semesters/SemesterDetail")
 );
+const TimeSlotsManagement = lazy(() => import("../pages/admin/slots"));
 const AboutHelp = lazy(() => import("../pages/PublicPortal/AboutHelp"));
 const PublicHome = lazy(() => import("../pages/PublicPortal/Home"));
 const VerificationHistory = lazy(
@@ -168,6 +167,16 @@ export const adminRoutes: RouteConfig = {
       allowedRoles: [ROLE_CODES.ADMIN, ROLE_CODES.MANAGER, ROLE_CODES.TEACHER],
       requiredPermissions: [PERMISSIONS.MANAGE_CLASSES],
       menuIndex: 3,
+      menuSection: "main",
+    },
+    {
+      path: "/admin/slots",
+      element: <TimeSlotsManagement />,
+      menuLabel: "Quản lý Ca học",
+      menuIcon: <ScheduleOutlined />,
+      showInMenu: true,
+      allowedRoles: [ROLE_CODES.ADMIN, ROLE_CODES.MANAGER, ROLE_CODES.TEACHER],
+      menuIndex: 3.2,
       menuSection: "main",
     },
     {

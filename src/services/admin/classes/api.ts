@@ -5,6 +5,8 @@ import type {
   CreateClassRequest,
   UpdateClassRequest,
   EligibleStudent,
+  GetClassesRequest,
+  PagedResult,
 } from "../../../types/Class";
 import type { SubjectDto } from "../../../types/Subject";
 import type { TeacherOption } from "../../../types/Teacher";
@@ -22,9 +24,48 @@ const normalizeItems = <T>(payload: {
   return [];
 };
 
-export const fetchClassesApi = async (): Promise<ClassSummary[]> => {
-  const response = await api.get<ClassesApiResponse>("/Classes");
-  return normalizeItems<ClassSummary>(response.data);
+export const fetchClassesApi = async (
+  params?: GetClassesRequest
+): Promise<PagedResult<ClassSummary>> => {
+  const response = await api.get<ClassesApiResponse>("/Classes", {
+    params: {
+      page: params?.page,
+      pageSize: params?.pageSize,
+      subjectId: params?.subjectId,
+      teacherId: params?.teacherId,
+      semesterId: params?.semesterId,
+      classCode: params?.classCode,
+      searchTerm: params?.searchTerm,
+      sortBy: params?.sortBy,
+      sortOrder: params?.sortOrder,
+    },
+  });
+
+  const items =
+    response.data?.items ??
+    (Array.isArray(response.data?.data) ? response.data.data : []);
+
+  const totalCount =
+    (response.data as any)?.totalCount ??
+    (response.data as any)?.TotalCount ??
+    items.length;
+  const page =
+    (response.data as any)?.page ??
+    (response.data as any)?.Page ??
+    params?.page ??
+    1;
+  const pageSize =
+    (response.data as any)?.pageSize ??
+    (response.data as any)?.PageSize ??
+    params?.pageSize ??
+    10;
+
+  return {
+    items,
+    totalCount,
+    page,
+    pageSize,
+  };
 };
 
 export const createClassApi = async (

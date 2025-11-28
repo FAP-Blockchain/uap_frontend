@@ -77,10 +77,38 @@ export interface ClassesApiResponse {
   data?: ClassSummary[];
 }
 
+export interface PagedResult<T> {
+  items: T[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
+}
+
+export interface GetClassesRequest {
+  subjectId?: string;
+  teacherId?: string;
+  semesterId?: string;
+  classCode?: string;
+  page?: number;
+  pageSize?: number;
+  searchTerm?: string;
+  sortBy?: string;
+  sortOrder?: string;
+}
+
+export interface CreateClassSlotRequest {
+  date: string;
+  timeSlotId?: string;
+  substituteTeacherId?: string;
+  substitutionReason?: string;
+  notes?: string;
+}
+
 export interface CreateClassRequest {
   classCode: string;
   subjectOfferingId: string;
   teacherId: string;
+  initialSlots?: CreateClassSlotRequest[];
 }
 
 export interface UpdateClassRequest extends CreateClassRequest {}
