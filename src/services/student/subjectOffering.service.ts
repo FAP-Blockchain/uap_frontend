@@ -1,4 +1,5 @@
 import api from "../../config/axios";
+import type { AxiosError } from "axios";
 import type { SubjectOffering } from "../../types/SubjectOffering";
 
 export const getSubjectOfferingsBySubject = async (
@@ -9,8 +10,9 @@ export const getSubjectOfferingsBySubject = async (
       `/SubjectOfferings/subject/${subjectId}`
     );
     return Array.isArray(response.data) ? response.data : [];
-  } catch (error: any) {
-    if (error.response?.status === 404) {
+  } catch (error) {
+    const axiosError = error as AxiosError;
+    if (axiosError.response?.status === 404) {
       return [];
     }
     throw error;
@@ -25,8 +27,9 @@ export const getSubjectOfferingsBySemester = async (
       `/SubjectOfferings/semester/${semesterId}`
     );
     return Array.isArray(response.data) ? response.data : [];
-  } catch (error: any) {
-    if (error.response?.status === 404) {
+  } catch (error) {
+    const axiosError = error as AxiosError;
+    if (axiosError.response?.status === 404) {
       return [];
     }
     throw error;
@@ -39,8 +42,9 @@ export const getSubjectOfferingById = async (
   try {
     const response = await api.get<SubjectOffering>(`/SubjectOfferings/${id}`);
     return response.data;
-  } catch (error: any) {
-    if (error.response?.status === 404) {
+  } catch (error) {
+    const axiosError = error as AxiosError;
+    if (axiosError.response?.status === 404) {
       return null;
     }
     throw error;
