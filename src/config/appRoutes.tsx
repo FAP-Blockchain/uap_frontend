@@ -48,7 +48,6 @@ const CredentialRequestDetailAdmin = lazy(
   () => import("../pages/admin/credentialRequests/RequestDetail")
 );
 const CurriculumManagement = lazy(() => import("../pages/admin/curriculums"));
-const ManagerProduct = lazy(() => import("../pages/admin/products"));
 const ReportsManagement = lazy(() => import("../pages/admin/reports"));
 const SecurityManagement = lazy(() => import("../pages/admin/security"));
 const RegisterUser = lazy(() => import("../pages/admin/registerUser"));
@@ -289,11 +288,6 @@ export const adminRoutes: RouteConfig = {
       allowedRoles: [ROLE_CODES.ADMIN], // Only admin
       menuIndex: 3,
       menuSection: "tools",
-    },
-    {
-      path: "/admin/quan-ly-san-pham",
-      element: <ManagerProduct />,
-      showInMenu: false,
     },
     {
       path: "/admin/users/register",

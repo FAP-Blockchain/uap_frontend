@@ -8,7 +8,7 @@ import { store } from "../redux/store";
 
 
 const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "http://localhost:8080/api";
+  import.meta.env.VITE_API_BASE_URL || "https://uap-blockchain.azurewebsites.net/api";
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -55,8 +55,8 @@ api.interceptors.response.use(
         }
 
         // Call refresh token API
-        const response = await axios.post<RefreshTokenResponse>(
-          `${API_BASE_URL}/Auth/refresh-token`,
+        const response = await api.post<RefreshTokenResponse>(
+           "/Auth/refresh-token",
           { refreshToken }
         );
 
@@ -89,6 +89,24 @@ api.interceptors.response.use(
         
         return Promise.reject(refreshError);
       }
+    }
+
+    // Global error handler
+    if (error.response) {
+      // Error from backend (4xx, 5xx)
+      const message = 
+        (error.response.data as unknown as { message?: string; error?: string })?.message || 
+        (error.response.data as unknown as { error?: string })?.error ||
+        error.message ||
+        "An error occurred while calling the API";
+      
+      // Import toast and display
+      const { toast } = await import("react-toastify");
+      toast.error(message);
+    } else if (error.request) {
+      // Network error (no response)
+      const { toast } = await import("react-toastify");
+      toast.error("Cannot connect to server. Please check your network connection.");
     }
 
     return Promise.reject(error);

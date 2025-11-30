@@ -1,24 +1,14 @@
-import axios from "axios";
 import api from "../../config/axios";
 import type { CurriculumRoadmapDto, StudentRoadmapDto } from "../../types/Roadmap";
-
-const BLOCKCHAIN_API_BASE_URL = "https://uap-blockchain.azurewebsites.net/api";
 
 class RoadmapServices {
   /**
    * Get current student's curriculum roadmap from blockchain API
-   * Endpoint: GET https://uap-blockchain.azurewebsites.net/api/students/me/curriculum-roadmap
+   * Endpoint: GET {VITE_API_BASE_URL}/students/me/curriculum-roadmap
    */
   static async getMyCurriculumRoadmap(): Promise<CurriculumRoadmapDto> {
-    const token = localStorage.getItem("token") || "";
-    const response = await axios.get<CurriculumRoadmapDto>(
-      `${BLOCKCHAIN_API_BASE_URL}/students/me/curriculum-roadmap`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      }
+    const response = await api.get<CurriculumRoadmapDto>(
+      "/students/me/curriculum-roadmap"
     );
     return response.data;
   }

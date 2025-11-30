@@ -21,7 +21,6 @@ export const ROUTES = {
     REPORTS: "/admin/reports",
     SECURITY: "/admin/security",
     BLOCKCHAIN: "/admin/blockchain",
-    PRODUCTS: "/admin/quan-ly-san-pham",
   },
 
   // Student Portal Routes

@@ -287,7 +287,7 @@ const ClassDetail: React.FC = () => {
   };
 
   const handleCancelEdit = () => {
-    form.resetFields();
+      form.resetFields();
     slotForm.resetFields();
     setIsEditing(false);
   };
