@@ -35,7 +35,8 @@ import {
 } from "../../../services/student/credentialRequest.service";
 import { getGraduationStatus } from "../../../services/student/graduation.service";
 import type {
-  CurriculumRoadmapDto,
+  CurriculumRoadmapSummaryDto,
+  CurriculumSemesterDto,
   CurriculumRoadmapSubjectDto,
 } from "../../../types/Roadmap";
 import type {
@@ -51,7 +52,12 @@ const { TextArea } = Input;
 
 const RequestCredential: React.FC = () => {
   const [loading, setLoading] = useState(true);
-  const [roadmap, setRoadmap] = useState<CurriculumRoadmapDto | null>(null);
+  const [summary, setSummary] = useState<CurriculumRoadmapSummaryDto | null>(
+    null
+  );
+  const [semesterDetails, setSemesterDetails] = useState<
+    Record<number, CurriculumSemesterDto>
+  >({});
   const [graduationStatus, setGraduationStatus] =
     useState<GraduationEligibilityDto | null>(null);
   const [requests, setRequests] = useState<CredentialRequestDto[]>([]);
@@ -71,14 +77,35 @@ const RequestCredential: React.FC = () => {
     const loadData = async () => {
       setLoading(true);
       try {
-        const [roadmapData, graduationData, requestsData] = await Promise.all([
-          RoadmapServices.getMyCurriculumRoadmap(),
+        const [summaryData, graduationData, requestsData] = await Promise.all([
+          RoadmapServices.getMyCurriculumRoadmapSummary(),
           getGraduationStatus(),
           getMyCredentialRequests(),
         ]);
-        setRoadmap(roadmapData);
+        setSummary(summaryData);
         setGraduationStatus(graduationData);
         setRequests(requestsData);
+
+        // Prefetch chi tiết cho các kỳ có môn đã hoàn thành
+        const targetSemesters = summaryData.semesterSummaries
+          .filter((s) => s.completedSubjects > 0)
+          .map((s) => s.semesterNumber);
+
+        if (targetSemesters.length > 0) {
+          const semesterResponses = await Promise.all(
+            targetSemesters.map((n) =>
+              RoadmapServices.getMyCurriculumSemester(n)
+            )
+          );
+
+          setSemesterDetails((prev) => {
+            const updated = { ...prev };
+            semesterResponses.forEach((sem) => {
+              updated[sem.semesterNumber] = sem;
+            });
+            return updated;
+          });
+        }
       } catch (error) {
         console.error("Error loading data:", error);
         message.error("Không thể tải dữ liệu");
@@ -92,20 +119,23 @@ const RequestCredential: React.FC = () => {
 
   // Get completed subjects
   const completedSubjects = useMemo(() => {
-    if (!roadmap) return [];
+    if (!summary) return [];
     const subjects: Array<{
       subject: CurriculumRoadmapSubjectDto;
       semesterNumber: number;
     }> = [];
-    roadmap.semesters.forEach((semester) => {
+    Object.values(semesterDetails).forEach((semester) => {
       semester.subjects
         .filter((s) => s.status === "Completed")
-        .forEach((subject) => {
-          subjects.push({ subject, semesterNumber: semester.semesterNumber });
-        });
+        .forEach((subject) =>
+          subjects.push({
+            subject,
+            semesterNumber: semester.semesterNumber,
+          })
+        );
     });
     return subjects;
-  }, [roadmap]);
+  }, [semesterDetails, summary]);
 
   // Check if subject already has a pending/approved request
   const hasRequestForSubject = (subjectId: string) => {
@@ -382,90 +412,95 @@ const RequestCredential: React.FC = () => {
             activeKey={activeSemesterKey}
             onChange={(key) => setActiveSemesterKey(key)}
           >
-            {roadmap?.semesters.map((semester) => {
-              const completedInSemester = semester.subjects.filter(
-                (s) => s.status === "Completed"
-              );
-              if (completedInSemester.length === 0) return null;
+            {summary &&
+              summary.semesterSummaries.map((sem) => {
+                const detail = semesterDetails[sem.semesterNumber];
+                if (!detail) return null;
 
-              return (
-                <Panel
-                  header={`Học kỳ ${semester.semesterNumber} (${completedInSemester.length} môn)`}
-                  key={semester.semesterNumber}
-                >
-                  <List
-                    dataSource={completedInSemester}
-                    renderItem={(subject) => (
-                      <List.Item
-                        actions={[
-                          hasRequestForSubject(subject.subjectId) ? (
-                            <Tag
-                              color="success"
-                              style={{
-                                borderRadius: "8px",
-                                padding: "4px 12px",
-                                fontWeight: 600,
-                                fontSize: "13px",
-                              }}
-                            >
-                              <CheckOutlined style={{ marginRight: 4 }} />
-                              Đã yêu cầu
-                            </Tag>
-                          ) : (
-                            <Button
-                              type="primary"
-                              size="small"
-                              icon={<SendOutlined />}
-                              onClick={() => handleRequestSubject(subject)}
-                              style={{
-                                background:
-                                  "linear-gradient(135deg, #1a94fc, #0ea5e9)",
-                                border: "none",
-                                borderRadius: "8px",
-                                fontWeight: 600,
-                                boxShadow: "0 2px 8px rgba(26, 148, 252, 0.3)",
-                              }}
-                            >
-                              Yêu cầu chứng chỉ
-                            </Button>
-                          ),
-                        ]}
-                      >
-                        <List.Item.Meta
-                          title={`${subject.subjectCode} - ${subject.subjectName}`}
-                          description={
-                            <Space>
+                const completedInSemester = detail.subjects.filter(
+                  (s) => s.status === "Completed"
+                );
+                if (completedInSemester.length === 0) return null;
+
+                return (
+                  <Panel
+                    header={`Học kỳ ${sem.semesterNumber} (${completedInSemester.length} môn)`}
+                    key={sem.semesterNumber}
+                  >
+                    <List
+                      dataSource={completedInSemester}
+                      renderItem={(subject) => (
+                        <List.Item
+                          actions={[
+                            hasRequestForSubject(subject.subjectId) ? (
                               <Tag
+                                color="success"
                                 style={{
                                   borderRadius: "8px",
+                                  padding: "4px 12px",
                                   fontWeight: 600,
-                                  background: "#e6f7ff",
-                                  color: "#1a94fc",
-                                  border: "1px solid #91d5ff",
+                                  fontSize: "13px",
                                 }}
                               >
-                                {subject.credits} tín chỉ
+                                <CheckOutlined style={{ marginRight: 4 }} />
+                                Đã yêu cầu
                               </Tag>
-                              {subject.finalScore !== null && (
+                            ) : (
+                              <Button
+                                type="primary"
+                                size="small"
+                                icon={<SendOutlined />}
+                                onClick={() => handleRequestSubject(subject)}
+                                style={{
+                                  background:
+                                    "linear-gradient(135deg, #1a94fc, #0ea5e9)",
+                                  border: "none",
+                                  borderRadius: "8px",
+                                  fontWeight: 600,
+                                  boxShadow:
+                                    "0 2px 8px rgba(26, 148, 252, 0.3)",
+                                }}
+                              >
+                                Yêu cầu chứng chỉ
+                              </Button>
+                            ),
+                          ]}
+                        >
+                          <List.Item.Meta
+                            title={`${subject.subjectCode} - ${subject.subjectName}`}
+                            description={
+                              <Space>
                                 <Tag
-                                  color="gold"
                                   style={{
                                     borderRadius: "8px",
                                     fontWeight: 600,
+                                    background: "#e6f7ff",
+                                    color: "#1a94fc",
+                                    border: "1px solid #91d5ff",
                                   }}
                                 >
-                                  Điểm: {subject.finalScore.toFixed(2)}
+                                  {subject.credits} tín chỉ
                                 </Tag>
-                              )}
-                            </Space>
-                          }
-                        />
-                      </List.Item>
-                    )}
-                  />
-                </Panel>
-              );
-            })}
+                                {subject.finalScore !== null && (
+                                  <Tag
+                                    color="gold"
+                                    style={{
+                                      borderRadius: "8px",
+                                      fontWeight: 600,
+                                    }}
+                                  >
+                                    Điểm: {subject.finalScore.toFixed(2)}
+                                  </Tag>
+                                )}
+                              </Space>
+                            }
+                          />
+                        </List.Item>
+                      )}
+                    />
+                  </Panel>
+                );
+              })}
           </Collapse>
         </Card>
 

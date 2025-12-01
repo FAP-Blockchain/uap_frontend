@@ -21,6 +21,43 @@ export interface CurriculumRoadmapSemesterDto {
   subjects: CurriculumRoadmapSubjectDto[];
 }
 
+// V2 lightweight summary for roadmap
+export interface CurriculumSemesterSummaryDto {
+  semesterNumber: number;
+  semesterName: string;
+  subjectCount: number;
+  completedSubjects: number;
+  inProgressSubjects: number;
+  plannedSubjects: number;
+  failedSubjects: number;
+  lockedSubjects: number;
+}
+
+export interface CurriculumRoadmapSummaryDto {
+  studentId: string;
+  studentCode: string;
+  studentName: string;
+  curriculumId: number;
+  curriculumCode: string;
+  curriculumName: string;
+  currentGPA?: number | null;
+  totalSubjects: number;
+  completedSubjects: number;
+  failedSubjects: number;
+  inProgressSubjects: number;
+  openSubjects: number;
+  lockedSubjects: number;
+  semesterSummaries: CurriculumSemesterSummaryDto[];
+  generatedAt: string;
+}
+
+// V2 semester detail (lazy loaded)
+export interface CurriculumSemesterDto {
+  semesterNumber: number;
+  semesterName: string;
+  subjects: CurriculumRoadmapSubjectDto[];
+}
+
 export interface CurriculumRoadmapDto {
   studentId: string;
   studentCode: string;
