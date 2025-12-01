@@ -79,33 +79,48 @@ const SubjectsManagement: React.FC = () => {
     };
   }, [pagination.totalCount, subjects]);
 
-  const fetchData = useCallback(
-    async (
-      pageNumber = 1,
-      pageSize = pagination.pageSize,
-      search = searchText
-    ) => {
-      setLoading(true);
-      try {
-        const response = await fetchSubjectsApi({
-          pageNumber,
-          pageSize,
-          searchTerm: search || undefined,
-        });
-        setSubjects(response.data || []);
-        setPagination({
-          pageNumber: response.pageNumber || pageNumber,
-          pageSize: response.pageSize || pageSize,
-          totalCount: response.totalCount || response.data?.length || 0,
-        });
-      } catch {
-        toast.error("Không thể tải danh sách môn học");
-      } finally {
-        setLoading(false);
+const fetchData = useCallback(
+  async (
+    pageNumber = 1,
+    pageSize = pagination.pageSize,
+    search = searchText
+  ) => {
+    setLoading(true);
+    try {
+      const response = await fetchSubjectsApi({
+        pageNumber,
+        pageSize,
+        searchTerm: search || undefined,
+      });
+
+      let data = response.data || [];
+
+      // FE FILTER LẠI Ở ĐÂY 👇
+      if (search) {
+        const keyword = search.trim().toLowerCase();
+        data = data.filter(
+          (s) =>
+            s.subjectCode.toLowerCase().includes(keyword) ||
+            s.subjectName.toLowerCase().includes(keyword)
+        );
       }
-    },
-    [pagination.pageSize, searchText]
-  );
+
+      setSubjects(data);
+
+      setPagination({
+        pageNumber: response.pageNumber || pageNumber,
+        pageSize: response.pageSize || pageSize,
+        totalCount: data.length, // 👈 cập nhật lại total theo FE filter
+      });
+    } catch {
+      toast.error("Không thể tải danh sách môn học");
+    } finally {
+      setLoading(false);
+    }
+  },
+  [pagination.pageSize, searchText]
+);
+
 
   useEffect(() => {
     fetchData();
