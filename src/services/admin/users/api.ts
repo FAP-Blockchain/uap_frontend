@@ -22,6 +22,7 @@ export interface UserDto {
   specialization?: string;
   phoneNumber?: string;
   isActive: boolean;
+  profilePictureUrl?: string;
 }
 
 export interface PagedUsersResponse {
@@ -104,5 +105,21 @@ export const activateUserApi = async (id: string): Promise<void> => {
 
 export const deactivateUserApi = async (id: string): Promise<void> => {
   await api.patch(`/User/${id}/deactivate`);
+};
+
+export const uploadUserProfilePictureApi = async (
+  id: string,
+  file: File
+): Promise<{ url: string }> => {
+  const formData = new FormData();
+  formData.append("file", file);
+  const response = await api.post<{ url: string }>(
+    `/User/${id}/profile-picture`,
+    formData,
+    {
+      headers: { "Content-Type": "multipart/form-data" },
+    }
+  );
+  return response.data;
 };
 

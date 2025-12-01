@@ -51,6 +51,9 @@ const CurriculumManagement = lazy(() => import("../pages/admin/curriculums"));
 const ReportsManagement = lazy(() => import("../pages/admin/reports"));
 const SecurityManagement = lazy(() => import("../pages/admin/security"));
 const RegisterUser = lazy(() => import("../pages/admin/registerUser"));
+const RegisterUserDetail = lazy(
+  () => import("../pages/admin/registerUser/detail")
+);
 const BulkRegister = lazy(() => import("../pages/admin/bulkRegister"));
 const SemestersManagement = lazy(() => import("../pages/admin/semesters"));
 const SemesterDetail = lazy(
@@ -298,6 +301,12 @@ export const adminRoutes: RouteConfig = {
       allowedRoles: [ROLE_CODES.ADMIN],
       menuIndex: 5,
       menuSection: "main",
+    },
+    {
+      path: "/admin/users/:userId",
+      element: <RegisterUserDetail />,
+      showInMenu: false,
+      allowedRoles: [ROLE_CODES.ADMIN],
     },
     {
       path: "/admin/users/bulk-register",
