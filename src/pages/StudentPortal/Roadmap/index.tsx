@@ -23,7 +23,11 @@ import type { ColumnsType } from "antd/es/table";
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import RoadmapServices from "../../../services/roadmap/api.service";
-import type { CurriculumRoadmapDto } from "../../../types/Roadmap";
+import type {
+  CurriculumRoadmapSummaryDto,
+  CurriculumSemesterDto,
+  CurriculumRoadmapSubjectDto,
+} from "../../../types/Roadmap";
 import "./Roadmap.scss";
 
 const { Title, Text } = Typography;
@@ -79,17 +83,25 @@ const statusMap: Record<
 
 const Roadmap: React.FC = () => {
   const navigate = useNavigate();
-  const [roadmap, setRoadmap] = useState<CurriculumRoadmapDto | null>(null);
+  const [summary, setSummary] = useState<CurriculumRoadmapSummaryDto | null>(
+    null
+  );
+  const [semesterDetails, setSemesterDetails] = useState<
+    Record<number, RoadmapSemester>
+  >({});
+  const [loadingSemesters, setLoadingSemesters] = useState<
+    Record<number, boolean>
+  >({});
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchRoadmap = async () => {
+    const fetchSummary = async () => {
       setIsLoading(true);
       setError(null);
       try {
-        const data = await RoadmapServices.getMyCurriculumRoadmap();
-        setRoadmap(data);
+        const data = await RoadmapServices.getMyCurriculumRoadmapSummary();
+        setSummary(data);
       } catch (err) {
         const messageText =
           (
@@ -107,36 +119,49 @@ const Roadmap: React.FC = () => {
       }
     };
 
-    void fetchRoadmap();
+    void fetchSummary();
   }, []);
 
-  const semesters: RoadmapSemester[] = useMemo(() => {
-    if (!roadmap) return [];
+  // Tự động load dữ liệu cho kỳ đầu tiên sau khi có summary
+  useEffect(() => {
+    if (!summary || !summary.semesterSummaries.length) return;
+    const firstSemester = summary.semesterSummaries[0].semesterNumber;
+    void handleLoadSemester(firstSemester);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [summary]);
 
-    return roadmap.semesters.map((semester) => ({
-      semesterNumber: semester.semesterNumber,
-      courses: semester.subjects.map((subject) => ({
-        subjectId: subject.subjectId,
-        code: subject.subjectCode,
-        name: subject.subjectName,
-        credits: subject.credits,
-        prerequisite: subject.prerequisiteSubjectCode,
-        prerequisitesMet: subject.prerequisitesMet,
-        attendancePercentage: subject.attendancePercentage,
-        attendanceRequirementMet: subject.attendanceRequirementMet,
-        grade:
-          subject.finalScore !== null && subject.finalScore !== undefined
-            ? subject.finalScore.toFixed(2)
-            : undefined,
-        status: subject.status as CourseStatus,
-        currentClassCode: subject.currentClassCode,
-        currentSemesterName: subject.currentSemesterName,
-      })),
+  const mapSubjectsToCourses = (
+    subjects: CurriculumRoadmapSubjectDto[]
+  ): RoadmapCourse[] =>
+    subjects.map((subject) => ({
+      subjectId: subject.subjectId,
+      code: subject.subjectCode,
+      name: subject.subjectName,
+      credits: subject.credits,
+      prerequisite: subject.prerequisiteSubjectCode,
+      prerequisitesMet: subject.prerequisitesMet,
+      attendancePercentage: subject.attendancePercentage,
+      attendanceRequirementMet: subject.attendanceRequirementMet,
+      grade:
+        subject.finalScore !== null && subject.finalScore !== undefined
+          ? subject.finalScore.toFixed(2)
+          : undefined,
+      status: subject.status as CourseStatus,
+      currentClassCode: subject.currentClassCode,
+      currentSemesterName: subject.currentSemesterName,
     }));
-  }, [roadmap]);
+
+  const semesters: RoadmapSemester[] = useMemo(() => {
+    if (!summary) return [];
+
+    return summary.semesterSummaries.map((sem) => ({
+      semesterNumber: sem.semesterNumber,
+      courses: semesterDetails[sem.semesterNumber]?.courses || [],
+    }));
+  }, [summary, semesterDetails]);
 
   const stats = useMemo(() => {
-    if (!roadmap) {
+    if (!summary) {
       return {
         completedCredits: 0,
         totalCredits: 0,
@@ -144,52 +169,38 @@ const Roadmap: React.FC = () => {
       };
     }
 
-    const completedCredits = roadmap.semesters.reduce(
-      (sum, semester) =>
-        sum +
-        semester.subjects
-          .filter((subject) => subject.status === "Completed")
-          .reduce((acc, subject) => acc + subject.credits, 0),
-      0
-    );
-
-    const totalCredits = roadmap.semesters.reduce(
-      (sum, semester) =>
-        sum +
-        semester.subjects.reduce((acc, subject) => acc + subject.credits, 0),
-      0
-    );
-
-    // Calculate GPA from completed subjects with finalScore
-    const completedSubjects = roadmap.semesters
-      .flatMap((semester) => semester.subjects)
-      .filter(
-        (subject) =>
-          subject.status === "Completed" &&
-          subject.finalScore !== null &&
-          subject.finalScore !== undefined
-      );
-
-    const totalScore = completedSubjects.reduce(
-      (sum, subject) => sum + (subject.finalScore || 0),
-      0
-    );
-
-    const averageScore = completedSubjects.length
-      ? totalScore / completedSubjects.length
-      : 0;
-
-    // Convert 10-point scale to 4-point GPA scale
-    const gpa = completedSubjects.length
-      ? Number(((averageScore / 10) * 4).toFixed(2))
-      : 0;
-
     return {
-      completedCredits,
-      totalCredits,
-      gpa,
+      completedCredits: summary.completedSubjects, // dùng số môn như proxy
+      totalCredits: summary.totalSubjects,
+      gpa: summary.currentGPA ?? 0,
     };
-  }, [roadmap]);
+  }, [summary]);
+
+  const handleLoadSemester = async (semesterNumber: number) => {
+    if (semesterDetails[semesterNumber] || !summary) return;
+    setLoadingSemesters((prev) => ({ ...prev, [semesterNumber]: true }));
+    try {
+      const data: CurriculumSemesterDto =
+        await RoadmapServices.getMyCurriculumSemester(semesterNumber);
+      setSemesterDetails((prev) => ({
+        ...prev,
+        [semesterNumber]: {
+          semesterNumber: data.semesterNumber,
+          courses: mapSubjectsToCourses(data.subjects),
+        },
+      }));
+    } catch (err) {
+      const msg =
+        (err as { message?: string })?.message ||
+        "Không thể tải dữ liệu kỳ học.";
+      message.error(msg);
+    } finally {
+      setLoadingSemesters((prev) => ({
+        ...prev,
+        [semesterNumber]: false,
+      }));
+    }
+  };
 
   const handleRegister = (course: RoadmapCourse) => {
     navigate("/student-portal/enroll-list", {
@@ -404,7 +415,7 @@ const Roadmap: React.FC = () => {
     );
   }
 
-  if (!roadmap || !semesters.length) {
+  if (!summary || !semesters.length) {
     return (
       <div className="student-roadmap">
         <Empty description="Chưa có dữ liệu lộ trình học tập" />
@@ -424,7 +435,7 @@ const Roadmap: React.FC = () => {
               Lộ trình học tập
             </Title>
             <Text style={{ color: "rgba(255, 255, 255, 0.85)" }}>
-              {roadmap.curriculumName} ({roadmap.curriculumCode})
+              {summary.curriculumName} ({summary.curriculumCode})
             </Text>
           </div>
 
@@ -461,7 +472,7 @@ const Roadmap: React.FC = () => {
                     fontWeight: 700,
                   }}
                 >
-                  {roadmap.totalSubjects} môn học
+                  {summary.totalSubjects} môn học
                 </Title>
                 <Text
                   strong
@@ -470,8 +481,8 @@ const Roadmap: React.FC = () => {
                     fontSize: "14px",
                   }}
                 >
-                  {roadmap.completedSubjects} đã hoàn thành ·{" "}
-                  {roadmap.inProgressSubjects} đang học
+                  {summary.completedSubjects} đã hoàn thành ·{" "}
+                  {summary.inProgressSubjects} đang học
                 </Text>
               </div>
             </Card>
@@ -484,21 +495,30 @@ const Roadmap: React.FC = () => {
         bordered={false}
         className="roadmap-collapse"
         defaultActiveKey={semesters[0]?.semesterNumber}
+        onChange={(key) => {
+          const numKey =
+            typeof key === "string"
+              ? Number(key)
+              : Array.isArray(key) && key.length > 0
+              ? Number(key[0])
+              : NaN;
+          if (!Number.isNaN(numKey)) {
+            void handleLoadSemester(numKey);
+          }
+        }}
       >
-        {semesters.map((semester) => (
+        {summary.semesterSummaries.map((semester) => (
           <Panel
             header={
               <div className="semester-panel-header">
                 <div>
-                  <Text strong>Kỳ {semester.semesterNumber}</Text>
+                    <Text strong>Kỳ {semester.semesterNumber}</Text>
                   <div className="semester-label">
-                    {semester.courses.length} môn học
+                      {semester.subjectCount} môn học
                   </div>
                 </div>
                 <Space size={8}>
-                  {semester.courses.some(
-                    (course) => course.status === "InProgress"
-                  ) && (
+                  {semester.inProgressSubjects > 0 && (
                     <Tag
                       icon={<StarOutlined />}
                       style={{
@@ -525,11 +545,7 @@ const Roadmap: React.FC = () => {
                       borderRadius: "8px",
                     }}
                   >
-                    {
-                      semester.courses.filter((c) => c.status === "Completed")
-                        .length
-                    }{" "}
-                    đã hoàn thành
+                    {semester.completedSubjects} đã hoàn thành
                   </Tag>
                 </Space>
               </div>
@@ -538,10 +554,15 @@ const Roadmap: React.FC = () => {
           >
             <Table
               columns={getColumns()}
-              dataSource={semester.courses}
-              rowKey={(record) => `${semester.semesterNumber}-${record.code}`}
+              dataSource={
+                semesterDetails[semester.semesterNumber]?.courses || []
+              }
+              rowKey={(record) =>
+                `${semester.semesterNumber}-${record.code}`
+              }
               pagination={false}
               size="small"
+              loading={!!loadingSemesters[semester.semesterNumber]}
             />
           </Panel>
         ))}

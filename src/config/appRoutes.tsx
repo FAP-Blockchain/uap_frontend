@@ -370,7 +370,7 @@ export const studentPortalRoutes: RouteConfig = {
     {
       path: "request-credential",
       element: <RequestCredential />,
-      menuLabel: "Yêu cầu cấp chứng chỉ",
+      menuLabel: "Yêu cầu chứng chỉ",
       menuIcon: <FileTextOutlined style={{ color: "rgba(0, 0, 0, 0.5)" }} />,
       showInMenu: true,
       allowedRoles: [ROLE_CODES.STUDENT],

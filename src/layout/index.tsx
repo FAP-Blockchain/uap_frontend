@@ -42,7 +42,9 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({
     const routeNameMap: Record<string, string> = {
       "student-portal": "Cổng sinh viên",
       dashboard: "Bảng điều khiển",
-      credentials: "Chứng chỉ",
+      roadmap: "Lộ trình học tập",
+      credentials: "Chứng chỉ của tôi",
+      "request-credential": "Yêu cầu chứng chỉ",
       timetable: "Thời khóa biểu",
       "attendance-report": "Báo cáo điểm danh",
       "grade-report": "Báo cáo điểm",
