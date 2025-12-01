@@ -3,7 +3,7 @@ import type {
   WeeklyScheduleDto,
   WeeklyScheduleResponse,
 } from "../../types/Schedule";
-import type { Student, StudentDetailDto } from "../../types/Student";
+import type { StudentDetailDto } from "../../types/Student";
 import type {
   GetStudentGradesRequest,
   StudentGradeTranscriptDto,
@@ -24,8 +24,8 @@ class StudentServices {
    * Get student by ID
    * Endpoint: GET /api/Students/{id}
    */
-  static async getStudentById(id: string): Promise<Student> {
-    const response = await api.get<Student>(`/Students/${id}`);
+  static async getStudentById(id: string): Promise<StudentDetailDto> {
+    const response = await api.get<StudentDetailDto>(`/Students/${id}`);
     return response.data;
   }
 

@@ -43,6 +43,7 @@ import {
   deactivateUserApi,
 } from "../../../services/admin/users/api";
 import "./index.scss";
+import { useNavigate } from "react-router-dom";
 
 const { Search } = Input;
 const { Option } = Select;
@@ -62,6 +63,8 @@ interface UserFormValues {
 const DEFAULT_PAGE_SIZE = 10;
 
 const RegisterUser: React.FC = () => {
+  const navigate = useNavigate();
+
   const [users, setUsers] = useState<UserDto[]>([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [editingUser, setEditingUser] = useState<UserDto | null>(null);
@@ -134,38 +137,6 @@ const RegisterUser: React.FC = () => {
   const handleRoleFilter = (value: string) => {
     setRoleFilter(value);
     fetchData(1, pagination.pageSize, searchText, value);
-  };
-
-  const showModal = async (user?: UserDto) => {
-    if (user) {
-      try {
-        setLoading(true);
-        const userDetail = await getUserByIdApi(user.id);
-        setEditingUser(userDetail);
-        form.setFieldsValue({
-          fullName: userDetail.fullName,
-          email: userDetail.email,
-          roleName: userDetail.roleName,
-          studentCode: userDetail.studentCode,
-          enrollmentDate: userDetail.enrollmentDate
-            ? dayjs(userDetail.enrollmentDate)
-            : undefined,
-          teacherCode: userDetail.teacherCode,
-          hireDate: userDetail.hireDate ? dayjs(userDetail.hireDate) : undefined,
-          specialization: userDetail.specialization,
-          phoneNumber: userDetail.phoneNumber,
-        });
-      } catch {
-        toast.error("Không thể tải thông tin người dùng");
-      } finally {
-        setLoading(false);
-      }
-    } else {
-      setEditingUser(null);
-      form.resetFields();
-      form.setFieldsValue({ roleName: roleFilter });
-    }
-    setIsModalVisible(true);
   };
 
   const handleOk = () => {
@@ -323,13 +294,17 @@ const RegisterUser: React.FC = () => {
               type="text"
               icon={<EditOutlined />}
               size="small"
-              onClick={() => showModal(record)}
+              onClick={(e) => {
+                e.stopPropagation();
+                showModal(record);
+              }}
               className="action-btn-edit"
             />
           </Tooltip>
           <Tooltip title={record.isActive ? "Vô hiệu hóa" : "Kích hoạt"}>
             <Switch
               checked={record.isActive}
+              onClick={(e) => e.stopPropagation()}
               onChange={() => handleToggleStatus(record)}
               checkedChildren={<CheckCircleOutlined />}
               unCheckedChildren={<CloseCircleOutlined />}
@@ -443,6 +418,9 @@ const RegisterUser: React.FC = () => {
               onChange: (page) =>
                 fetchData(page, pagination.pageSize, searchText, roleFilter),
             }}
+            onRow={(record) => ({
+              onClick: () => navigate(`/admin/users/${record.id}`),
+            })}
             size="small"
             locale={{
               emptyText: searchText

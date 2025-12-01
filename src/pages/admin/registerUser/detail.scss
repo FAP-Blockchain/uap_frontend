@@ -1,0 +1,50 @@
+.user-detail-page {
+  padding: 24px;
+
+  .profile-card {
+    text-align: center;
+
+    .avatar-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .user-info {
+      h2 {
+        margin-bottom: 4px;
+      }
+
+      span {
+        display: block;
+        margin-top: 8px;
+      }
+    }
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 12px;
+
+    .stat-item {
+      padding: 10px;
+      border: 1px solid #f0f0f0;
+      border-radius: 10px;
+      background: #fafafa;
+
+      .value {
+        font-size: 18px;
+        font-weight: 600;
+      }
+
+      .label {
+        color: #8c8c8c;
+        font-size: 12px;
+      }
+    }
+  }
+}
+
+
