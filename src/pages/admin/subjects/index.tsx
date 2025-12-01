@@ -12,7 +12,6 @@ import {
   Space,
   Table,
   Tag,
-  Tooltip,
   Popconfirm,
   Spin,
 } from "antd";
@@ -79,48 +78,47 @@ const SubjectsManagement: React.FC = () => {
     };
   }, [pagination.totalCount, subjects]);
 
-const fetchData = useCallback(
-  async (
-    pageNumber = 1,
-    pageSize = pagination.pageSize,
-    search = searchText
-  ) => {
-    setLoading(true);
-    try {
-      const response = await fetchSubjectsApi({
-        pageNumber,
-        pageSize,
-        searchTerm: search || undefined,
-      });
+  const fetchData = useCallback(
+    async (
+      pageNumber = 1,
+      pageSize = pagination.pageSize,
+      search = searchText
+    ) => {
+      setLoading(true);
+      try {
+        const response = await fetchSubjectsApi({
+          pageNumber,
+          pageSize,
+          searchTerm: search || undefined,
+        });
 
-      let data = response.data || [];
+        let data = response.data || [];
 
-      // FE FILTER LẠI Ở ĐÂY 👇
-      if (search) {
-        const keyword = search.trim().toLowerCase();
-        data = data.filter(
-          (s) =>
-            s.subjectCode.toLowerCase().includes(keyword) ||
-            s.subjectName.toLowerCase().includes(keyword)
-        );
+        // FE FILTER LẠI Ở ĐÂY 👇
+        if (search) {
+          const keyword = search.trim().toLowerCase();
+          data = data.filter(
+            (s) =>
+              s.subjectCode.toLowerCase().includes(keyword) ||
+              s.subjectName.toLowerCase().includes(keyword)
+          );
+        }
+
+        setSubjects(data);
+
+        setPagination({
+          pageNumber: response.pageNumber || pageNumber,
+          pageSize: response.pageSize || pageSize,
+          totalCount: data.length, // 👈 cập nhật lại total theo FE filter
+        });
+      } catch {
+        toast.error("Không thể tải danh sách môn học");
+      } finally {
+        setLoading(false);
       }
-
-      setSubjects(data);
-
-      setPagination({
-        pageNumber: response.pageNumber || pageNumber,
-        pageSize: response.pageSize || pageSize,
-        totalCount: data.length, // 👈 cập nhật lại total theo FE filter
-      });
-    } catch {
-      toast.error("Không thể tải danh sách môn học");
-    } finally {
-      setLoading(false);
-    }
-  },
-  [pagination.pageSize, searchText]
-);
-
+    },
+    [pagination.pageSize, searchText]
+  );
 
   useEffect(() => {
     fetchData();
@@ -312,33 +310,34 @@ const fetchData = useCallback(
     {
       title: "Thao tác",
       key: "actions",
-      width: 120,
+      width: 160,
       fixed: "right",
       render: (_, record) => (
-        <Space size="small">
-          <Tooltip title="Chỉnh sửa">
-            <Button
-              type="text"
-              icon={<EditOutlined />}
-              size="small"
-              onClick={() => showModal(record)}
-              className="action-btn-edit"
-            />
-          </Tooltip>
+        <Space size="middle">
+          <Button
+            type="primary"
+            ghost
+            icon={<EditOutlined />}
+            size="small"
+            onClick={() => showModal(record)}
+          >
+            Sửa
+          </Button>
           <Popconfirm
             title="Bạn có chắc chắn muốn xóa môn học này?"
             onConfirm={() => handleDelete(record.id)}
             okText="Có"
             cancelText="Không"
           >
-            <Tooltip title="Xóa">
-              <Button
-                type="text"
-                icon={<DeleteOutlined />}
-                size="small"
-                className="action-btn-delete"
-              />
-            </Tooltip>
+            <Button
+              type="primary"
+              danger
+              ghost
+              icon={<DeleteOutlined />}
+              size="small"
+            >
+              Xóa
+            </Button>
           </Popconfirm>
         </Space>
       ),
@@ -565,16 +564,16 @@ const fetchData = useCallback(
             </Select>
           </Form.Item>
 
-        <Form.Item
-          name="department"
-          label="Chuyên ngành"
-          extra="VD: Công nghệ thông tin, Kinh tế, Ngôn ngữ Anh..."
-        >
-          <Input
-            placeholder="Nhập chuyên ngành phụ trách môn học"
-            size="large"
-          />
-        </Form.Item>
+          <Form.Item
+            name="department"
+            label="Chuyên ngành"
+            extra="VD: Công nghệ thông tin, Kinh tế, Ngôn ngữ Anh..."
+          >
+            <Input
+              placeholder="Nhập chuyên ngành phụ trách môn học"
+              size="large"
+            />
+          </Form.Item>
         </Form>
       </Modal>
     </div>
