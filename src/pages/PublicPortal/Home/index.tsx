@@ -118,14 +118,14 @@ const PublicHome: React.FC = () => {
                   type="primary"
                   size="large"
                   icon={<SearchOutlined />}
-                  onClick={() => navigate("/public-portal/verify")}
+                  onClick={() => navigate("/verify")}
                   className="cta-button"
                 >
                   Bắt đầu xác thực
                 </Button>
                 <Button
                   size="large"
-                  onClick={() => navigate("/public-portal/help")}
+                  onClick={() => navigate("/help")}
                 >
                   Tìm hiểu cách hoạt động
                 </Button>

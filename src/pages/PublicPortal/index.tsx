@@ -30,25 +30,25 @@ function PublicPortal() {
       key: "",
       icon: <HomeOutlined />,
       label: "Trang chủ",
-      onClick: () => navigate("/public-portal"),
+      onClick: () => navigate("/"),
     },
     {
       key: "verify",
       icon: <SafetyCertificateOutlined />,
       label: "Xác thực chứng chỉ",
-      onClick: () => navigate("/public-portal/verify"),
+      onClick: () => navigate("/verify"),
     },
     {
       key: "history",
       icon: <HistoryOutlined />,
       label: "Lịch sử xác thực",
-      onClick: () => navigate("/public-portal/history"),
+      onClick: () => navigate("/history"),
     },
     {
       key: "help",
       icon: <QuestionCircleOutlined />,
       label: "Trợ giúp & FAQ",
-      onClick: () => navigate("/public-portal/help"),
+      onClick: () => navigate("/help"),
     },
   ];
 
@@ -75,9 +75,11 @@ function PublicPortal() {
 
   // Get current selected key
   const getCurrentKey = () => {
-    const path = location.pathname.replace("/public-portal/", "");
-    if (path === "/public-portal" || path === "") return "";
-    return path.split("/")[0];
+    const path = location.pathname;
+    if (path === "/" || path === "") return "";
+    // Remove leading slash and get first segment
+    const segments = path.split("/").filter(Boolean);
+    return segments[0] || "";
   };
 
   return (
@@ -169,7 +171,7 @@ function PublicPortal() {
                   type="primary"
                   icon={<SearchOutlined />}
                   size="large"
-                  onClick={() => navigate("/public-portal/verify")}
+                  onClick={() => navigate("/verify")}
                 >
                   Xác thực nhanh
                 </Button>

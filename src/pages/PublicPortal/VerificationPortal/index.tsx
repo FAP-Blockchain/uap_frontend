@@ -118,7 +118,7 @@ const VerificationPortal: React.FC = () => {
 
       message.success("Xác thực thành công! Đang mở chứng chỉ...");
       navigate(
-        `/public-portal/certificates/verify/${encodeURIComponent(
+        `/certificates/verify/${encodeURIComponent(
             credentialNumberFromResult
           )}`
       );
@@ -239,7 +239,7 @@ const VerificationPortal: React.FC = () => {
 
       message.success("Xác thực thành công! Đang mở chứng chỉ...");
       navigate(
-        `/public-portal/certificates/verify/${encodeURIComponent(
+        `/certificates/verify/${encodeURIComponent(
             credentialNumberFromResult
           )}`
       );

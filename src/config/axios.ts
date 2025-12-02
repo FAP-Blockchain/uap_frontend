@@ -5,6 +5,7 @@ import type { RefreshTokenResponse } from "../types/Auth";
 
 import { logout } from "../redux/features/authSlice";
 import { store } from "../redux/store";
+import { navigateTo } from "../utils/navigation";
 
 
 const API_BASE_URL =
@@ -82,9 +83,9 @@ api.interceptors.response.use(
         localStorage.removeItem("refreshToken");
         clearAllCookies();
         
-        // Redirect to login
+        // Redirect to login using React Router navigation
         if (window.location.pathname !== "/login") {
-          window.location.href = "/login";
+          navigateTo("/login", { replace: true });
         }
         
         return Promise.reject(refreshError);

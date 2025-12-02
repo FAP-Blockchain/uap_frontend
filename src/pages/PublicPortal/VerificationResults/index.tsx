@@ -120,7 +120,7 @@ const VerificationResults: React.FC = () => {
 					action={
 						<Button
 							type="primary"
-							onClick={() => navigate("/public-portal/verify")}
+							onClick={() => navigate("/verify")}
 						>
 							Quay lại cổng xác thực
 						</Button>

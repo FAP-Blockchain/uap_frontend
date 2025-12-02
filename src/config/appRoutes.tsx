@@ -518,7 +518,8 @@ export const teacherRoutes: RouteConfig = {
   ],
 };
 
-// Public Portal Routes
+// Public Portal Routes (moved to root level in App.tsx)
+// Keeping this for reference but routes are now at root level
 export const publicPortalRoutes: RouteConfig = {
   path: "/public-portal",
   element: (

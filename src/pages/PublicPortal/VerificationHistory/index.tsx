@@ -177,7 +177,7 @@ const VerificationHistory: React.FC = () => {
   };
 
   const handleViewDetails = (record: HistoryRecord) => {
-    navigate("/public-portal/results", {
+    navigate("/results", {
       state: {
         success: record.result === "success",
         verificationData: { id: record.credentialId },

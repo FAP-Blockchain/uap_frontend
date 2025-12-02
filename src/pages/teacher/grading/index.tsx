@@ -11,6 +11,7 @@ import {
   message,
   Tabs,
   Spin,
+  notification,
 } from "antd";
 import { EditOutlined, DownloadOutlined } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
@@ -196,12 +197,18 @@ const TeacherGrading: React.FC = () => {
 
     setLoading((prev) => ({ ...prev, [student.studentId]: true }));
     try {
-        const updateRequest = {
-          grades: gradesToUpdate,
-        };
-        await updateStudentGradesApi(updateRequest);
+      const updateRequest = {
+        grades: gradesToUpdate,
+      };
+      await updateStudentGradesApi(updateRequest);
 
-      message.success(`Đã cập nhật điểm cho ${student.fullName}`);
+      // Toast FE thuần, không dùng message từ BE
+      notification.success({
+        message: "Cập nhật điểm thành công",
+        description: `Điểm của sinh viên ${student.fullName} đã được cập nhật.`,
+        placement: "topRight",
+        duration: 3,
+      });
     } catch (error) {
       console.error("Error saving/updating grades:", error);
       message.error("Có lỗi xảy ra khi cập nhật điểm!");
@@ -311,7 +318,7 @@ const TeacherGrading: React.FC = () => {
   return (
     <div className="teacher-grading">
       <div className="grading-header">
-        <h1>Chấm điểm & Đánh giá</h1>
+        <h1>Chấm điểm </h1>
         <div className="grading-controls">
           <Space>
             <Spin spinning={loadingClasses}>

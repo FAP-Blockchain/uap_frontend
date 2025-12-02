@@ -50,14 +50,14 @@ export const ROUTES = {
     CLASS_LIST: "/teacher/class-list/:courseCode",
   },
 
-  // Public Portal Routes
+  // Public Portal Routes (now at root level)
   PUBLIC_PORTAL: {
-    BASE: "/public-portal",
-    HOME: "/public-portal/home",
-    VERIFY: "/public-portal/verify",
-    RESULTS: "/public-portal/results",
-    HISTORY: "/public-portal/history",
-    HELP: "/public-portal/help",
+    BASE: "/",
+    HOME: "/",
+    VERIFY: "/verify",
+    RESULTS: "/results",
+    HISTORY: "/history",
+    HELP: "/help",
   },
 } as const;
 
