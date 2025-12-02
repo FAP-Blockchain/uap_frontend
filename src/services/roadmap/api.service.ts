@@ -4,6 +4,9 @@ import type {
   CurriculumRoadmapSummaryDto,
   CurriculumSemesterDto,
   StudentRoadmapDto,
+  RecommendedSubjectDto,
+  PlanRetakeRequest,
+  StudentRoadmapResponse,
 } from "../../types/Roadmap";
 
 class RoadmapServices {
@@ -49,6 +52,32 @@ class RoadmapServices {
    */
   static async getMyRoadmap(): Promise<StudentRoadmapDto> {
     const response = await api.get<StudentRoadmapDto>("/students/me/roadmap");
+    return response.data;
+  }
+
+  /**
+   * Get subjects recommended for retake (failed subjects only)
+   * Endpoint: GET /api/students/me/roadmap/retake-options
+   */
+  static async getMyRetakeOptions(): Promise<RecommendedSubjectDto[]> {
+    const response = await api.get<RecommendedSubjectDto[]>(
+      "/students/me/roadmap/retake-options"
+    );
+    return response.data;
+  }
+
+  /**
+   * Plan a retake for a specific roadmap entry
+   * Endpoint: POST /api/students/me/roadmap/{roadmapId}/retake-plan
+   */
+  static async planMyRetake(
+    roadmapId: string,
+    payload: PlanRetakeRequest
+  ): Promise<StudentRoadmapResponse> {
+    const response = await api.post<StudentRoadmapResponse>(
+      `/students/me/roadmap/${roadmapId}/retake-plan`,
+      payload
+    );
     return response.data;
   }
 }

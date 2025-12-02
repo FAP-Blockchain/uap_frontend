@@ -3,7 +3,7 @@ export interface CurriculumRoadmapSubjectDto {
   subjectCode: string;
   subjectName: string;
   credits: number;
-  status: "Open" | "InProgress" | "Locked" | "Completed";
+  status: "Open" | "InProgress" | "Locked" | "Completed" | "Failed";
   finalScore: number | null;
   currentClassId: string | null;
   currentClassCode: string | null;
@@ -91,6 +91,7 @@ export interface RoadmapSubjectDto {
   startedAt?: string | null;
   completedAt?: string | null;
   notes?: string | null;
+  canRetake?: boolean; // backend StudentRoadmapDto includes CanRetake
 }
 
 export interface SemesterRoadmapGroupDto {
@@ -114,5 +115,48 @@ export interface StudentRoadmapDto {
   failedSubjects: number;
   completionPercentage: number;
   semesterGroups: SemesterRoadmapGroupDto[];
+}
+
+// ===== Retake support DTOs (match backend StudentRoadmapDtos) =====
+
+export interface AvailableClassInfoDto {
+  classId: string;
+  classCode: string;
+  teacherName: string;
+  currentEnrollment: number;
+  maxStudents: number;
+  availableSlots: number;
+  isFull: boolean;
+  schedule: string;
+}
+
+export interface RecommendedSubjectDto {
+  subjectId: string;
+  subjectCode: string;
+  subjectName: string;
+  credits: number;
+  semesterId: string;
+  semesterName: string;
+  sequenceOrder: number;
+  recommendationReason: string;
+  prerequisites: string[];
+  allPrerequisitesMet: boolean;
+  hasAvailableClasses: boolean;
+  availableClassCount: number;
+  availableClasses: AvailableClassInfoDto[];
+  isRetake: boolean;
+  retakeReason?: string | null;
+}
+
+export interface PlanRetakeRequest {
+  semesterId: string;
+  notes?: string;
+}
+
+export interface StudentRoadmapResponse {
+  success: boolean;
+  message: string;
+  roadmapId?: string;
+  errors: string[];
 }
 

@@ -10,6 +10,10 @@ import {
   Card,
   Collapse,
   Empty,
+  Form,
+  Input,
+  Modal,
+  Select,
   Space,
   Spin,
   Statistic,
@@ -27,11 +31,15 @@ import type {
   CurriculumRoadmapSummaryDto,
   CurriculumSemesterDto,
   CurriculumRoadmapSubjectDto,
+  RecommendedSubjectDto,
 } from "../../../types/Roadmap";
+import type { SemesterDto } from "../../../types/Semester";
+import { fetchSemestersApi } from "../../../services/admin/semesters/api";
 import "./Roadmap.scss";
 
 const { Title, Text } = Typography;
 const { Panel } = Collapse;
+const { Option } = Select;
 
 type CourseStatus = "Completed" | "InProgress" | "Open" | "Locked" | "Failed";
 
@@ -99,6 +107,21 @@ const Roadmap: React.FC = () => {
   >({});
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [retakeOptions, setRetakeOptions] = useState<RecommendedSubjectDto[]>(
+    []
+  );
+  const [loadingRetakes, setLoadingRetakes] = useState(false);
+  const [allSemesters, setAllSemesters] = useState<SemesterDto[]>([]);
+  const [failedRetakeBySubject, setFailedRetakeBySubject] = useState<
+    Record<string, string>
+  >({});
+  const [retakeModalVisible, setRetakeModalVisible] = useState(false);
+  const [retakeModalLoading, setRetakeModalLoading] = useState(false);
+  const [selectedRetake, setSelectedRetake] = useState<{
+    roadmapId: string;
+    subjectName: string;
+  } | null>(null);
+  const [retakeForm] = Form.useForm();
 
   useEffect(() => {
     const fetchSummary = async () => {
@@ -125,6 +148,69 @@ const Roadmap: React.FC = () => {
     };
 
     void fetchSummary();
+  }, []);
+
+  // Load legacy roadmap (để lấy CanRetake + roadmapId) và danh sách kỳ còn mở
+  useEffect(() => {
+    const loadRoadmapAndSemesters = async () => {
+      try {
+        const [roadmap, semestersResponse] = await Promise.all([
+          RoadmapServices.getMyRoadmap(),
+          fetchSemestersApi({
+            pageNumber: 1,
+            pageSize: 100,
+            isClosed: false,
+            sortBy: "EndDate",
+            isDescending: false,
+          }),
+        ]);
+
+        const failedMap: Record<string, string> = {};
+
+        roadmap.semesterGroups.forEach((group) => {
+          group.subjects.forEach((subject) => {
+            if (subject.status === "Failed" && !failedMap[subject.subjectId]) {
+              failedMap[subject.subjectId] = subject.id;
+            }
+          });
+        });
+
+        setFailedRetakeBySubject(failedMap);
+
+        const now = new Date();
+        const futureSemesters = semestersResponse.data.filter(
+          (s) => new Date(s.endDate) > now
+        );
+        setAllSemesters(futureSemesters);
+      } catch {
+        // bỏ qua lỗi nhẹ, không chặn trang roadmap chính
+      }
+    };
+
+    void loadRoadmapAndSemesters();
+  }, []);
+
+  // Load retake options (failed subjects that can be retaken)
+  useEffect(() => {
+    const fetchRetakeOptions = async () => {
+      setLoadingRetakes(true);
+      try {
+        const data = await RoadmapServices.getMyRetakeOptions();
+        // Backend already filters IsRetake = true, nhưng lọc thêm cho chắc
+        setRetakeOptions(data.filter((item) => item.isRetake));
+      } catch (err) {
+        // Không cần show error lớn, chỉ thông báo nhẹ
+        const messageText =
+          (err as { message?: string })?.message ||
+          "Không thể tải danh sách môn cần học lại.";
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
+        message.warn(messageText);
+      } finally {
+        setLoadingRetakes(false);
+      }
+    };
+
+    void fetchRetakeOptions();
   }, []);
 
   // Tự động load dữ liệu cho kỳ đầu tiên sau khi có summary
@@ -223,6 +309,77 @@ const Roadmap: React.FC = () => {
     navigate("/student-portal/grade-report", {
       state: { subjectId },
     });
+  };
+
+  const openRetakeModal = (roadmapId: string, course: RoadmapCourse) => {
+    setSelectedRetake({
+      roadmapId,
+      subjectName: course.name,
+    });
+    retakeForm.resetFields();
+    setRetakeModalVisible(true);
+  };
+
+  const handleSubmitRetake = async () => {
+    try {
+      const values = await retakeForm.validateFields();
+      if (!selectedRetake) return;
+
+      setRetakeModalLoading(true);
+
+      const payload = {
+        semesterId: values.semesterId as string,
+        notes: (values.notes as string | undefined)?.trim() || undefined,
+      };
+
+      const result = await RoadmapServices.planMyRetake(
+        selectedRetake.roadmapId,
+        payload
+      );
+
+      if (!result.success) {
+        message.error(result.message || "Lên kế hoạch học lại thất bại");
+      } else {
+        message.success(result.message || "Đã lên kế hoạch học lại");
+
+        // Refresh lại danh sách môn cần học lại và map CanRetake
+        try {
+          const [retakes, roadmap] = await Promise.all([
+            RoadmapServices.getMyRetakeOptions(),
+            RoadmapServices.getMyRoadmap(),
+          ]);
+
+          setRetakeOptions(retakes.filter((item) => item.isRetake));
+
+        const failedMap: Record<string, string> = {};
+
+          roadmap.semesterGroups.forEach((group) => {
+            group.subjects.forEach((subject) => {
+              if (subject.status === "Failed" && !failedMap[subject.subjectId]) {
+                failedMap[subject.subjectId] = subject.id;
+              }
+            });
+          });
+
+          setFailedRetakeBySubject(failedMap);
+        } catch {
+          // nếu refresh fail thì vẫn giữ state cũ
+        }
+      }
+    } catch (err) {
+      // Nếu là lỗi validate của Form thì bỏ qua
+      if ((err as { errorFields?: unknown }).errorFields) {
+        return;
+      }
+      const msg =
+        (err as { message?: string }).message ||
+        "Không thể lên kế hoạch học lại";
+      message.error(msg);
+    } finally {
+      setRetakeModalLoading(false);
+      setRetakeModalVisible(false);
+      setSelectedRetake(null);
+    }
   };
 
   const getColumns = (): ColumnsType<RoadmapCourse> => [
@@ -374,6 +531,22 @@ const Roadmap: React.FC = () => {
               Đăng ký
             </Button>
           );
+        }
+
+        if (record.status === "Failed") {
+          const roadmapId = failedRetakeBySubject[record.subjectId];
+          if (roadmapId) {
+            return (
+              <Button
+                type="primary"
+                size="small"
+                ghost
+                onClick={() => openRetakeModal(roadmapId, record)}
+              >
+                Học lại
+              </Button>
+            );
+          }
         }
 
         if (record.status === "Locked" || !record.prerequisitesMet) {
@@ -570,6 +743,130 @@ const Roadmap: React.FC = () => {
           </Panel>
         ))}
       </Collapse>
+
+      <Card
+        title="Môn cần học lại"
+        style={{ marginTop: 24 }}
+        bodyStyle={{ paddingTop: 12 }}
+      >
+        {loadingRetakes ? (
+          <div style={{ textAlign: "center", padding: "12px 0" }}>
+            <Spin size="small" />
+          </div>
+        ) : retakeOptions.length === 0 ? (
+          <Empty description="Hiện chưa có môn nào cần học lại" />
+        ) : (
+          <Table<RecommendedSubjectDto>
+            size="small"
+            rowKey={(record) => record.subjectId}
+            pagination={false}
+            columns={[
+              {
+                title: "Mã môn",
+                dataIndex: "subjectCode",
+                key: "subjectCode",
+                width: 120,
+                render: (code: string) => <Text strong>{code}</Text>,
+              },
+              {
+                title: "Tên môn",
+                dataIndex: "subjectName",
+                key: "subjectName",
+              },
+              {
+                title: "Kỳ gợi ý",
+                dataIndex: "semesterName",
+                key: "semesterName",
+                width: 160,
+              },
+              {
+                title: "Lý do",
+                dataIndex: "retakeReason",
+                key: "retakeReason",
+                render: (value: string | null, record: RecommendedSubjectDto) =>
+                  value || record.recommendationReason,
+              },
+              {
+                title: "Lớp gợi ý",
+                dataIndex: "availableClasses",
+                key: "availableClasses",
+                width: 260,
+                render: (classes: RecommendedSubjectDto["availableClasses"]) => {
+                  if (!classes || classes.length === 0) {
+                    return <Text type="secondary">Chưa có lớp mở</Text>;
+                  }
+                  const first = classes[0];
+                  return (
+                    <Space direction="vertical" size={2}>
+                      <Text strong>{first.classCode}</Text>
+                      <Text type="secondary" style={{ fontSize: 12 }}>
+                        {first.schedule}
+                      </Text>
+                    </Space>
+                  );
+                },
+              },
+            ]}
+            dataSource={retakeOptions}
+          />
+        )}
+      </Card>
+
+      <Modal
+        title="Lên kế hoạch học lại"
+        open={retakeModalVisible}
+        onOk={handleSubmitRetake}
+        onCancel={() => {
+          setRetakeModalVisible(false);
+          setSelectedRetake(null);
+        }}
+        confirmLoading={retakeModalLoading}
+        okText="Xác nhận"
+        cancelText="Hủy"
+        destroyOnClose
+      >
+        <Form form={retakeForm} layout="vertical">
+          <Form.Item label="Môn học" style={{ marginBottom: 12 }}>
+            <Input
+              value={selectedRetake?.subjectName}
+              disabled
+              style={{ fontWeight: 500 }}
+            />
+          </Form.Item>
+          <Form.Item
+            label="Kỳ học"
+            name="semesterId"
+            rules={[{ required: true, message: "Vui lòng chọn kỳ học" }]}
+          >
+            <Select
+              placeholder="Chọn kỳ để học lại"
+              showSearch
+              optionFilterProp="children"
+            >
+              {allSemesters.map((sem) => (
+                <Option key={sem.id} value={sem.id}>
+                  {sem.name}
+                </Option>
+              ))}
+            </Select>
+          </Form.Item>
+          <Form.Item
+            label="Ghi chú (tuỳ chọn)"
+            name="notes"
+            rules={[
+              {
+                max: 500,
+                message: "Ghi chú tối đa 500 ký tự",
+              },
+            ]}
+          >
+            <Input.TextArea
+              rows={3}
+              placeholder="Ví dụ: Ưu tiên lớp buổi sáng, tránh trùng lịch thực tập..."
+            />
+          </Form.Item>
+        </Form>
+      </Modal>
     </div>
   );
 };
