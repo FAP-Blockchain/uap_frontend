@@ -170,7 +170,7 @@ const TeacherSchedule: React.FC = () => {
       setError(null);
       try {
         const data = await TeacherServices.getMyWeeklySchedule(
-          monday.toISOString()
+          monday.format("YYYY-MM-DD")
         );
         setWeeklySchedule(data);
       } catch (err) {

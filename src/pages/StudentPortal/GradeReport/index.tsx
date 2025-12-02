@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   Alert,
   Card,
@@ -60,9 +61,12 @@ const GradeReport: React.FC = () => {
   const [gradeData, setGradeData] = useState<GradeRecord[]>([]);
   const [isLoadingGrades, setIsLoadingGrades] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [pendingSubjectId, setPendingSubjectId] = useState<string | null>(null);
 
   const accessToken = useSelector((state: RootState) => state.auth.accessToken);
   const userProfile = useSelector((state: RootState) => state.auth.userProfile);
+  const location = useLocation();
+  const navigate = useNavigate();
 
   const handleLoadSemester = useCallback(async (semesterNumber: number) => {
     setLoadingSemesters((prev) => {
@@ -92,6 +96,22 @@ const GradeReport: React.FC = () => {
       }));
     }
   }, []);
+
+  const ensureSemesterVisible = useCallback(
+    (semesterName?: string | null) => {
+      if (!semesterName || !summary) return;
+      const targetSemester = summary.semesterSummaries.find(
+        (semester) =>
+          semester.semesterName?.toLowerCase() === semesterName.toLowerCase()
+      );
+      if (targetSemester) {
+        const key = String(targetSemester.semesterNumber);
+        setActiveSemesterKey(key);
+        void handleLoadSemester(targetSemester.semesterNumber);
+      }
+    },
+    [summary, handleLoadSemester]
+  );
 
   // Load summary on mount (dùng API roadmap giống trang điểm danh)
   useEffect(() => {
@@ -132,8 +152,8 @@ const GradeReport: React.FC = () => {
   const handleSemesterChange = (key: string | string[]) => {
     if (key === undefined || key === null) {
       setActiveSemesterKey(undefined);
-      return;
-    }
+        return;
+      }
 
     const keyString =
       typeof key === "string"
@@ -151,13 +171,14 @@ const GradeReport: React.FC = () => {
     }
   };
 
-  const loadGradesForSubject = useCallback(async (subjectId: string) => {
+  const loadGradesForSubject = useCallback(
+    async (subjectId: string) => {
     setIsLoadingGrades(true);
-    setError(null);
-    try {
-      const response = await StudentGradeServices.getMyGrades({
+        setError(null);
+        try {
+          const response = await StudentGradeServices.getMyGrades({
         SubjectId: subjectId,
-      });
+          });
 
       const subject =
         response.subjects.find((s) => s.subjectId === subjectId) ||
@@ -167,28 +188,49 @@ const GradeReport: React.FC = () => {
       if (subject) {
         setSelectedSubject(subject);
         setGradeData(transformGradeData(subject));
+          ensureSemesterVisible(subject.semesterName);
       } else {
         setSelectedSubject(null);
         setGradeData([]);
-      }
-    } catch (err) {
-      const errorMessage =
-        (
-          err as {
-            response?: { data?: { message?: string } };
-            message?: string;
           }
-        ).response?.data?.message ||
-        (err as { message?: string }).message ||
+        } catch (err) {
+          const errorMessage =
+            (
+              err as {
+                response?: { data?: { message?: string } };
+                message?: string;
+              }
+            ).response?.data?.message ||
+            (err as { message?: string }).message ||
         "Không thể tải dữ liệu điểm";
-      setError(errorMessage);
-      message.error(errorMessage);
+          setError(errorMessage);
+          message.error(errorMessage);
       setSelectedSubject(null);
       setGradeData([]);
     } finally {
       setIsLoadingGrades(false);
     }
-  }, []);
+    },
+    [ensureSemesterVisible]
+  );
+
+  useEffect(() => {
+    const incomingSubjectId =
+      (location.state as { subjectId?: string } | undefined)?.subjectId ??
+      null;
+    if (incomingSubjectId) {
+      setPendingSubjectId(incomingSubjectId);
+      navigate(location.pathname, { replace: true });
+    }
+  }, [location.pathname, location.state, navigate]);
+
+  useEffect(() => {
+    if (pendingSubjectId) {
+      setSelectedSubjectId(pendingSubjectId);
+      void loadGradesForSubject(pendingSubjectId);
+      setPendingSubjectId(null);
+    }
+  }, [pendingSubjectId, loadGradesForSubject]);
 
   // Transform API grade data to table format
   const transformGradeData = (subjectGrade: SubjectGradeDto): GradeRecord[] => {
@@ -388,12 +430,12 @@ const GradeReport: React.FC = () => {
           </Title>
         </div>
         <Card>
-          <Alert
-            message="Yêu cầu xác thực"
-            description="Vui lòng đăng nhập để xem báo cáo điểm của bạn."
-            type="warning"
-            showIcon
-          />
+            <Alert
+              message="Yêu cầu xác thực"
+              description="Vui lòng đăng nhập để xem báo cáo điểm của bạn."
+              type="warning"
+              showIcon
+            />
         </Card>
       </div>
     );
@@ -425,12 +467,12 @@ const GradeReport: React.FC = () => {
           <Card className="sidebar-card" loading={isLoading}>
             <div className="semester-list">
               {semestersForSidebar.length > 0 ? (
-                <Collapse
+              <Collapse
                   accordion
-                  activeKey={activeSemesterKey}
+                activeKey={activeSemesterKey}
                   onChange={handleSemesterChange}
-                  ghost
-                >
+                ghost
+              >
                   {semestersForSidebar.map((semester) => {
                     const semesterData =
                       semesterDetails[semester.semesterNumber];
@@ -440,52 +482,52 @@ const GradeReport: React.FC = () => {
                       ? getFilteredSubjects(semesterData.subjects)
                       : [];
 
-                    return (
+                  return (
                       <Panel
                         header={semester.semesterName}
                         key={String(semester.semesterNumber)}
                       >
                         {isLoadingSemester ? (
-                          <Spin
-                            size="small"
-                            style={{
-                              display: "block",
-                              textAlign: "center",
-                              padding: "20px 0",
-                            }}
-                          />
+                        <Spin
+                          size="small"
+                          style={{
+                            display: "block",
+                            textAlign: "center",
+                            padding: "20px 0",
+                          }}
+                        />
                         ) : subjects.length === 0 ? (
-                          <Empty
-                            description="Không có môn học"
-                            image={Empty.PRESENTED_IMAGE_SIMPLE}
-                            style={{ padding: "20px 0" }}
-                          />
-                        ) : (
+                        <Empty
+                          description="Không có môn học"
+                          image={Empty.PRESENTED_IMAGE_SIMPLE}
+                          style={{ padding: "20px 0" }}
+                        />
+                      ) : (
                           subjects.map((subject) => (
-                            <div
-                              key={subject.subjectId}
-                              className={`course-item ${
-                                selectedSubjectId === subject.subjectId
-                                  ? "active"
-                                  : ""
-                              }`}
-                              onClick={() =>
-                                handleSubjectClick(subject.subjectId)
-                              }
-                            >
-                              <Text strong className="course-code">
-                                {subject.subjectCode}
-                              </Text>
-                              <Text className="course-name">
-                                {subject.subjectName}
-                              </Text>
-                            </div>
-                          ))
-                        )}
-                      </Panel>
-                    );
-                  })}
-                </Collapse>
+                          <div
+                            key={subject.subjectId}
+                            className={`course-item ${
+                              selectedSubjectId === subject.subjectId
+                                ? "active"
+                                : ""
+                            }`}
+                            onClick={() =>
+                              handleSubjectClick(subject.subjectId)
+                            }
+                          >
+                            <Text strong className="course-code">
+                              {subject.subjectCode}
+                            </Text>
+                            <Text className="course-name">
+                              {subject.subjectName}
+                            </Text>
+                          </div>
+                        ))
+                      )}
+                    </Panel>
+                  );
+                })}
+              </Collapse>
               ) : (
                 <Empty
                   description="Chưa có dữ liệu học kỳ"
@@ -516,36 +558,36 @@ const GradeReport: React.FC = () => {
                 }
               >
                 <Spin spinning={isLoadingGrades}>
-                  {gradeData.length === 0 ? (
-                    <Empty description="Không có dữ liệu điểm" />
-                  ) : (
-                    <Table
-                      columns={columns}
-                      dataSource={gradeData}
-                      rowKey={(record, index) =>
-                        `${record.gradeCategory}-${record.gradeItem}-${index}`
-                      }
-                      pagination={false}
-                      scroll={{ x: 800 }}
-                      size="small"
-                      className="grade-table"
-                      bordered
-                      rowClassName={(record) => {
-                        if (
-                          record.isCourseTotal &&
-                          record.gradeCategory === "TỔNG KẾT MÔN HỌC"
-                        )
-                          return "course-total-row";
-                        if (
-                          record.isCourseTotal &&
-                          record.gradeItem === "TRẠNG THÁI"
-                        )
-                          return "status-row";
-                        if (record.isTotal) return "total-row";
-                        return "";
-                      }}
-                    />
-                  )}
+                {gradeData.length === 0 ? (
+                  <Empty description="Không có dữ liệu điểm" />
+                ) : (
+                  <Table
+                    columns={columns}
+                    dataSource={gradeData}
+                    rowKey={(record, index) =>
+                      `${record.gradeCategory}-${record.gradeItem}-${index}`
+                    }
+                    pagination={false}
+                    scroll={{ x: 800 }}
+                    size="small"
+                    className="grade-table"
+                    bordered
+                    rowClassName={(record) => {
+                      if (
+                        record.isCourseTotal &&
+                        record.gradeCategory === "TỔNG KẾT MÔN HỌC"
+                      )
+                        return "course-total-row";
+                      if (
+                        record.isCourseTotal &&
+                        record.gradeItem === "TRẠNG THÁI"
+                      )
+                        return "status-row";
+                      if (record.isTotal) return "total-row";
+                      return "";
+                    }}
+                  />
+                )}
                 </Spin>
               </Card>
             )}
