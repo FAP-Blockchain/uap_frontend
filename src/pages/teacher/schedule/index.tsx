@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import {
   Alert,
   Badge,
@@ -28,10 +28,12 @@ import {
 import dayjs from "dayjs";
 import weekOfYear from "dayjs/plugin/weekOfYear";
 import TeacherServices from "../../../services/teacher/api.service";
+import { getAllTimeSlots } from "../../../services/admin/timeSlots/api";
 import type {
   ScheduleItemDto,
   WeeklyScheduleDto,
 } from "../../../types/Schedule";
+import type { TimeSlotDto } from "../../../types/TimeSlot";
 import "../../StudentPortal/WeeklyTimetable/WeeklyTimetable.scss";
 import "./index.scss";
 
@@ -51,8 +53,8 @@ type DayKey =
 
 interface TimetableSlot {
   slotIndex: number;
-  time: string;
   label: string;
+  time?: string;
   monday?: ClassInfo | ClassInfo[];
   tuesday?: ClassInfo | ClassInfo[];
   wednesday?: ClassInfo | ClassInfo[];
@@ -90,20 +92,75 @@ const dayMappings: Record<
   Sunday: { key: "sunday", label: "Chủ nhật", shortLabel: "CN" },
 };
 
-const DEFAULT_TIME_SLOTS: TimetableSlot[] = [
-  { slotIndex: 1, time: "07:30 - 09:20", label: "Ca 1" },
-  { slotIndex: 2, time: "09:30 - 11:20", label: "Ca 2" },
-  { slotIndex: 3, time: "12:30 - 14:20", label: "Ca 3" },
-  { slotIndex: 4, time: "14:30 - 16:20", label: "Ca 4" },
-];
-
 const TeacherSchedule: React.FC = () => {
   const navigate = useNavigate();
-  const [selectedWeek, setSelectedWeek] = useState(dayjs());
+  const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // Khôi phục selectedWeek từ URL params hoặc location.state (chỉ một lần khi mount)
+  const getInitialWeek = () => {
+    // Ưu tiên từ location.state (khi quay lại từ classList)
+    if (
+      location.state &&
+      (location.state as { selectedWeek?: string }).selectedWeek
+    ) {
+      const weekFromState = dayjs(
+        (location.state as { selectedWeek: string }).selectedWeek
+      );
+      if (weekFromState.isValid()) {
+        return weekFromState;
+      }
+    }
+    // Sau đó từ URL params
+    const weekParam = searchParams.get("week");
+    if (weekParam) {
+      const weekFromUrl = dayjs(weekParam);
+      if (weekFromUrl.isValid()) {
+        return weekFromUrl;
+      }
+    }
+    // Mặc định là tuần hiện tại
+    return dayjs();
+  };
+
+  const [selectedWeek, setSelectedWeek] = useState(getInitialWeek);
   const [weeklySchedule, setWeeklySchedule] =
     useState<WeeklyScheduleDto | null>(null);
+  const [timeSlots, setTimeSlots] = useState<TimeSlotDto[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Khôi phục selectedWeek khi quay lại từ classList (chỉ chạy khi location.state thay đổi)
+  useEffect(() => {
+    if (
+      location.state &&
+      (location.state as { selectedWeek?: string }).selectedWeek
+    ) {
+      const weekFromState = dayjs(
+        (location.state as { selectedWeek: string }).selectedWeek
+      );
+      if (weekFromState.isValid()) {
+        const weekStr = weekFromState.format("YYYY-MM-DD");
+        const currentWeekStr = selectedWeek.format("YYYY-MM-DD");
+        if (weekStr !== currentWeekStr) {
+          setSelectedWeek(weekFromState);
+        }
+      }
+      // Clear location.state sau khi đã sử dụng để tránh restore lại khi refresh
+      window.history.replaceState({}, document.title);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.state]);
+
+  // Cập nhật URL params khi selectedWeek thay đổi (nhưng không tạo vòng lặp)
+  useEffect(() => {
+    const weekParam = selectedWeek.format("YYYY-MM-DD");
+    const currentWeekParam = searchParams.get("week");
+    if (currentWeekParam !== weekParam) {
+      setSearchParams({ week: weekParam }, { replace: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedWeek]);
 
   const getMondayOfWeek = useCallback((date: dayjs.Dayjs) => {
     const day = date.day();
@@ -128,14 +185,10 @@ const TeacherSchedule: React.FC = () => {
 
   const mapAttendance = useCallback(
     (slot: ScheduleItemDto): ClassInfo["attendance"] => {
-      // Backend semantics:
-      // - hasAttendance === true  => lớp đã được điểm danh (ĐÃ DẠY)
-      // - hasAttendance === false => lớp chưa điểm danh (CHƯA DẠY)
-      if (slot.hasAttendance === true) {
-        return "attended";
-      }
-
-      return "not_yet";
+      if (slot.isPresent === true) return "attended";
+      if (slot.isPresent === false) return "absent";
+      if (slot.hasAttendance) return "not_yet";
+      return undefined;
     },
     []
   );
@@ -190,26 +243,40 @@ const TeacherSchedule: React.FC = () => {
     fetchWeeklySchedule(selectedWeek);
   }, [fetchWeeklySchedule, selectedWeek]);
 
+  // Load full list of time slots so table luôn hiển thị đủ các ca học
+  useEffect(() => {
+    const loadTimeSlots = async () => {
+      try {
+        const slots = await getAllTimeSlots();
+        // Sắp xếp theo startTime để hiển thị đúng thứ tự
+        const sorted = [...slots].sort((a, b) =>
+          a.startTime.localeCompare(b.startTime)
+        );
+        setTimeSlots(sorted);
+      } catch {
+        // Nếu lỗi vẫn fallback dùng data từ schedule
+        setTimeSlots([]);
+      }
+    };
+
+    void loadTimeSlots();
+  }, []);
+
   const getStatusTag = (attendance?: string) => {
     switch (attendance) {
       case "attended":
         return (
           <Tag color="success" icon={<CheckCircleOutlined />}>
-            Đã dạy
+            Đã điểm danh
           </Tag>
         );
       case "absent":
         return (
           <Tag color="error" icon={<CloseCircleOutlined />}>
-            Vắng
+            Chưa điểm danh
           </Tag>
         );
       case "not_yet":
-        return (
-          <Tag color="warning" icon={<ExclamationCircleOutlined />}>
-            Chưa dạy
-          </Tag>
-        );
       default:
         return null;
     }
@@ -233,20 +300,24 @@ const TeacherSchedule: React.FC = () => {
           date: info.date,
           startTime: info.startTime,
           endTime: info.endTime,
+          selectedWeek: selectedWeek.format("YYYY-MM-DD"), // Lưu tuần hiện tại
         },
       });
     },
-    [navigate]
+    [navigate, selectedWeek]
   );
 
   const handleNavigateClass = useCallback(
     (info: ClassInfo, dayKey: string) => {
       const targetId = info.classId || info.courseCode || dayKey;
       navigate(`/teacher/class-list/${targetId}`, {
-        state: { slot: info.rawSlot },
+        state: { 
+          slot: info.rawSlot,
+          selectedWeek: selectedWeek.format("YYYY-MM-DD"), // Lưu tuần hiện tại
+        },
       });
     },
-    [navigate]
+    [navigate, selectedWeek]
   );
 
   const renderClassCell = useCallback(
@@ -285,20 +356,15 @@ const TeacherSchedule: React.FC = () => {
                 </Tooltip>
               </div>
               <div className="course-info">
-                <Text style={{ fontSize: 12 }}>
-                  {info.courseName}
-                  {info.location ? ` • ${info.location}` : ""}
-                </Text>
+                <Text style={{ fontSize: 12 }}>{info.courseName}</Text>
               </div>
               <div className="attendance-status">
                 {getStatusTag(info.attendance)}
               </div>
               <div className="time-info">
-                <Text type="secondary" style={{ fontSize: 11 }}>
-                  {info.date && dayjs(info.date).isValid()
-                    ? dayjs(info.date).format("DD/MM/YYYY")
-                    : "—"}
-                </Text>
+                <span className="time-pill">
+                  {formatTimeRange(info.startTime, info.endTime)}
+                </span>
               </div>
             </div>
           ))}
@@ -309,9 +375,24 @@ const TeacherSchedule: React.FC = () => {
   );
 
   const timetableData = useMemo(() => {
-    if (!weeklySchedule) return DEFAULT_TIME_SLOTS;
+    if (!weeklySchedule) return [];
+
+    // Nếu có danh sách TimeSlots từ backend thì dùng làm khung chính
+    const baseSlots: TimetableSlot[] =
+      timeSlots.length > 0
+        ? timeSlots.map((ts, index) => ({
+            slotIndex: index + 1,
+            label: ts.name || `Slot ${index + 1}`,
+            time: formatTimeRange(ts.startTime, ts.endTime),
+          }))
+        : [];
 
     const slotMap = new Map<string, TimetableSlot>();
+
+    // Khởi tạo map từ baseSlots để luôn có đủ các ca
+    baseSlots.forEach((s) => {
+      slotMap.set(s.label, { ...s });
+    });
 
     weeklySchedule.days.forEach((day) => {
       const dayMeta = dayMappings[day.dayOfWeek];
@@ -325,24 +406,25 @@ const TeacherSchedule: React.FC = () => {
       day.slots.forEach((slot) => {
         const slotDate =
           slot.date && dayjs(slot.date).isValid() ? slot.date : dayDate;
-        const timeSlotKey = slot.timeSlotId || slot.slotId;
-        const startTime = slot.startTime || "00:00:00";
-        const key = `${timeSlotKey}-${startTime}`;
 
-        if (!slotMap.has(key)) {
-          slotMap.set(key, {
+        // Tìm dòng theo TimeSlotName nếu có, nếu không fallback label tự sinh
+        const labelKey = slot.timeSlotName || `Slot-${slot.timeSlotId}`;
+
+        if (!slotMap.has(labelKey)) {
+          slotMap.set(labelKey, {
             slotIndex: slotMap.size + 1,
+            label: labelKey,
             time: formatTimeRange(slot.startTime, slot.endTime),
-            label: slot.timeSlotName || `Ca ${slotMap.size + 1}`,
           });
         }
 
-        const row = slotMap.get(key);
+        const row = slotMap.get(labelKey);
         if (!row) return;
 
         const slotWithDate = { ...slot, date: slotDate };
         const classInfo = convertSlotToClassInfo(slotWithDate, dayDate);
         const existing = row[dayMeta.key];
+
         if (existing) {
           if (Array.isArray(existing)) {
             existing.push(classInfo);
@@ -355,14 +437,12 @@ const TeacherSchedule: React.FC = () => {
       });
     });
 
-    const rows = Array.from(slotMap.values()).sort((a, b) => {
-      const timeA = a.time.split(" - ")[0] || "00:00";
-      const timeB = b.time.split(" - ")[0] || "00:00";
-      return timeA.localeCompare(timeB);
-    });
+    const rows = Array.from(slotMap.values()).sort(
+      (a, b) => a.slotIndex - b.slotIndex
+    );
 
-    return rows.length > 0 ? rows : DEFAULT_TIME_SLOTS;
-  }, [weeklySchedule, convertSlotToClassInfo, formatTimeRange]);
+    return rows;
+  }, [weeklySchedule, timeSlots, convertSlotToClassInfo, formatTimeRange]);
 
   const columns: ColumnsType<TimetableSlot> = useMemo(() => {
     const base: ColumnsType<TimetableSlot> = [
@@ -370,11 +450,10 @@ const TeacherSchedule: React.FC = () => {
         title: "Ca học",
         dataIndex: "slotIndex",
         key: "slotIndex",
-        width: 130,
+        width: 120,
         render: (_: number, record: TimetableSlot) => (
           <div className="time-slot-header">
             <div className="slot-number">{record.label}</div>
-            <div className="slot-time">{record.time}</div>
           </div>
         ),
       },
@@ -431,15 +510,16 @@ const TeacherSchedule: React.FC = () => {
             <Col>
               <div className="week-info">
                 <Title level={4} style={{ margin: 0 }}>
-                  {weeklySchedule?.weekLabel ||
-                    `Tuần: ${getMondayOfWeek(selectedWeek).format(
-                      "DD/MM"
-                    )} - ${getMondayOfWeek(selectedWeek)
-                      .add(6, "day")
-                      .format("DD/MM/YYYY")}`}
+                  {(() => {
+                    const start = getMondayOfWeek(selectedWeek);
+                    const end = start.add(6, "day");
+                    return `Từ ${start.format("DD/MM")} đến ${end.format(
+                      "DD/MM/YYYY"
+                    )}`;
+                  })()}
                 </Title>
                 <Text type="secondary">
-                  Tổng số ca dạy: {weeklySchedule?.totalSlots ?? 0}
+                  Tổng số ca: {weeklySchedule?.totalSlots ?? 0}
                 </Text>
               </div>
             </Col>
@@ -515,9 +595,12 @@ const TeacherSchedule: React.FC = () => {
           </Col>
           <Col>
             <Space>
-              <Badge color="#52c41a" text="Đã dạy - Lớp đã hoàn thành" />
-              <Badge color="#ff4d4f" text="Vắng - Lớp bị hủy/vắng" />
-              <Badge color="#faad14" text="Chưa dạy - Lớp sắp diễn ra" />
+              <Badge
+                color="#52c41a"
+                text="Đã tham gia - Sinh viên đã tham gia lớp học này"
+              />
+              <Badge color="#ff4d4f" text="Vắng mặt - Sinh viên đã vắng mặt" />
+              <Badge color="#faad14" text="Chưa có - Lớp học chưa bắt đầu" />
             </Space>
           </Col>
         </Row>

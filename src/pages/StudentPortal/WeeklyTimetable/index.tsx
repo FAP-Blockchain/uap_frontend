@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import {
   Alert,
   Badge,
@@ -92,12 +92,73 @@ const dayMappings: Record<
 
 const WeeklyTimetable: React.FC = () => {
   const navigate = useNavigate();
-  const [selectedWeek, setSelectedWeek] = useState(dayjs());
+  const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // Khôi phục selectedWeek từ URL params hoặc location.state (chỉ một lần khi mount)
+  const getInitialWeek = () => {
+    // Ưu tiên từ location.state (khi quay lại từ ActivityDetail)
+    if (
+      location.state &&
+      (location.state as { selectedWeek?: string }).selectedWeek
+    ) {
+      const weekFromState = dayjs(
+        (location.state as { selectedWeek: string }).selectedWeek
+      );
+      if (weekFromState.isValid()) {
+        return weekFromState;
+      }
+    }
+    // Sau đó từ URL params
+    const weekParam = searchParams.get("week");
+    if (weekParam) {
+      const weekFromUrl = dayjs(weekParam);
+      if (weekFromUrl.isValid()) {
+        return weekFromUrl;
+      }
+    }
+    // Mặc định là tuần hiện tại
+    return dayjs();
+  };
+
+  const [selectedWeek, setSelectedWeek] = useState(getInitialWeek);
   const [weeklySchedule, setWeeklySchedule] =
     useState<WeeklyScheduleDto | null>(null);
   const [timeSlots, setTimeSlots] = useState<TimeSlotDto[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Khôi phục selectedWeek khi quay lại từ ActivityDetail (chỉ chạy khi location.state thay đổi)
+  useEffect(() => {
+    if (
+      location.state &&
+      (location.state as { selectedWeek?: string }).selectedWeek
+    ) {
+      const weekFromState = dayjs(
+        (location.state as { selectedWeek: string }).selectedWeek
+      );
+      if (weekFromState.isValid()) {
+        const weekStr = weekFromState.format("YYYY-MM-DD");
+        const currentWeekStr = selectedWeek.format("YYYY-MM-DD");
+        if (weekStr !== currentWeekStr) {
+          setSelectedWeek(weekFromState);
+        }
+      }
+      // Clear location.state sau khi đã sử dụng để tránh restore lại khi refresh
+      window.history.replaceState({}, document.title);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.state]);
+
+  // Cập nhật URL params khi selectedWeek thay đổi (nhưng không tạo vòng lặp)
+  useEffect(() => {
+    const weekParam = selectedWeek.format("YYYY-MM-DD");
+    const currentWeekParam = searchParams.get("week");
+    if (currentWeekParam !== weekParam) {
+      setSearchParams({ week: weekParam }, { replace: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedWeek]);
 
   const getMondayOfWeek = useCallback((date: dayjs.Dayjs) => {
     const day = date.day();
@@ -274,7 +335,10 @@ const WeeklyTimetable: React.FC = () => {
             const handleViewDetails = () => {
               const activityId = getActivityId(info, dayKey || "tue");
               navigate(`/student-portal/activity/${activityId}`, {
-                state: { slot: info.rawSlot },
+                state: {
+                  slot: info.rawSlot,
+                  selectedWeek: selectedWeek.format("YYYY-MM-DD"), // Lưu tuần hiện tại
+                },
               });
             };
 
@@ -299,7 +363,7 @@ const WeeklyTimetable: React.FC = () => {
                         handleViewDetails();
                       }}
                     >
-                      Xem tài liệu
+                      Chi tiết lớp
                     </Button>
                   </Tooltip>
                 </div>
@@ -320,7 +384,7 @@ const WeeklyTimetable: React.FC = () => {
         </div>
       );
     },
-    [navigate, formatTimeRange]
+    [navigate, formatTimeRange, selectedWeek]
   );
 
   const timetableData = useMemo(() => {

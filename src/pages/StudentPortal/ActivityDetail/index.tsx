@@ -29,7 +29,9 @@ const ActivityDetail: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const slot = (location.state as { slot?: ScheduleItemDto })?.slot;
+  const state = location.state as { slot?: ScheduleItemDto; selectedWeek?: string } | undefined;
+  const slot = state?.slot;
+  const selectedWeek = state?.selectedWeek;
 
   if (!slot) {
     return (
@@ -45,7 +47,15 @@ const ActivityDetail: React.FC = () => {
             <Button
               type="primary"
               icon={<ArrowLeftOutlined />}
-              onClick={() => navigate("/student-portal/timetable")}
+              onClick={() => {
+                if (selectedWeek) {
+                  navigate("/student-portal/timetable", {
+                    state: { selectedWeek },
+                  });
+                } else {
+                  navigate("/student-portal/timetable");
+                }
+              }}
               style={{ marginTop: 16 }}
             >
               Quay lại thời khóa biểu
@@ -95,7 +105,15 @@ const ActivityDetail: React.FC = () => {
       <div className="detail-header">
         <Button
           icon={<ArrowLeftOutlined />}
-          onClick={() => navigate("/student-portal/timetable")}
+          onClick={() => {
+            if (selectedWeek) {
+              navigate("/student-portal/timetable", {
+                state: { selectedWeek },
+              });
+            } else {
+              navigate("/student-portal/timetable");
+            }
+          }}
           style={{ marginBottom: 16 }}
         >
           Quay lại thời khóa biểu

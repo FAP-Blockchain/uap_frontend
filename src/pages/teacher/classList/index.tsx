@@ -55,6 +55,7 @@ const TeacherClassStudentList: React.FC = () => {
     endTime?: string;
     className?: string;
     room?: string;
+    selectedWeek?: string;
   };
 
   const [searchText, setSearchText] = useState("");
@@ -457,10 +458,18 @@ const TeacherClassStudentList: React.FC = () => {
         <div className="list-header">
           <Button
             icon={<ArrowLeftOutlined />}
-            onClick={() => navigate(-1)}
+            onClick={() => {
+              if (state.selectedWeek) {
+                navigate("/teacher/schedule", {
+                  state: { selectedWeek: state.selectedWeek },
+                });
+              } else {
+                navigate(-1);
+              }
+            }}
             style={{ marginBottom: 16 }}
           >
-            Back
+            Quay lại lịch giảng dạy
           </Button>
 
           <Row
