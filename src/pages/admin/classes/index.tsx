@@ -20,6 +20,7 @@ import {
   Checkbox,
   Divider,
   Empty,
+  Typography,
 } from "antd";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
@@ -30,6 +31,7 @@ import {
   UserOutlined,
   DeleteOutlined,
   ReloadOutlined,
+  EditOutlined,
 } from "@ant-design/icons";
 import "./index.scss";
 import type {
@@ -51,7 +53,11 @@ import { fetchSubjectOfferingsApi } from "../../../services/admin/subjectOfferin
 import { fetchEnrollmentsByClassApi } from "../../../services/admin/enrollments/api";
 import type { TimeSlotDto } from "../../../types/TimeSlot";
 import { getAllTimeSlots } from "../../../services/admin/timeSlots/api";
+import type { SemesterDto } from "../../../types/Semester";
+import { fetchSemestersApi } from "../../../services/admin/semesters/api";
 import dayjs, { Dayjs } from "dayjs";
+
+const { Text } = Typography;
 
 const WEEKDAY_OPTIONS: Array<{ label: string; value: number }> = [
   { label: "Thứ 2", value: 1 },
@@ -136,6 +142,7 @@ const ClassesManagement: React.FC = () => {
   const [form] = Form.useForm<CreateClassRequest>();
   const [manualSlotForm] = Form.useForm<ManualSlotFormValues>();
   const [timeSlots, setTimeSlots] = useState<TimeSlotDto[]>([]);
+  const [semesters, setSemesters] = useState<SemesterDto[]>([]);
   const [currentStep, setCurrentStep] = useState(0);
   const [scheduleEntries, setScheduleEntries] = useState<ScheduleEntry[]>([]);
   const [activeScheduleTab, setActiveScheduleTab] = useState<"auto" | "manual">(
@@ -145,9 +152,13 @@ const ClassesManagement: React.FC = () => {
     startDate: Dayjs;
     slotCount: number;
   }>({
-    startDate: dayjs(),
+    startDate: dayjs().add(7, "day"),
     slotCount: 10,
   });
+  const [autoScheduleMessage, setAutoScheduleMessage] = useState<{
+    type: "success" | "error";
+    text: string;
+  } | null>(null);
   const [autoPatterns, setAutoPatterns] = useState<AutoPattern[]>(
     createDefaultPatterns()
   );
@@ -166,11 +177,12 @@ const ClassesManagement: React.FC = () => {
 
   const resetScheduleBuilder = () => {
     setScheduleEntries([]);
-    setAutoConfig({ startDate: dayjs(), slotCount: 10 });
+    setAutoConfig({ startDate: dayjs().add(7, "day"), slotCount: 10 });
     setAutoPatterns(createDefaultPatterns());
     setActiveScheduleTab("auto");
     manualSlotForm.resetFields();
     setEditingScheduleEntryId(null);
+    setAutoScheduleMessage(null); // Xóa message khi reset
   };
 
   const getTimeSlotById = useCallback(
@@ -261,17 +273,19 @@ const ClassesManagement: React.FC = () => {
 
   const loadInitialData = async () => {
     try {
-      const [offeringsRes, teacherRes, teachersForFilterRes, timeSlotRes] =
+      const [offeringsRes, teacherRes, teachersForFilterRes, timeSlotRes, semestersRes] =
         await Promise.all([
           fetchSubjectOfferingsApi(),
           fetchTeachersApi(),
           fetchTeachersForFilterApi(),
           getAllTimeSlots(),
+          fetchSemestersApi({ pageNumber: 1, pageSize: 100 }),
         ]);
       setSubjectOfferings(offeringsRes);
       setTeachers(teacherRes);
       setTeachersForFilter(teachersForFilterRes);
       setTimeSlots(timeSlotRes);
+      setSemesters(semestersRes.data);
     } catch {
       toast.error("Không thể tải dữ liệu tham chiếu");
     }
@@ -286,21 +300,6 @@ const ClassesManagement: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const offeringSemesterOptions = useMemo(() => {
-    const semesters = Array.from(
-      new Set(subjectOfferings.map((offering) => offering.semesterName))
-    );
-    return semesters.sort((a, b) => a.localeCompare(b));
-  }, [subjectOfferings]);
-
-  useEffect(() => {
-    if (
-      selectedOfferingSemester !== "all" &&
-      !offeringSemesterOptions.includes(selectedOfferingSemester)
-    ) {
-      setSelectedOfferingSemester("all");
-    }
-  }, [offeringSemesterOptions, selectedOfferingSemester]);
 
   const semesterOptions = useMemo(() => {
     const map = new Map<string, string>();
@@ -313,6 +312,21 @@ const ClassesManagement: React.FC = () => {
       .map(([id, name]) => ({ id, name }))
       .sort((a, b) => a.name.localeCompare(b.name));
   }, [subjectOfferings]);
+
+  const filteredSubjectOfferings = useMemo(() => {
+    if (selectedOfferingSemester === "all") {
+      return subjectOfferings;
+    }
+    return subjectOfferings.filter(
+      (offering) => offering.semesterId === selectedOfferingSemester
+    );
+  }, [subjectOfferings, selectedOfferingSemester]);
+
+  // Lấy thông tin học kỳ đã chọn ở Step 1 để hiển thị ở Step 2
+  const selectedSemesterForStep2 = useMemo(() => {
+    if (selectedOfferingSemester === "all") return null;
+    return semesters.find((s) => s.id === selectedOfferingSemester);
+  }, [selectedOfferingSemester, semesters]);
 
   const scheduleTableData = useMemo(
     () =>
@@ -336,14 +350,6 @@ const ClassesManagement: React.FC = () => {
     };
   }, [paginationState.total]);
 
-  const filteredSubjectOfferings = useMemo(() => {
-    if (selectedOfferingSemester === "all") {
-      return subjectOfferings;
-    }
-    return subjectOfferings.filter(
-      (offering) => offering.semesterName === selectedOfferingSemester
-    );
-  }, [subjectOfferings, selectedOfferingSemester]);
 
   const statsCards = [
     {
@@ -612,6 +618,7 @@ const ClassesManagement: React.FC = () => {
         pattern.value === value ? { ...pattern, enabled: checked } : pattern
       )
     );
+    setAutoScheduleMessage(null); // Xóa message khi thay đổi pattern
   };
 
   const handleAutoPatternTimeSlotChange = (
@@ -623,29 +630,69 @@ const ClassesManagement: React.FC = () => {
         pattern.value === value ? { ...pattern, timeSlotId } : pattern
       )
     );
+    setAutoScheduleMessage(null); // Xóa message khi thay đổi slot
   };
 
   const handleGenerateAutoSchedule = () => {
+    // Xóa message trước khi validate
+    setAutoScheduleMessage(null);
+
+    if (!selectedSemesterForStep2) {
+      setAutoScheduleMessage({
+        type: "error",
+        text: "Vui lòng chọn học kỳ ở bước 1",
+      });
+      return;
+    }
     if (!autoConfig.startDate) {
-      toast.error("Vui lòng chọn ngày bắt đầu");
+      setAutoScheduleMessage({
+        type: "error",
+        text: "Vui lòng chọn ngày bắt đầu",
+      });
       return;
     }
     if (autoConfig.slotCount <= 0) {
-      toast.error("Số buổi phải lớn hơn 0");
+      setAutoScheduleMessage({
+        type: "error",
+        text: "Số buổi phải lớn hơn 0",
+      });
       return;
     }
     const activePatterns = autoPatterns.filter(
       (pattern) => pattern.enabled && pattern.timeSlotId
     );
     if (activePatterns.length === 0) {
-      toast.error("Vui lòng chọn ít nhất 1 thứ và slot");
+      setAutoScheduleMessage({
+        type: "error",
+        text: "Vui lòng chọn ít nhất 1 thứ và slot",
+      });
       return;
     }
+
+    const selectedSemester = selectedSemesterForStep2;
+    if (!selectedSemester) {
+      setAutoScheduleMessage({
+        type: "error",
+        text: "Không tìm thấy thông tin học kỳ",
+      });
+      return;
+    }
+
+    const semesterEndDate = dayjs(selectedSemester.endDate);
     const generated: ScheduleEntry[] = [];
     let currentDate = autoConfig.startDate.startOf("day");
     let guard = 0;
 
     while (generated.length < autoConfig.slotCount && guard < 365) {
+      // Kiểm tra nếu ngày vượt quá ngày kết thúc học kỳ
+      if (currentDate.isAfter(semesterEndDate, "day")) {
+        setAutoScheduleMessage({
+          type: "error",
+          text: `Lịch học vượt quá ngày kết thúc học kỳ (${semesterEndDate.format("DD/MM/YYYY")}). Vui lòng điều chỉnh số buổi hoặc ngày bắt đầu.`,
+        });
+        return;
+      }
+
       const pattern = activePatterns.find(
         (item) => item.value === currentDate.day()
       );
@@ -661,17 +708,42 @@ const ClassesManagement: React.FC = () => {
     }
 
     if (generated.length === 0) {
-      toast.error("Không thể sinh lịch với cấu hình hiện tại");
+      setAutoScheduleMessage({
+        type: "error",
+        text: "Không thể sinh lịch với cấu hình hiện tại",
+      });
       return;
     }
 
     setScheduleEntries(sortScheduleEntries(generated));
-    toast.success(`Đã sinh ${generated.length} buổi học`);
+    setAutoScheduleMessage({
+      type: "success",
+      text: `Đã sinh ${generated.length} buổi học`,
+    });
   };
 
   const handleManualSlotSubmit = async () => {
     try {
+      if (!selectedSemesterForStep2) {
+        toast.error("Vui lòng chọn học kỳ ở bước 1 trước khi thêm buổi học");
+        return;
+      }
+
       const values = await manualSlotForm.validateFields();
+      const selectedSemester = selectedSemesterForStep2;
+      
+      if (selectedSemester) {
+        const semesterEndDate = dayjs(selectedSemester.endDate);
+        const entryDate = dayjs(values.date);
+        
+        if (entryDate.isAfter(semesterEndDate, "day")) {
+          toast.error(
+            `Ngày học không được vượt quá ngày kết thúc học kỳ (${semesterEndDate.format("DD/MM/YYYY")})`
+          );
+          return;
+        }
+      }
+
       const baseEntry: ScheduleEntry = {
         id: editingScheduleEntryId ?? generateTempId(),
         date: values.date,
@@ -734,11 +806,51 @@ const ClassesManagement: React.FC = () => {
       const values = await form.validateFields();
       setIsSubmitting(true);
 
+      if (selectedOfferingSemester === "all") {
+        toast.error("Vui lòng chọn học kỳ ở bước 1");
+        setIsSubmitting(false);
+        setCurrentStep(0);
+        return;
+      }
+
+      // Validation: Kiểm tra Subject Offering có thuộc học kỳ đã chọn không
+      const selectedSubjectOffering = subjectOfferings.find(
+        (offering) => offering.id === values.subjectOfferingId
+      );
+      if (selectedSubjectOffering) {
+        if (selectedSubjectOffering.semesterId !== selectedOfferingSemester) {
+          toast.error(
+            `Subject Offering "${selectedSubjectOffering.subjectCode}" không thuộc học kỳ đã chọn. Vui lòng chọn lại Subject Offering hoặc học kỳ.`
+          );
+          setIsSubmitting(false);
+          setCurrentStep(0);
+          return;
+        }
+      }
+
       if (scheduleEntries.length === 0) {
         toast.error("Vui lòng thiết lập lịch học cho lớp");
         setIsSubmitting(false);
         setCurrentStep(1);
         return;
+      }
+
+      // Validation: Kiểm tra các buổi học có vượt quá ngày kết thúc học kỳ không
+      const selectedSemester = semesters.find((s) => s.id === selectedOfferingSemester);
+      if (selectedSemester) {
+        const semesterEndDate = dayjs(selectedSemester.endDate);
+        const invalidEntries = scheduleEntries.filter((entry) =>
+          entry.date.isAfter(semesterEndDate, "day")
+        );
+
+        if (invalidEntries.length > 0) {
+          toast.error(
+            `Có ${invalidEntries.length} buổi học vượt quá ngày kết thúc học kỳ (${semesterEndDate.format("DD/MM/YYYY")}). Vui lòng điều chỉnh lại lịch học.`
+          );
+          setIsSubmitting(false);
+          setCurrentStep(1);
+          return;
+        }
       }
 
       const payload: CreateClassRequest = {
@@ -790,11 +902,15 @@ const ClassesManagement: React.FC = () => {
             allowClear={false}
           >
             <Option value="all">Tất cả kỳ học</Option>
-            {offeringSemesterOptions.map((semester) => (
-              <Option key={semester} value={semester}>
-                {semester}
-              </Option>
-            ))}
+            {semesters
+              .filter((s) => !s.isClosed)
+              .map((semester) => (
+                <Option key={semester.id} value={semester.id}>
+                  {semester.name} (
+                  {dayjs(semester.startDate).format("DD/MM/YYYY")} -{" "}
+                  {dayjs(semester.endDate).format("DD/MM/YYYY")})
+                </Option>
+              ))}
           </Select>
         </Form.Item>
 
@@ -856,26 +972,80 @@ const ClassesManagement: React.FC = () => {
     </div>
   );
 
-  const renderAutoTabContent = () => (
-    <div className="auto-config">
-      <Row gutter={16}>
-        <Col xs={24} sm={12}>
-          <Form layout="vertical">
-            <Form.Item label="Ngày bắt đầu">
-              <DatePicker
-                style={{ width: "100%" }}
-                format="DD/MM/YYYY"
-                value={autoConfig.startDate}
-                onChange={(date) =>
-                  setAutoConfig((prev) => ({
-                    ...prev,
-                    startDate: date || prev.startDate,
-                  }))
+  const renderAutoTabContent = () => {
+    // Tính ngày tối thiểu: sau 1 tuần từ hiện tại
+    const minDate = dayjs().add(7, "day").startOf("day");
+    // Ngày tối đa: endDate của học kỳ đã chọn ở Step 1 (nếu có)
+    const maxDate = selectedSemesterForStep2
+      ? dayjs(selectedSemesterForStep2.endDate).endOf("day")
+      : undefined;
+
+    return (
+      <div className="auto-config">
+        {selectedSemesterForStep2 ? (
+          <div style={{ marginBottom: 16, padding: 12, background: "#f0f5ff", borderRadius: 6 }}>
+            <Text strong style={{ display: "block", marginBottom: 4 }}>
+              Học kỳ: {selectedSemesterForStep2.name}
+            </Text>
+            <Text type="secondary" style={{ fontSize: 13 }}>
+              Thời gian: {dayjs(selectedSemesterForStep2.startDate).format("DD/MM/YYYY")} -{" "}
+              {dayjs(selectedSemesterForStep2.endDate).format("DD/MM/YYYY")}
+            </Text>
+          </div>
+        ) : (
+          <div style={{ marginBottom: 16, padding: 12, background: "#fff7e6", borderRadius: 6 }}>
+            <Text type="warning">
+              Vui lòng chọn học kỳ ở bước 1 trước khi thiết lập lịch học
+            </Text>
+          </div>
+        )}
+
+        <Row gutter={16}>
+          <Col xs={24} sm={12}>
+            <Form layout="vertical">
+              <Form.Item
+                label="Ngày bắt đầu"
+                required
+                validateStatus={
+                  !autoConfig.startDate || !selectedSemesterForStep2 ? "error" : ""
                 }
-              />
-            </Form.Item>
-          </Form>
-        </Col>
+                help={
+                  !selectedSemesterForStep2
+                    ? "Vui lòng chọn học kỳ ở bước 1"
+                    : !autoConfig.startDate
+                    ? "Vui lòng chọn ngày bắt đầu"
+                    : ""
+                }
+              >
+                <DatePicker
+                  style={{ width: "100%" }}
+                  format="DD/MM/YYYY"
+                  value={autoConfig.startDate}
+                  onChange={(date) => {
+                    setAutoConfig((prev) => ({
+                      ...prev,
+                      startDate: date || prev.startDate,
+                    }));
+                    setAutoScheduleMessage(null); // Xóa message khi thay đổi ngày
+                  }}
+                  disabled={!selectedSemesterForStep2}
+                  disabledDate={(current) => {
+                    if (!current) return false;
+                    // Không cho chọn ngày trước 1 tuần từ hiện tại
+                    if (current.isBefore(minDate, "day")) {
+                      return true;
+                    }
+                    // Nếu đã chọn học kỳ, không cho chọn sau endDate
+                    if (maxDate && current.isAfter(maxDate, "day")) {
+                      return true;
+                    }
+                    return false;
+                  }}
+                  placeholder="Chọn ngày bắt đầu (sau 1 tuần từ hôm nay)"
+                />
+              </Form.Item>
+            </Form>
+          </Col>
         <Col xs={24} sm={12}>
           <Form layout="vertical">
             <Form.Item label="Số buổi cần tạo">
@@ -884,12 +1054,13 @@ const ClassesManagement: React.FC = () => {
                 max={40}
                 style={{ width: "100%" }}
                 value={autoConfig.slotCount}
-                onChange={(value) =>
+                onChange={(value) => {
                   setAutoConfig((prev) => ({
                     ...prev,
                     slotCount: Number(value) || prev.slotCount,
-                  }))
-                }
+                  }));
+                  setAutoScheduleMessage(null); // Xóa message khi thay đổi số buổi
+                }}
               />
             </Form.Item>
           </Form>
@@ -931,77 +1102,153 @@ const ClassesManagement: React.FC = () => {
         <Button type="primary" onClick={handleGenerateAutoSchedule}>
           Sinh lịch tự động
         </Button>
+        {autoScheduleMessage && (
+          <div style={{ marginTop: 8 }}>
+            <Text
+              type={autoScheduleMessage.type === "success" ? "success" : "danger"}
+              style={{ fontSize: 13 }}
+            >
+              {autoScheduleMessage.text}
+            </Text>
+          </div>
+        )}
       </div>
     </div>
-  );
+    );
+  };
 
-  const renderManualTabContent = () => (
-    <div className="manual-config">
-      <Form form={manualSlotForm} layout="vertical">
-        <Row gutter={16}>
-          <Col xs={24} md={8}>
-            <Form.Item
-              name="date"
-              label="Ngày học"
-              rules={[{ required: true, message: "Vui lòng chọn ngày học" }]}
-            >
-              <DatePicker style={{ width: "100%" }} format="DD/MM/YYYY" />
-            </Form.Item>
-          </Col>
-          <Col xs={24} md={8}>
-            <Form.Item
-              name="timeSlotId"
-              label="Ca học"
-              rules={[{ required: true, message: "Vui lòng chọn ca học" }]}
-            >
-              <Select placeholder="Chọn slot">
-                {timeSlots.map((slot) => (
-                  <Option key={slot.id} value={slot.id}>
-                    {slot.name} ({slot.startTime} - {slot.endTime})
-                  </Option>
-                ))}
-              </Select>
-            </Form.Item>
-          </Col>
-          <Col xs={24} md={8}>
-            <Form.Item name="substituteTeacherId" label="GV thay thế (nếu có)">
-              <Select placeholder="Chọn giảng viên" allowClear>
-                {teachers.map((teacher) => (
-                  <Option key={teacher.id} value={teacher.id}>
-                    {teacher.fullName}
-                  </Option>
-                ))}
-              </Select>
-            </Form.Item>
-          </Col>
-        </Row>
+  const renderManualTabContent = () => {
+    // Tính ngày tối thiểu: sau 1 tuần từ hiện tại
+    const minDate = dayjs().add(7, "day").startOf("day");
+    // Ngày tối đa: endDate của học kỳ đã chọn ở Step 1 (nếu có)
+    const maxDate = selectedSemesterForStep2
+      ? dayjs(selectedSemesterForStep2.endDate).endOf("day")
+      : undefined;
 
-        <Row gutter={16}>
-          <Col xs={24} md={12}>
-            <Form.Item name="substitutionReason" label="Lý do thay thế">
-              <Input placeholder="Nhập lý do (nếu có)" />
-            </Form.Item>
-          </Col>
-          <Col xs={24} md={12}>
-            <Form.Item name="notes" label="Ghi chú">
-              <Input placeholder="Nhập ghi chú" />
-            </Form.Item>
-          </Col>
-        </Row>
+    return (
+      <div className="manual-config">
+        {selectedSemesterForStep2 ? (
+          <div style={{ marginBottom: 16, padding: 12, background: "#f0f5ff", borderRadius: 6 }}>
+            <Text strong style={{ display: "block", marginBottom: 4 }}>
+              Học kỳ: {selectedSemesterForStep2.name}
+            </Text>
+            <Text type="secondary" style={{ fontSize: 13 }}>
+              Thời gian: {dayjs(selectedSemesterForStep2.startDate).format("DD/MM/YYYY")} -{" "}
+              {dayjs(selectedSemesterForStep2.endDate).format("DD/MM/YYYY")}
+            </Text>
+          </div>
+        ) : (
+          <div style={{ marginBottom: 16, padding: 12, background: "#fff7e6", borderRadius: 6 }}>
+            <Text type="warning">
+              Vui lòng chọn học kỳ ở bước 1 trước khi thiết lập lịch học
+            </Text>
+          </div>
+        )}
 
-        <Space>
-          <Button type="primary" onClick={handleManualSlotSubmit}>
-            {editingScheduleEntryId ? "Cập nhật buổi" : "Thêm buổi"}
-          </Button>
-          {editingScheduleEntryId && (
-            <Button onClick={handleCancelEditScheduleEntry}>
-              Hủy chỉnh sửa
+        <Form form={manualSlotForm} layout="vertical">
+          <Row gutter={16}>
+            <Col xs={24} md={12}>
+              <Form.Item
+                name="date"
+                label="Ngày học"
+                rules={[
+                  { required: true, message: "Vui lòng chọn ngày học" },
+                  {
+                    validator: (_, value) => {
+                      if (!value) return Promise.resolve();
+                      if (!selectedSemesterForStep2) {
+                        return Promise.reject(
+                          new Error("Vui lòng chọn học kỳ ở bước 1")
+                        );
+                      }
+                      if (maxDate && dayjs(value).isAfter(maxDate, "day")) {
+                        return Promise.reject(
+                          new Error(
+                            `Ngày học không được vượt quá ngày kết thúc học kỳ (${maxDate.format("DD/MM/YYYY")})`
+                          )
+                        );
+                      }
+                      return Promise.resolve();
+                    },
+                  },
+                ]}
+              >
+                <DatePicker
+                  style={{ width: "100%" }}
+                  format="DD/MM/YYYY"
+                  disabled={!selectedSemesterForStep2}
+                  disabledDate={(current) => {
+                    if (!current) return false;
+                    // Không cho chọn ngày trước 1 tuần từ hiện tại
+                    if (current.isBefore(minDate, "day")) {
+                      return true;
+                    }
+                    // Nếu đã chọn học kỳ, không cho chọn sau endDate
+                    if (maxDate && current.isAfter(maxDate, "day")) {
+                      return true;
+                    }
+                    return false;
+                  }}
+                  placeholder="Chọn ngày học (sau 1 tuần từ hôm nay)"
+                />
+              </Form.Item>
+            </Col>
+          </Row>
+          <Row gutter={16}>
+            <Col xs={24} md={8}>
+              <Form.Item
+                name="timeSlotId"
+                label="Ca học"
+                rules={[{ required: true, message: "Vui lòng chọn ca học" }]}
+              >
+                <Select placeholder="Chọn slot">
+                  {timeSlots.map((slot) => (
+                    <Option key={slot.id} value={slot.id}>
+                      {slot.name} ({slot.startTime} - {slot.endTime})
+                    </Option>
+                  ))}
+                </Select>
+              </Form.Item>
+            </Col>
+            <Col xs={24} md={8}>
+              <Form.Item name="substituteTeacherId" label="GV thay thế (nếu có)">
+                <Select placeholder="Chọn giảng viên" allowClear>
+                  {teachers.map((teacher) => (
+                    <Option key={teacher.id} value={teacher.id}>
+                      {teacher.fullName}
+                    </Option>
+                  ))}
+                </Select>
+              </Form.Item>
+            </Col>
+          </Row>
+          <Row gutter={16}>
+            <Col xs={24} md={12}>
+              <Form.Item name="substitutionReason" label="Lý do thay thế">
+                <Input placeholder="Nhập lý do (nếu có)" />
+              </Form.Item>
+            </Col>
+            <Col xs={24} md={12}>
+              <Form.Item name="notes" label="Ghi chú">
+                <Input placeholder="Nhập ghi chú" />
+              </Form.Item>
+            </Col>
+          </Row>
+
+          <Space>
+            <Button type="primary" onClick={handleManualSlotSubmit}>
+              {editingScheduleEntryId ? "Cập nhật buổi" : "Thêm buổi"}
             </Button>
-          )}
-        </Space>
-      </Form>
-    </div>
-  );
+            {editingScheduleEntryId && (
+              <Button onClick={handleCancelEditScheduleEntry}>
+                Hủy chỉnh sửa
+              </Button>
+            )}
+          </Space>
+        </Form>
+      </div>
+    );
+  };
 
   const renderScheduleBuilder = () => (
     <div className="schedule-step">
