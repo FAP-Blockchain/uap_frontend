@@ -152,8 +152,8 @@ const GradeReport: React.FC = () => {
   const handleSemesterChange = (key: string | string[]) => {
     if (key === undefined || key === null) {
       setActiveSemesterKey(undefined);
-        return;
-      }
+      return;
+    }
 
     const keyString =
       typeof key === "string"
@@ -171,53 +171,144 @@ const GradeReport: React.FC = () => {
     }
   };
 
+  // Dịch letterGrade sang tiếng Việt
+  const translateLetterGrade = useCallback(
+    (letterGrade: string | null | undefined): string => {
+      if (!letterGrade) return "N/A";
+
+      const gradeMap: Record<string, string> = {
+        "A+": "Xuất sắc",
+        A: "Giỏi",
+        "B+": "Khá giỏi",
+        B: "Khá",
+        "C+": "Trung bình khá",
+        C: "Trung bình",
+        "D+": "Trung bình yếu",
+        D: "Yếu",
+        F: "Kém",
+      };
+
+      return gradeMap[letterGrade.toUpperCase()] || letterGrade;
+    },
+    []
+  );
+
+  // Transform API grade data to table format
+  const transformGradeData = useCallback(
+    (subjectGrade: SubjectGradeDto): GradeRecord[] => {
+      const records: GradeRecord[] = [];
+
+      // Group component grades by category (componentName)
+      const groupedByCategory: Record<string, ComponentGradeDto[]> = {};
+      subjectGrade.componentGrades.forEach((component) => {
+        const category = component.componentName;
+        if (!groupedByCategory[category]) {
+          groupedByCategory[category] = [];
+        }
+        groupedByCategory[category].push(component);
+      });
+
+      // Create records for each category
+      Object.entries(groupedByCategory).forEach(([category, components]) => {
+        // Add individual component grades
+        components.forEach((component) => {
+          records.push({
+            gradeCategory: category,
+            gradeItem: component.componentName,
+            weight: `${component.componentWeight}%`,
+            value: component.score ?? 0,
+            comment: component.letterGrade || undefined,
+          });
+        });
+
+        // Calculate total for this category
+        const categoryTotal = components.reduce((sum, comp) => {
+          return sum + (comp.score ?? 0) * (comp.componentWeight / 100);
+        }, 0);
+        const categoryWeight = components.reduce(
+          (sum, comp) => sum + comp.componentWeight,
+          0
+        );
+
+        records.push({
+          gradeCategory: "",
+          gradeItem: "Tổng",
+          weight: `${categoryWeight}%`,
+          value: categoryTotal.toFixed(2),
+          isTotal: true,
+        });
+      });
+
+      // Add course total
+      if (subjectGrade.averageScore !== null) {
+        records.push({
+          gradeCategory: "TỔNG KẾT MÔN HỌC",
+          gradeItem: "ĐIỂM TRUNG BÌNH",
+          weight: "",
+          value: subjectGrade.averageScore.toFixed(2),
+          isCourseTotal: true,
+        });
+
+        records.push({
+          gradeCategory: "",
+          gradeItem: "ĐIỂM CHỮ",
+          weight: "",
+          value: translateLetterGrade(subjectGrade.finalLetterGrade),
+          isCourseTotal: true,
+        });
+      }
+
+      return records;
+    },
+    [translateLetterGrade]
+  );
+
   const loadGradesForSubject = useCallback(
     async (subjectId: string) => {
-    setIsLoadingGrades(true);
-        setError(null);
-        try {
-          const response = await StudentGradeServices.getMyGrades({
-        SubjectId: subjectId,
-          });
+      setIsLoadingGrades(true);
+      setError(null);
+      try {
+        const response = await StudentGradeServices.getMyGrades({
+          SubjectId: subjectId,
+        });
 
-      const subject =
-        response.subjects.find((s) => s.subjectId === subjectId) ||
-        response.subjects[0] ||
-        null;
+        const subject =
+          response.subjects.find((s) => s.subjectId === subjectId) ||
+          response.subjects[0] ||
+          null;
 
-      if (subject) {
-        setSelectedSubject(subject);
-        setGradeData(transformGradeData(subject));
+        if (subject) {
+          setSelectedSubject(subject);
+          setGradeData(transformGradeData(subject));
           ensureSemesterVisible(subject.semesterName);
-      } else {
+        } else {
+          setSelectedSubject(null);
+          setGradeData([]);
+        }
+      } catch (err) {
+        const errorMessage =
+          (
+            err as {
+              response?: { data?: { message?: string } };
+              message?: string;
+            }
+          ).response?.data?.message ||
+          (err as { message?: string }).message ||
+          "Không thể tải dữ liệu điểm";
+        setError(errorMessage);
+        message.error(errorMessage);
         setSelectedSubject(null);
         setGradeData([]);
-          }
-        } catch (err) {
-          const errorMessage =
-            (
-              err as {
-                response?: { data?: { message?: string } };
-                message?: string;
-              }
-            ).response?.data?.message ||
-            (err as { message?: string }).message ||
-        "Không thể tải dữ liệu điểm";
-          setError(errorMessage);
-          message.error(errorMessage);
-      setSelectedSubject(null);
-      setGradeData([]);
-    } finally {
-      setIsLoadingGrades(false);
-    }
+      } finally {
+        setIsLoadingGrades(false);
+      }
     },
-    [ensureSemesterVisible]
+    [ensureSemesterVisible, transformGradeData]
   );
 
   useEffect(() => {
     const incomingSubjectId =
-      (location.state as { subjectId?: string } | undefined)?.subjectId ??
-      null;
+      (location.state as { subjectId?: string } | undefined)?.subjectId ?? null;
     if (incomingSubjectId) {
       setPendingSubjectId(incomingSubjectId);
       navigate(location.pathname, { replace: true });
@@ -231,73 +322,6 @@ const GradeReport: React.FC = () => {
       setPendingSubjectId(null);
     }
   }, [pendingSubjectId, loadGradesForSubject]);
-
-  // Transform API grade data to table format
-  const transformGradeData = (subjectGrade: SubjectGradeDto): GradeRecord[] => {
-    const records: GradeRecord[] = [];
-
-    // Group component grades by category (componentName)
-    const groupedByCategory: Record<string, ComponentGradeDto[]> = {};
-    subjectGrade.componentGrades.forEach((component) => {
-      const category = component.componentName;
-      if (!groupedByCategory[category]) {
-        groupedByCategory[category] = [];
-      }
-      groupedByCategory[category].push(component);
-    });
-
-    // Create records for each category
-    Object.entries(groupedByCategory).forEach(([category, components]) => {
-      // Add individual component grades
-      components.forEach((component) => {
-        records.push({
-          gradeCategory: category,
-          gradeItem: component.componentName,
-          weight: `${component.componentWeight}%`,
-          value: component.score ?? 0,
-          comment: component.letterGrade || undefined,
-        });
-      });
-
-      // Calculate total for this category
-      const categoryTotal = components.reduce((sum, comp) => {
-        return sum + (comp.score ?? 0) * (comp.componentWeight / 100);
-      }, 0);
-      const categoryWeight = components.reduce(
-        (sum, comp) => sum + comp.componentWeight,
-        0
-      );
-
-      records.push({
-        gradeCategory: "",
-        gradeItem: "Tổng",
-        weight: `${categoryWeight}%`,
-        value: categoryTotal.toFixed(2),
-        isTotal: true,
-      });
-    });
-
-    // Add course total
-    if (subjectGrade.averageScore !== null) {
-      records.push({
-        gradeCategory: "TỔNG KẾT MÔN HỌC",
-        gradeItem: "ĐIỂM TRUNG BÌNH",
-        weight: "",
-        value: subjectGrade.averageScore.toFixed(2),
-        isCourseTotal: true,
-      });
-
-      records.push({
-        gradeCategory: "",
-        gradeItem: "TRẠNG THÁI",
-        weight: "",
-        value: subjectGrade.finalLetterGrade || "N/A",
-        isCourseTotal: true,
-      });
-    }
-
-    return records;
-  };
 
   const handleSubjectClick = (subjectId: string) => {
     setSelectedSubjectId(subjectId);
@@ -332,8 +356,7 @@ const GradeReport: React.FC = () => {
             <Text
               strong
               style={{
-                color:
-                  record.gradeItem === "TRẠNG THÁI" ? "#52c41a" : "#1a94fc",
+                color: record.gradeItem === "ĐIỂM CHỮ" ? "#52c41a" : "#1a94fc",
                 fontSize: 14,
               }}
             >
@@ -367,7 +390,7 @@ const GradeReport: React.FC = () => {
       align: "center",
       render: (value: number | string, record: GradeRecord) => {
         if (record.isCourseTotal) {
-          if (record.gradeItem === "TRẠNG THÁI") {
+          if (record.gradeItem === "ĐIỂM CHỮ") {
             return (
               <Tag color="success" style={{ fontSize: 12, fontWeight: 600 }}>
                 {value}
@@ -391,18 +414,6 @@ const GradeReport: React.FC = () => {
           return <Text style={{ color: "#ff4d4f" }}>{value}</Text>;
         }
         return <Text>{value}</Text>;
-      },
-    },
-    {
-      title: "NHẬN XÉT",
-      dataIndex: "comment",
-      key: "comment",
-      align: "center",
-      render: (comment?: string) => {
-        if (comment === "Absent") {
-          return <Tag color="error">{comment}</Tag>;
-        }
-        return comment ? <Tag color="blue">{comment}</Tag> : null;
       },
     },
   ];
@@ -430,12 +441,12 @@ const GradeReport: React.FC = () => {
           </Title>
         </div>
         <Card>
-            <Alert
-              message="Yêu cầu xác thực"
-              description="Vui lòng đăng nhập để xem báo cáo điểm của bạn."
-              type="warning"
-              showIcon
-            />
+          <Alert
+            message="Yêu cầu xác thực"
+            description="Vui lòng đăng nhập để xem báo cáo điểm của bạn."
+            type="warning"
+            showIcon
+          />
         </Card>
       </div>
     );
@@ -467,12 +478,12 @@ const GradeReport: React.FC = () => {
           <Card className="sidebar-card" loading={isLoading}>
             <div className="semester-list">
               {semestersForSidebar.length > 0 ? (
-              <Collapse
+                <Collapse
                   accordion
-                activeKey={activeSemesterKey}
+                  activeKey={activeSemesterKey}
                   onChange={handleSemesterChange}
-                ghost
-              >
+                  ghost
+                >
                   {semestersForSidebar.map((semester) => {
                     const semesterData =
                       semesterDetails[semester.semesterNumber];
@@ -482,52 +493,52 @@ const GradeReport: React.FC = () => {
                       ? getFilteredSubjects(semesterData.subjects)
                       : [];
 
-                  return (
+                    return (
                       <Panel
                         header={semester.semesterName}
                         key={String(semester.semesterNumber)}
                       >
                         {isLoadingSemester ? (
-                        <Spin
-                          size="small"
-                          style={{
-                            display: "block",
-                            textAlign: "center",
-                            padding: "20px 0",
-                          }}
-                        />
+                          <Spin
+                            size="small"
+                            style={{
+                              display: "block",
+                              textAlign: "center",
+                              padding: "20px 0",
+                            }}
+                          />
                         ) : subjects.length === 0 ? (
-                        <Empty
-                          description="Không có môn học"
-                          image={Empty.PRESENTED_IMAGE_SIMPLE}
-                          style={{ padding: "20px 0" }}
-                        />
-                      ) : (
+                          <Empty
+                            description="Không có môn học"
+                            image={Empty.PRESENTED_IMAGE_SIMPLE}
+                            style={{ padding: "20px 0" }}
+                          />
+                        ) : (
                           subjects.map((subject) => (
-                          <div
-                            key={subject.subjectId}
-                            className={`course-item ${
-                              selectedSubjectId === subject.subjectId
-                                ? "active"
-                                : ""
-                            }`}
-                            onClick={() =>
-                              handleSubjectClick(subject.subjectId)
-                            }
-                          >
-                            <Text strong className="course-code">
-                              {subject.subjectCode}
-                            </Text>
-                            <Text className="course-name">
-                              {subject.subjectName}
-                            </Text>
-                          </div>
-                        ))
-                      )}
-                    </Panel>
-                  );
-                })}
-              </Collapse>
+                            <div
+                              key={subject.subjectId}
+                              className={`course-item ${
+                                selectedSubjectId === subject.subjectId
+                                  ? "active"
+                                  : ""
+                              }`}
+                              onClick={() =>
+                                handleSubjectClick(subject.subjectId)
+                              }
+                            >
+                              <Text strong className="course-code">
+                                {subject.subjectCode}
+                              </Text>
+                              <Text className="course-name">
+                                {subject.subjectName}
+                              </Text>
+                            </div>
+                          ))
+                        )}
+                      </Panel>
+                    );
+                  })}
+                </Collapse>
               ) : (
                 <Empty
                   description="Chưa có dữ liệu học kỳ"
@@ -558,36 +569,36 @@ const GradeReport: React.FC = () => {
                 }
               >
                 <Spin spinning={isLoadingGrades}>
-                {gradeData.length === 0 ? (
-                  <Empty description="Không có dữ liệu điểm" />
-                ) : (
-                  <Table
-                    columns={columns}
-                    dataSource={gradeData}
-                    rowKey={(record, index) =>
-                      `${record.gradeCategory}-${record.gradeItem}-${index}`
-                    }
-                    pagination={false}
-                    scroll={{ x: 800 }}
-                    size="small"
-                    className="grade-table"
-                    bordered
-                    rowClassName={(record) => {
-                      if (
-                        record.isCourseTotal &&
-                        record.gradeCategory === "TỔNG KẾT MÔN HỌC"
-                      )
-                        return "course-total-row";
-                      if (
-                        record.isCourseTotal &&
-                        record.gradeItem === "TRẠNG THÁI"
-                      )
-                        return "status-row";
-                      if (record.isTotal) return "total-row";
-                      return "";
-                    }}
-                  />
-                )}
+                  {gradeData.length === 0 ? (
+                    <Empty description="Không có dữ liệu điểm" />
+                  ) : (
+                    <Table
+                      columns={columns}
+                      dataSource={gradeData}
+                      rowKey={(record, index) =>
+                        `${record.gradeCategory}-${record.gradeItem}-${index}`
+                      }
+                      pagination={false}
+                      scroll={{ x: 800 }}
+                      size="small"
+                      className="grade-table"
+                      bordered
+                      rowClassName={(record) => {
+                        if (
+                          record.isCourseTotal &&
+                          record.gradeCategory === "TỔNG KẾT MÔN HỌC"
+                        )
+                          return "course-total-row";
+                        if (
+                          record.isCourseTotal &&
+                          record.gradeItem === "ĐIỂM CHỮ"
+                        )
+                          return "status-row";
+                        if (record.isTotal) return "total-row";
+                        return "";
+                      }}
+                    />
+                  )}
                 </Spin>
               </Card>
             )}

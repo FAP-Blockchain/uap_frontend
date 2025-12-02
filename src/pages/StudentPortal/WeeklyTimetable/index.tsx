@@ -434,18 +434,18 @@ const WeeklyTimetable: React.FC = () => {
         const row = slotMap.get(labelKey);
         if (!row) return;
 
-        const slotWithDate = { ...slot, date: slotDate };
-        const classInfo = convertSlotToClassInfo(slotWithDate);
-        const existing = row[dayMeta.key];
+          const slotWithDate = { ...slot, date: slotDate };
+          const classInfo = convertSlotToClassInfo(slotWithDate);
+          const existing = row[dayMeta.key];
 
-        if (existing) {
-          if (Array.isArray(existing)) {
-            existing.push(classInfo);
+          if (existing) {
+            if (Array.isArray(existing)) {
+              existing.push(classInfo);
+            } else {
+              row[dayMeta.key] = [existing, classInfo];
+            }
           } else {
-            row[dayMeta.key] = [existing, classInfo];
-          }
-        } else {
-          row[dayMeta.key] = classInfo;
+            row[dayMeta.key] = classInfo;
         }
       });
     });

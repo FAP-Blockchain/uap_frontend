@@ -13,7 +13,6 @@ import {
   Spin,
   Tag,
   Typography,
-  message,
 } from "antd";
 import {
   ArrowLeftOutlined,
@@ -58,6 +57,7 @@ const EnrollList: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [registering, setRegistering] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [api, contextHolder] = notification.useNotification();
 
   const [subjectCode, setSubjectCode] = useState<string>("");
   const [subjectName, setSubjectName] = useState<string>("");
@@ -142,11 +142,47 @@ const EnrollList: React.FC = () => {
             // Format schedule
             const scheduleText = formatSlotsToSchedule(slots);
 
+            // Load enrollment status from localStorage
+            const enrollmentKey = `enrollment_${cls.id}`;
+            const savedEnrollment = localStorage.getItem(enrollmentKey);
+            let enrollmentStatus:
+              | "Pending"
+              | "Approved"
+              | "Rejected"
+              | undefined;
+            let isEnrolled = false;
+
+            if (savedEnrollment) {
+              try {
+                const parsed = JSON.parse(savedEnrollment);
+                if (parsed.status && parsed.timestamp) {
+                  // Check if enrollment is still valid (not expired after 30 days)
+                  const enrollmentDate = dayjs(parsed.timestamp);
+                  const daysSinceEnrollment = dayjs().diff(
+                    enrollmentDate,
+                    "day"
+                  );
+                  if (daysSinceEnrollment < 30) {
+                    enrollmentStatus = parsed.status;
+                    isEnrolled = true;
+                  } else {
+                    // Remove expired enrollment
+                    localStorage.removeItem(enrollmentKey);
+                  }
+                }
+              } catch {
+                // Invalid data, remove it
+                localStorage.removeItem(enrollmentKey);
+              }
+            }
+
             return {
               ...cls,
               slots,
               enrolledCount,
               scheduleText,
+              isEnrolled,
+              enrollmentStatus,
             };
           })
         );
@@ -159,7 +195,6 @@ const EnrollList: React.FC = () => {
           (err as { message?: string })?.message ||
           "Có lỗi xảy ra khi tải dữ liệu";
         setError(errorMessage);
-        message.error(errorMessage);
       } finally {
         setLoading(false);
       }
@@ -233,9 +268,9 @@ const EnrollList: React.FC = () => {
     try {
       const response = await createEnrollment({ classId });
 
-      // Nếu backend trả về cảnh báo không blocking, có thể hiển thị thêm
+      // Nếu backend trả về cảnh báo không blocking, hiển thị thêm
       if (response.warnings && response.warnings.length > 0) {
-        notification.info({
+        api.info({
           message: "Lưu ý khi đăng ký lớp",
           description: response.warnings.join("; "),
           placement: "topRight",
@@ -243,21 +278,25 @@ const EnrollList: React.FC = () => {
         });
       }
 
-      // Show success notification
-      notification.success({
+      // Show success notification với message từ API
+      api.success({
         message: "Đăng ký thành công!",
         description:
           response.message ||
           "Yêu cầu đăng ký của bạn đã được gửi và đang chờ được duyệt bởi quản trị viên.",
         placement: "topRight",
         duration: 5,
-        icon: <CheckCircleOutlined style={{ color: "#10b981" }} />,
+        icon: <CheckCircleOutlined style={{ color: "#52c41a" }} />,
       });
 
-      // Also show message for consistency (ưu tiên message từ backend)
-      message.success(
-        response.message ||
-          "Yêu cầu đăng ký của bạn đã được gửi và đang chờ được duyệt bởi quản trị viên."
+      // Save enrollment status to localStorage
+      const enrollmentKey = `enrollment_${classId}`;
+      localStorage.setItem(
+        enrollmentKey,
+        JSON.stringify({
+          status: "Pending",
+          timestamp: dayjs().toISOString(),
+        })
       );
 
       // Update the class to show enrolled status
@@ -302,16 +341,13 @@ const EnrollList: React.FC = () => {
         (err as { message?: string })?.message ||
         "Không thể đăng ký lớp học. Vui lòng thử lại sau.";
 
-      // Show error notification
-      notification.error({
+      // Show error notification với message từ API
+      api.error({
         message: "Đăng ký thất bại",
         description: errorMessage,
         placement: "topRight",
         duration: 5,
       });
-
-      // Also show message for consistency
-      message.error(errorMessage);
     } finally {
       setRegistering(null);
     }
@@ -360,139 +396,106 @@ const EnrollList: React.FC = () => {
   }
 
   return (
-    <div className="enroll-list-page">
-      <div className="enroll-header">
-        <div className="header-content">
-          <Button
-            icon={<ArrowLeftOutlined />}
-            onClick={handleBack}
-            style={{
-              position: "absolute",
-              top: 24,
-              left: 24,
-              zIndex: 10,
-              background: "rgba(255, 255, 255, 0.2)",
-              borderColor: "rgba(255, 255, 255, 0.3)",
-              color: "#ffffff",
-            }}
-          >
-            Quay lại
-          </Button>
-          <div className="header-title-section">
-            <Text className="header-eyebrow">ĐĂNG KÝ LỚP HỌC</Text>
-            <Title level={2} style={{ margin: 0, color: "#ffffff" }}>
-              {subjectCode} - {subjectName}
-            </Title>
-            {semester && (
-              <Text className="header-description">
-                Học kỳ: {semester.name} (
-                {dayjs(semester.startDate).format("DD/MM/YYYY")} -{" "}
-                {dayjs(semester.endDate).format("DD/MM/YYYY")})
-              </Text>
-            )}
+    <>
+      {contextHolder}
+      <div className="enroll-list-page">
+        <div className="enroll-header">
+          <div className="header-content">
+            <Button
+              icon={<ArrowLeftOutlined />}
+              onClick={handleBack}
+              style={{
+                position: "absolute",
+                top: 24,
+                left: 24,
+                zIndex: 10,
+                background: "rgba(255, 255, 255, 0.2)",
+                borderColor: "rgba(255, 255, 255, 0.3)",
+                color: "#ffffff",
+              }}
+            >
+              Quay lại
+            </Button>
+            <div className="header-title-section">
+              <Text className="header-eyebrow">ĐĂNG KÝ LỚP HỌC</Text>
+              <Title level={2} style={{ margin: 0, color: "#ffffff" }}>
+                {subjectCode} - {subjectName}
+              </Title>
+              {semester && (
+                <Text className="header-description">
+                  Học kỳ: {semester.name} (
+                  {dayjs(semester.startDate).format("DD/MM/YYYY")} -{" "}
+                  {dayjs(semester.endDate).format("DD/MM/YYYY")})
+                </Text>
+              )}
+            </div>
           </div>
         </div>
-      </div>
 
-      {classes.length === 0 ? (
-        <Card className="empty-card">
-          <Empty
-            description={
-              <Text type="secondary">
-                Hiện không có lớp học nào cho môn học này trong học kỳ sắp tới.
-              </Text>
-            }
-          />
-        </Card>
-      ) : (
-        <div className="classes-container">
-          {classes.map((cls) => {
-            const seatsPercent = cls.maxEnrollment
-              ? Math.round((cls.enrolledCount / cls.maxEnrollment) * 100)
-              : 0;
-            const isFull = cls.maxEnrollment
-              ? cls.enrolledCount >= cls.maxEnrollment
-              : false;
-            const availableSeats = cls.maxEnrollment
-              ? cls.maxEnrollment - cls.enrolledCount
-              : 0;
+        {classes.length === 0 ? (
+          <Card className="empty-card">
+            <Empty
+              description={
+                <Text type="secondary">
+                  Hiện không có lớp học nào cho môn học này trong học kỳ sắp
+                  tới.
+                </Text>
+              }
+            />
+          </Card>
+        ) : (
+          <div className="classes-container">
+            {classes.map((cls) => {
+              const seatsPercent = cls.maxEnrollment
+                ? Math.round((cls.enrolledCount / cls.maxEnrollment) * 100)
+                : 0;
+              const isFull = cls.maxEnrollment
+                ? cls.enrolledCount >= cls.maxEnrollment
+                : false;
+              const availableSeats = cls.maxEnrollment
+                ? cls.maxEnrollment - cls.enrolledCount
+                : 0;
 
-            return (
-              <Badge.Ribbon
-                text={isFull ? "Đã đầy" : "Còn chỗ"}
-                color={isFull ? "volcano" : "cyan"}
-                key={cls.id}
-              >
-                <Card className="class-card">
-                  <Row gutter={[24, 24]}>
-                    <Col xs={24} lg={16}>
-                      <Space
-                        direction="vertical"
-                        size={16}
-                        style={{ width: "100%" }}
-                      >
-                        <div>
-                          <Space
-                            size={12}
-                            align="center"
-                            style={{ marginBottom: 8 }}
-                          >
-                            <Text
-                              strong
-                              style={{ fontSize: "20px", color: "#1a94fc" }}
-                            >
-                              {cls.classCode}
-                            </Text>
-                            <Tag
-                              color="blue"
-                              style={{ fontSize: "13px", padding: "4px 12px" }}
-                            >
-                              {cls.credits} tín chỉ
-                            </Tag>
-                          </Space>
-                        </div>
-
-                        <div className="info-row">
-                          <UserOutlined
-                            style={{ color: "#1a94fc", fontSize: "16px" }}
-                          />
+              return (
+                <Badge.Ribbon
+                  text={isFull ? "Đã đầy" : "Còn chỗ"}
+                  color={isFull ? "volcano" : "cyan"}
+                  key={cls.id}
+                >
+                  <Card className="class-card">
+                    <Row gutter={[24, 24]}>
+                      <Col xs={24} lg={16}>
+                        <Space
+                          direction="vertical"
+                          size={16}
+                          style={{ width: "100%" }}
+                        >
                           <div>
-                            <Text type="secondary" style={{ fontSize: "13px" }}>
-                              Giảng viên
-                            </Text>
-                            <div>
-                              <Text strong>{cls.teacherName}</Text>
-                              {cls.teacherCode && (
-                                <Text
-                                  type="secondary"
-                                  style={{ marginLeft: 8 }}
-                                >
-                                  ({cls.teacherCode})
-                                </Text>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="info-row">
-                          <CalendarOutlined
-                            style={{ color: "#1a94fc", fontSize: "16px" }}
-                          />
-                          <div>
-                            <Text type="secondary" style={{ fontSize: "13px" }}>
-                              Lịch học
-                            </Text>
-                            <div>
-                              <Text>
-                                {cls.scheduleText || "Chưa có lịch học"}
+                            <Space
+                              size={12}
+                              align="center"
+                              style={{ marginBottom: 8 }}
+                            >
+                              <Text
+                                strong
+                                style={{ fontSize: "20px", color: "#1a94fc" }}
+                              >
+                                {cls.classCode}
                               </Text>
-                            </div>
+                              <Tag
+                                color="blue"
+                                style={{
+                                  fontSize: "13px",
+                                  padding: "4px 12px",
+                                }}
+                              >
+                                {cls.credits} tín chỉ
+                              </Tag>
+                            </Space>
                           </div>
-                        </div>
 
-                        {cls.slots.length > 0 && (
                           <div className="info-row">
-                            <ClockCircleOutlined
+                            <UserOutlined
                               style={{ color: "#1a94fc", fontSize: "16px" }}
                             />
                             <div>
@@ -500,140 +503,186 @@ const EnrollList: React.FC = () => {
                                 type="secondary"
                                 style={{ fontSize: "13px" }}
                               >
-                                Số ca học
+                                Giảng viên
                               </Text>
                               <div>
-                                    <Text style={{ fontSize: "13px" }}>
-                                  {cls.slots.length} Slot
+                                <Text strong>{cls.teacherName}</Text>
+                                {cls.teacherCode && (
+                                  <Text
+                                    type="secondary"
+                                    style={{ marginLeft: 8 }}
+                                  >
+                                    ({cls.teacherCode})
                                   </Text>
+                                )}
                               </div>
                             </div>
                           </div>
-                        )}
-                      </Space>
-                    </Col>
 
-                    <Col xs={24} lg={8}>
-                      <Space
-                        direction="vertical"
-                        size={16}
-                        style={{ width: "100%" }}
-                      >
-                        <div className="enrollment-info">
-                          <TeamOutlined
-                            style={{ color: "#1a94fc", fontSize: "20px" }}
-                          />
-                          <div style={{ flex: 1 }}>
-                            <Text
-                              type="secondary"
-                              style={{
-                                fontSize: "13px",
-                                display: "block",
-                                marginBottom: 4,
-                              }}
-                            >
-                              Sức chứa
-                            </Text>
-                            <Text
-                              strong
-                              style={{ fontSize: "18px", color: "#1a94fc" }}
-                            >
-                              {cls.enrolledCount}/{cls.maxEnrollment || "N/A"}{" "}
-                              sinh viên
-                            </Text>
-                            <Progress
-                              percent={seatsPercent}
-                              status={isFull ? "exception" : "active"}
-                              strokeColor={{
-                                "0%": "#1a94fc",
-                                "100%": "#0ea5e9",
-                              }}
-                              style={{ marginTop: 8 }}
+                          <div className="info-row">
+                            <CalendarOutlined
+                              style={{ color: "#1a94fc", fontSize: "16px" }}
                             />
-                            <Text
-                              type={isFull ? "danger" : "success"}
+                            <div>
+                              <Text
+                                type="secondary"
+                                style={{ fontSize: "13px" }}
+                              >
+                                Lịch học
+                              </Text>
+                              <div>
+                                <Text>
+                                  {cls.scheduleText || "Chưa có lịch học"}
+                                </Text>
+                              </div>
+                            </div>
+                          </div>
+
+                          {cls.slots.length > 0 && (
+                            <div className="info-row">
+                              <ClockCircleOutlined
+                                style={{ color: "#1a94fc", fontSize: "16px" }}
+                              />
+                              <div>
+                                <Text
+                                  type="secondary"
+                                  style={{ fontSize: "13px" }}
+                                >
+                                  Số ca học
+                                </Text>
+                                <div>
+                                  <Text style={{ fontSize: "13px" }}>
+                                    {cls.slots.length} Slot
+                                  </Text>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </Space>
+                      </Col>
+
+                      <Col xs={24} lg={8}>
+                        <Space
+                          direction="vertical"
+                          size={16}
+                          style={{ width: "100%" }}
+                        >
+                          <div className="enrollment-info">
+                            <TeamOutlined
+                              style={{ color: "#1a94fc", fontSize: "20px" }}
+                            />
+                            <div style={{ flex: 1 }}>
+                              <Text
+                                type="secondary"
+                                style={{
+                                  fontSize: "13px",
+                                  display: "block",
+                                  marginBottom: 4,
+                                }}
+                              >
+                                Sức chứa
+                              </Text>
+                              <Text
+                                strong
+                                style={{ fontSize: "18px", color: "#1a94fc" }}
+                              >
+                                {cls.enrolledCount}/{cls.maxEnrollment || "N/A"}{" "}
+                                sinh viên
+                              </Text>
+                              <Progress
+                                percent={seatsPercent}
+                                status={isFull ? "exception" : "active"}
+                                strokeColor={{
+                                  "0%": "#1a94fc",
+                                  "100%": "#0ea5e9",
+                                }}
+                                style={{ marginTop: 8 }}
+                              />
+                              <Text
+                                type={isFull ? "danger" : "success"}
+                                style={{
+                                  fontSize: "13px",
+                                  display: "block",
+                                  marginTop: 4,
+                                }}
+                              >
+                                {isFull
+                                  ? "Lớp đã đầy"
+                                  : `Còn ${availableSeats} chỗ trống`}
+                              </Text>
+                            </div>
+                          </div>
+
+                          {cls.isEnrolled ? (
+                            <Button
+                              type="default"
+                              size="large"
+                              block
+                              icon={<CheckCircleOutlined />}
+                              disabled
                               style={{
-                                fontSize: "13px",
-                                display: "block",
-                                marginTop: 4,
+                                background:
+                                  cls.enrollmentStatus === "Approved"
+                                    ? "linear-gradient(135deg, #10b981, #059669)"
+                                    : cls.enrollmentStatus === "Rejected"
+                                    ? "linear-gradient(135deg, #ef4444, #dc2626)"
+                                    : "linear-gradient(135deg, #f59e0b, #d97706)",
+                                border: "none",
+                                borderRadius: "12px",
+                                height: "48px",
+                                fontWeight: 600,
+                                fontSize: "16px",
+                                color: "#ffffff",
+                                cursor: "not-allowed",
                               }}
                             >
-                              {isFull
+                              {cls.enrollmentStatus === "Approved"
+                                ? "Đã được duyệt"
+                                : cls.enrollmentStatus === "Rejected"
+                                ? "Đã bị từ chối"
+                                : "Đang chờ duyệt"}
+                            </Button>
+                          ) : (
+                            <Button
+                              type="primary"
+                              size="large"
+                              block
+                              icon={<CheckCircleOutlined />}
+                              loading={registering === cls.id}
+                              disabled={isFull || registering !== null}
+                              onClick={() => handleRegister(cls.id)}
+                              style={{
+                                background: isFull
+                                  ? "#94a3b8"
+                                  : "linear-gradient(135deg, #1a94fc, #0ea5e9)",
+                                border: "none",
+                                borderRadius: "12px",
+                                height: "48px",
+                                fontWeight: 600,
+                                fontSize: "16px",
+                                boxShadow: isFull
+                                  ? "none"
+                                  : "0 4px 12px rgba(26, 148, 252, 0.3)",
+                              }}
+                            >
+                              {registering === cls.id
+                                ? "Đang đăng ký..."
+                                : isFull
                                 ? "Lớp đã đầy"
-                                : `Còn ${availableSeats} chỗ trống`}
-                            </Text>
-                          </div>
-                        </div>
-
-                        {cls.isEnrolled ? (
-                          <Button
-                            type="default"
-                            size="large"
-                            block
-                            icon={<CheckCircleOutlined />}
-                            disabled
-                            style={{
-                              background:
-                                cls.enrollmentStatus === "Approved"
-                                  ? "linear-gradient(135deg, #10b981, #059669)"
-                                  : cls.enrollmentStatus === "Rejected"
-                                  ? "linear-gradient(135deg, #ef4444, #dc2626)"
-                                  : "linear-gradient(135deg, #f59e0b, #d97706)",
-                              border: "none",
-                              borderRadius: "12px",
-                              height: "48px",
-                              fontWeight: 600,
-                              fontSize: "16px",
-                              color: "#ffffff",
-                              cursor: "not-allowed",
-                            }}
-                          >
-                            {cls.enrollmentStatus === "Approved"
-                              ? "Đã được duyệt"
-                              : cls.enrollmentStatus === "Rejected"
-                              ? "Đã bị từ chối"
-                              : "Đang chờ duyệt"}
-                          </Button>
-                        ) : (
-                          <Button
-                            type="primary"
-                            size="large"
-                            block
-                            icon={<CheckCircleOutlined />}
-                            loading={registering === cls.id}
-                            disabled={isFull || registering !== null}
-                            onClick={() => handleRegister(cls.id)}
-                            style={{
-                              background: isFull
-                                ? "#94a3b8"
-                                : "linear-gradient(135deg, #1a94fc, #0ea5e9)",
-                              border: "none",
-                              borderRadius: "12px",
-                              height: "48px",
-                              fontWeight: 600,
-                              fontSize: "16px",
-                              boxShadow: isFull
-                                ? "none"
-                                : "0 4px 12px rgba(26, 148, 252, 0.3)",
-                            }}
-                          >
-                            {registering === cls.id
-                              ? "Đang đăng ký..."
-                              : isFull
-                              ? "Lớp đã đầy"
-                              : "Đăng ký lớp này"}
-                          </Button>
-                        )}
-                      </Space>
-                    </Col>
-                  </Row>
-                </Card>
-              </Badge.Ribbon>
-            );
-          })}
-        </div>
-      )}
-    </div>
+                                : "Đăng ký lớp này"}
+                            </Button>
+                          )}
+                        </Space>
+                      </Col>
+                    </Row>
+                  </Card>
+                </Badge.Ribbon>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </>
   );
 };
 
