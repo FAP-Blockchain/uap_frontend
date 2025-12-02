@@ -189,7 +189,7 @@ const WeeklyTimetable: React.FC = () => {
       setError(null);
       try {
         const data = await StudentServices.getMyWeeklySchedule(
-          monday.toISOString()
+          monday.format("YYYY-MM-DD")
         );
         setWeeklySchedule(data);
       } catch (err) {

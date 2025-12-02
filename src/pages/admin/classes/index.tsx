@@ -202,7 +202,7 @@ const ClassesManagement: React.FC = () => {
     entries: ScheduleEntry[]
   ): CreateClassSlotRequest[] =>
     entries.map((entry) => ({
-      date: entry.date.toISOString(),
+      date: entry.date.format("YYYY-MM-DD"),
       timeSlotId: entry.timeSlotId,
       substituteTeacherId: entry.substituteTeacherId || undefined,
       substitutionReason: entry.substitutionReason?.trim() || undefined,
