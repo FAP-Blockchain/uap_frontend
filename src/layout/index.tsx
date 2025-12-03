@@ -7,6 +7,10 @@ import "./index.scss";
 import SiderComponent from "./siderAdmin";
 import { getUserByIdApi } from "../services/admin/users/api";
 import { getSemesterByIdApi } from "../services/admin/semesters/api";
+import {
+  getCredentialByIdApi,
+  getCredentialRequestByIdApi,
+} from "../services/admin/credentials/api";
 
 const { Content } = Layout;
 
@@ -27,6 +31,12 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({
   const pathname = location.pathname;
   const [userNameMap, setUserNameMap] = useState<Record<string, string>>({});
   const [semesterNameMap, setSemesterNameMap] = useState<
+    Record<string, string>
+  >({});
+  const [credentialNameMap, setCredentialNameMap] = useState<
+    Record<string, string>
+  >({});
+  const [credentialRequestNameMap, setCredentialRequestNameMap] = useState<
     Record<string, string>
   >({});
   const fetchingRef = useRef<Set<string>>(new Set());
@@ -108,7 +118,102 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({
           });
       }
     }
-  }, [pathname, userNameMap, semesterNameMap]);
+
+    // Check if path is /admin/credentials/:credentialId
+    if (
+      paths.length >= 3 &&
+      paths[0] === "admin" &&
+      paths[1] === "credentials"
+    ) {
+      const credentialId = paths[2];
+
+      // Check if it's a UUID and not already fetched or currently fetching
+      if (
+        isUUID(credentialId) &&
+        !credentialNameMap[credentialId] &&
+        !fetchingRef.current.has(`credential-${credentialId}`)
+      ) {
+        fetchingRef.current.add(`credential-${credentialId}`);
+
+        getCredentialByIdApi(credentialId)
+          .then((credential) => {
+            // Use subjectName, semesterName, roadmapName, or certificateType as fallback
+            const credentialName =
+              credential.subjectName ||
+              credential.semesterName ||
+              credential.roadmapName ||
+              credential.certificateType ||
+              credentialId;
+            setCredentialNameMap((prev) => ({
+              ...prev,
+              [credentialId]: credentialName,
+            }));
+            fetchingRef.current.delete(`credential-${credentialId}`);
+          })
+          .catch((error) => {
+            console.error("Failed to fetch credential for breadcrumb:", error);
+            // Fallback to credentialId if fetch fails
+            setCredentialNameMap((prev) => ({
+              ...prev,
+              [credentialId]: credentialId,
+            }));
+            fetchingRef.current.delete(`credential-${credentialId}`);
+          });
+      }
+    }
+
+    // Check if path is /admin/credential-requests/:requestId
+    if (
+      paths.length >= 3 &&
+      paths[0] === "admin" &&
+      paths[1] === "credential-requests"
+    ) {
+      const requestId = paths[2];
+
+      // Check if it's a UUID and not already fetched or currently fetching
+      if (
+        isUUID(requestId) &&
+        !credentialRequestNameMap[requestId] &&
+        !fetchingRef.current.has(`credential-request-${requestId}`)
+      ) {
+        fetchingRef.current.add(`credential-request-${requestId}`);
+
+        getCredentialRequestByIdApi(requestId)
+          .then((request) => {
+            // Use subjectName, semesterName, roadmapName, or studentName + certificateType as fallback
+            const requestName =
+              request.subjectName ||
+              request.semesterName ||
+              request.roadmapName ||
+              `${request.studentName} - ${request.certificateType}` ||
+              requestId;
+            setCredentialRequestNameMap((prev) => ({
+              ...prev,
+              [requestId]: requestName,
+            }));
+            fetchingRef.current.delete(`credential-request-${requestId}`);
+          })
+          .catch((error) => {
+            console.error(
+              "Failed to fetch credential request for breadcrumb:",
+              error
+            );
+            // Fallback to requestId if fetch fails
+            setCredentialRequestNameMap((prev) => ({
+              ...prev,
+              [requestId]: requestId,
+            }));
+            fetchingRef.current.delete(`credential-request-${requestId}`);
+          });
+      }
+    }
+  }, [
+    pathname,
+    userNameMap,
+    semesterNameMap,
+    credentialNameMap,
+    credentialRequestNameMap,
+  ]);
 
   // Generate default breadcrumb items based on the current path if not provided
   const generateDefaultBreadcrumbs = () => {
@@ -131,6 +236,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({
       dashboard: "Bảng điều khiển",
       roadmap: "Lộ trình học tập",
       credentials: "Chứng chỉ của tôi",
+      "credential-requests": "Đơn yêu cầu chứng chỉ",
       "request-credential": "Yêu cầu chứng chỉ",
       timetable: "Thời khóa biểu",
       "attendance-report": "Báo cáo điểm danh",
@@ -214,11 +320,31 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({
         ) {
           displayName = semesterNameMap[path];
         }
-        // Fallback: try both maps (shouldn't happen, but safe)
+        // Check context: if previous path is "credentials", use credentialNameMap
+        else if (
+          index > 0 &&
+          paths[index - 1] === "credentials" &&
+          credentialNameMap[path]
+        ) {
+          displayName = credentialNameMap[path];
+        }
+        // Check context: if previous path is "credential-requests", use credentialRequestNameMap
+        else if (
+          index > 0 &&
+          paths[index - 1] === "credential-requests" &&
+          credentialRequestNameMap[path]
+        ) {
+          displayName = credentialRequestNameMap[path];
+        }
+        // Fallback: try all maps (shouldn't happen, but safe)
         else if (userNameMap[path]) {
           displayName = userNameMap[path];
         } else if (semesterNameMap[path]) {
           displayName = semesterNameMap[path];
+        } else if (credentialNameMap[path]) {
+          displayName = credentialNameMap[path];
+        } else if (credentialRequestNameMap[path]) {
+          displayName = credentialRequestNameMap[path];
         } else {
           // UUID but no mapping yet, use default formatting
           displayName =
