@@ -1,7 +1,7 @@
 @use "../../../styles/variables" as *;
 
-// Public Portal Layout Styles
-.public-portal-layout {
+// Public Portal Layout Styles (Old - not used anymore, kept for reference)
+.public-portal-layout-old {
   height: 100vh;
   overflow: hidden;
   background: $gradient-blue;
@@ -149,7 +149,7 @@
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
     overflow-y: auto;
     overflow-x: hidden;
-    max-height: calc(100vh - 64px - 48px); // 64px header, 48px margin
+    // Removed max-height to allow full scrolling
 
     // Custom scrollbar
     &::-webkit-scrollbar {
@@ -197,7 +197,7 @@
   // Global Ant Design customizations for Public Portal
   .ant-layout {
     background: transparent;
-    overflow: hidden;
+    // Removed overflow: hidden to allow scrolling
   }
 
   .ant-menu-inline {

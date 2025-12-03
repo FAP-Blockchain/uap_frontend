@@ -10,5 +10,13 @@ html,
 body,
 #root {
   height: 100%;
+  // Allow scrolling for public portal pages
+  overflow: auto;
+}
+
+// For admin/student/teacher portals, keep overflow hidden
+body:has(.admin-content-wrapper),
+body:has(.student-portal),
+body:has(.teacher-portal) {
   overflow: hidden;
 }

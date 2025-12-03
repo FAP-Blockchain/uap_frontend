@@ -29,6 +29,7 @@ import { Outlet } from "react-router-dom";
 import type { Permission, RoleCode } from "../constants/roles";
 import { PERMISSIONS, ROLE_CODES } from "../constants/roles";
 import AdminLayout from "../layout";
+import PublicPortalLayout from "../layout/PublicPortalLayout";
 
 // Lazy load all page components for code splitting
 const ClassesManagement = lazy(() => import("../pages/admin/classes"));
@@ -527,11 +528,7 @@ export const teacherRoutes: RouteConfig = {
 // Keeping this for reference but routes are now at root level
 export const publicPortalRoutes: RouteConfig = {
   path: "/public-portal",
-  element: (
-    <AdminLayout>
-      <Outlet />
-    </AdminLayout>
-  ),
+  element: <PublicPortalLayout />,
   children: [
     {
       path: "",

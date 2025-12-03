@@ -15,6 +15,7 @@ import {
   type RouteConfig,
 } from "./config/appRoutes";
 import { setNavigate } from "./utils/navigation";
+import PublicPortalLayout from "./layout/PublicPortalLayout";
 
 // Lazy load auth pages
 const Login = lazy(() => import("./pages/Login"));
@@ -83,10 +84,6 @@ function App() {
       element: <Root />,
       children: [
         {
-          index: true,
-          element: wrapWithSuspense(<PublicHome />),
-        },
-        {
           path: "/login",
           element: wrapWithSuspense(<Login />),
         },
@@ -98,26 +95,40 @@ function App() {
           path: "/change-password",
           element: wrapWithSuspense(<ChangePassword />),
         },
-        // Public Portal Routes (at root level)
+        // Public Portal Routes with Layout
         {
-          path: "/verify",
-          element: wrapWithSuspense(<VerificationPortal />),
-        },
-        {
-          path: "/results",
-          element: wrapWithSuspense(<VerificationResults />),
-        },
-        {
-          path: "/certificates/verify/:credentialId",
-          element: wrapWithSuspense(<VerificationResults />),
-        },
-        {
-          path: "/history",
-          element: wrapWithSuspense(<VerificationHistory />),
-        },
-        {
-          path: "/help",
-          element: wrapWithSuspense(<AboutHelp />),
+          path: "/",
+          element: <PublicPortalLayout />,
+          children: [
+            {
+              index: true,
+              element: wrapWithSuspense(<PublicHome />),
+            },
+            {
+              path: "home",
+              element: wrapWithSuspense(<PublicHome />),
+            },
+            {
+              path: "verify",
+              element: wrapWithSuspense(<VerificationPortal />),
+            },
+            {
+              path: "results",
+              element: wrapWithSuspense(<VerificationResults />),
+            },
+            {
+              path: "certificates/verify/:credentialId",
+              element: wrapWithSuspense(<VerificationResults />),
+            },
+            {
+              path: "history",
+              element: wrapWithSuspense(<VerificationHistory />),
+            },
+            {
+              path: "help",
+              element: wrapWithSuspense(<AboutHelp />),
+            },
+          ],
         },
         // Process all route configs with Suspense
         processRoute(studentPortalRoutes),

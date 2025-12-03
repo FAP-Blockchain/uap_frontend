@@ -86,12 +86,6 @@ const PublicHome: React.FC = () => {
     },
   ];
 
-  const trustedInstitutions = [
-    { name: "FPT University", icon: "🎓", students: "50K+" },
-    { name: "VNU", icon: "", students: "30K+" },
-    { name: "RMIT Vietnam", icon: "🌏", students: "25K+" },
-    { name: "UEH", icon: "📊", students: "40K+" },
-  ];
 
   return (
     <div className="public-home">
@@ -282,35 +276,6 @@ const PublicHome: React.FC = () => {
         </Row>
       </Card>
 
-      {/* Trusted Institutions */}
-      <Card className="section-card">
-        <Title level={2} style={{ textAlign: "center", marginBottom: 32 }}>
-          Được tin tưởng bởi các tổ chức hàng đầu
-        </Title>
-        <Row gutter={[24, 24]} justify="center">
-          {trustedInstitutions.map((institution, index) => (
-            <Col xs={12} sm={6} key={index}>
-              <Card hoverable className="institution-card">
-                <div style={{ textAlign: "center" }}>
-                  <div style={{ fontSize: 48, marginBottom: 16 }}>
-                    {institution.icon}
-                  </div>
-                  <Title level={5} style={{ margin: "0 0 8px" }}>
-                    {institution.name}
-                  </Title>
-                  <Text type="secondary">{institution.students} Sinh viên</Text>
-                </div>
-              </Card>
-            </Col>
-          ))}
-        </Row>
-
-        <div style={{ textAlign: "center", marginTop: 32 }}>
-          <Text type="secondary">
-            Tham gia cùng 500+ tổ chức trên toàn thế giới tin tưởng hệ thống xác thực của chúng tôi
-          </Text>
-        </div>
-      </Card>
     </div>
   );
 };
