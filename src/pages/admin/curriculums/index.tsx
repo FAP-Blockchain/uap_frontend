@@ -29,7 +29,6 @@ import {
   PlusOutlined,
   ReloadOutlined,
   SearchOutlined,
-  SettingOutlined,
 } from "@ant-design/icons";
 import { toast } from "react-toastify";
 import type {
@@ -403,53 +402,36 @@ const CurriculumManagementPage: React.FC = () => {
           </Space>
         </div>
 
-        <div className="stats-row">
-          <div className="stat-item total">
-            <div className="stat-icon">
-              <AppstoreOutlined />
-            </div>
-            <div>
-              <div className="stat-value">{stats.total}</div>
-              <div className="stat-label">Khung chương trình</div>
-            </div>
+        <div className="stats-compact">
+          <div className="stat-chip total">
+            <span className="value">{stats.total}</span>
+            <span className="label">Khung chương trình</span>
           </div>
-          <div className="stat-item credits">
-            <div className="stat-icon">
-              <SettingOutlined />
-            </div>
-            <div>
-              <div className="stat-value">{stats.totalCredits}</div>
-              <div className="stat-label">Tổng tín chỉ</div>
-            </div>
+          <div className="stat-chip credits">
+            <span className="value">{stats.totalCredits}</span>
+            <span className="label">Tổng tín chỉ</span>
           </div>
-          <div className="stat-item subjects">
-            <div className="stat-icon">
-              <BookOutlined />
-            </div>
-            <div>
-              <div className="stat-value">{stats.totalSubjects}</div>
-              <div className="stat-label">Môn học</div>
-            </div>
+          <div className="stat-chip subjects">
+            <span className="value">{stats.totalSubjects}</span>
+            <span className="label">Môn học</span>
           </div>
-          <div className="stat-item students">
-            <div className="stat-icon">
-              <AppstoreOutlined />
-            </div>
-            <div>
-              <div className="stat-value">{stats.totalStudents}</div>
-              <div className="stat-label">Sinh viên áp dụng</div>
-            </div>
+          <div className="stat-chip students">
+            <span className="value">{stats.totalStudents}</span>
+            <span className="label">Sinh viên áp dụng</span>
           </div>
         </div>
 
         <div className="filter-row">
           <Search
-            allowClear
             placeholder="Tìm theo tên, mã hoặc mô tả khung"
-            onSearch={(value) => setSearchTerm(value)}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            allowClear
             value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            onSearch={(value) => setSearchTerm(value)}
             prefix={<SearchOutlined />}
+            size="large"
+            enterButton="Tìm kiếm"
+            className="curriculum-search-input"
           />
           <Select
             value={sortOption}
@@ -471,6 +453,7 @@ const CurriculumManagementPage: React.FC = () => {
           locale={{
             emptyText: <Empty description="Chưa có khung chương trình" />,
           }}
+          className="custom-table"
         />
       </Card>
 
