@@ -1,12 +1,13 @@
-import React from "react";
+import React, { useState } from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
-import { Layout, Menu, Button, Space, Typography } from "antd";
+import { Layout, Menu, Button, Space, Typography, Drawer } from "antd";
 import {
   HomeOutlined,
   SafetyCertificateOutlined,
   HistoryOutlined,
   QuestionCircleOutlined,
   LoginOutlined,
+  MenuOutlined,
 } from "@ant-design/icons";
 import "./PublicPortalLayout.scss";
 
@@ -16,6 +17,7 @@ const { Title, Text } = Typography;
 const PublicPortalLayout: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Menu items cho Public Portal
   const menuItems = [
@@ -61,6 +63,8 @@ const PublicPortalLayout: React.FC = () => {
     } else {
       navigate(`/${key}`);
     }
+    // Close mobile menu after navigation
+    setMobileMenuOpen(false);
   };
 
   const handleLogin = () => {
@@ -68,7 +72,7 @@ const PublicPortalLayout: React.FC = () => {
   };
 
   return (
-    <Layout 
+    <Layout
       className="public-portal-layout"
       style={{ minHeight: "100vh", height: "auto" }}
     >
@@ -95,10 +99,17 @@ const PublicPortalLayout: React.FC = () => {
 
           <div className="header-right">
             <Button
+              className="mobile-menu-button"
+              type="text"
+              icon={<MenuOutlined />}
+              onClick={() => setMobileMenuOpen(true)}
+            />
+            <Button
               type="primary"
               icon={<LoginOutlined />}
               size="large"
               onClick={handleLogin}
+              className="login-button"
             >
               Đăng nhập
             </Button>
@@ -106,7 +117,45 @@ const PublicPortalLayout: React.FC = () => {
         </div>
       </Header>
 
-      <Content 
+      {/* Mobile Drawer Menu */}
+      <Drawer
+        title={
+          <div className="drawer-header">
+            <SafetyCertificateOutlined className="drawer-logo-icon" />
+            <span className="drawer-logo-text">Xác thực Chứng chỉ</span>
+          </div>
+        }
+        placement="left"
+        onClose={() => setMobileMenuOpen(false)}
+        open={mobileMenuOpen}
+        className="mobile-menu-drawer"
+        width={280}
+        bodyStyle={{ padding: 0, paddingBottom: 80 }}
+      >
+        <Menu
+          mode="inline"
+          selectedKeys={[getCurrentKey()]}
+          items={menuItems}
+          onClick={handleMenuClick}
+          className="mobile-nav-menu"
+        />
+        <div className="drawer-footer">
+          <Button
+            type="primary"
+            icon={<LoginOutlined />}
+            block
+            size="large"
+            onClick={() => {
+              handleLogin();
+              setMobileMenuOpen(false);
+            }}
+          >
+            Đăng nhập
+          </Button>
+        </div>
+      </Drawer>
+
+      <Content
         className="public-portal-content"
         style={{ overflow: "visible", height: "auto" }}
       >
@@ -119,8 +168,8 @@ const PublicPortalLayout: React.FC = () => {
             <div className="footer-section">
               <Title level={5}>Về chúng tôi</Title>
               <Text type="secondary">
-                Hệ thống xác thực chứng chỉ dựa trên công nghệ blockchain,
-                đảm bảo tính minh bạch và bảo mật.
+                Hệ thống xác thực chứng chỉ dựa trên công nghệ blockchain, đảm
+                bảo tính minh bạch và bảo mật.
               </Text>
             </div>
 
@@ -161,4 +210,3 @@ const PublicPortalLayout: React.FC = () => {
 };
 
 export default PublicPortalLayout;
-

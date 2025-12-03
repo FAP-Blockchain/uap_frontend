@@ -263,22 +263,73 @@
   }
 
   // Responsive Design
-  @media (max-width: 768px) {
+  @media (max-width: 1024px) {
     .hero-card {
-      .hero-login-btn-wrapper {
-        top: 12px;
-        right: 16px;
+      .ant-card-body {
+        padding: 40px 32px;
+      }
+    }
+
+    .section-card {
+      .ant-card-body {
+        padding: 32px;
+      }
+    }
+  }
+
+  @media (max-width: 768px) {
+    padding: 0;
+
+    .hero-card {
+      margin-bottom: 32px;
+      border-radius: 0;
+
+      .ant-card-body {
+        padding: 24px 16px;
       }
 
-      .hero-login-btn {
-        height: 36px;
-        padding: 0 18px;
+      .hero-title {
+        font-size: 28px;
+        margin-bottom: 16px;
+      }
+
+      .hero-description {
         font-size: 14px;
+        margin-bottom: 24px;
+      }
+
+      .cta-button {
+        height: 44px;
+        padding: 0 24px;
+        font-size: 14px;
+        width: 100%;
+        margin-bottom: 12px;
+      }
+
+      .hero-stats {
+        margin-top: 24px;
+        padding-top: 24px;
+
+        .ant-space {
+          width: 100%;
+          justify-content: space-around;
+
+          .ant-space-item {
+            flex: 1;
+            min-width: 100px;
+          }
+        }
+
+        .stat-item {
+          .ant-typography {
+            font-size: 20px !important;
+          }
+        }
       }
     }
 
     .hero-visual {
-      margin-top: 32px;
+      margin-top: 24px;
 
       .ant-avatar {
         width: 120px !important;
@@ -288,15 +339,23 @@
           font-size: 48px !important;
         }
       }
+
+      .floating-badges {
+        display: none;
+      }
     }
 
-    .hero-stats {
-      .ant-space {
-        justify-content: center;
+    .section-card {
+      margin-bottom: 32px;
+      border-radius: 0;
 
-        .ant-space-item {
-          flex: 1;
-        }
+      .ant-card-body {
+        padding: 20px 16px;
+      }
+
+      .ant-typography-title-2 {
+        font-size: 24px;
+        margin-bottom: 24px;
       }
     }
 
@@ -306,6 +365,65 @@
 
         .ant-steps-item {
           text-align: center;
+          margin-bottom: 16px;
+
+          .ant-steps-item-title {
+            font-size: 14px;
+          }
+
+          .ant-steps-item-description {
+            font-size: 12px;
+          }
+        }
+      }
+    }
+
+    .feature-card {
+      margin-bottom: 16px;
+
+      .ant-card-body {
+        padding: 24px 16px;
+      }
+
+      .anticon {
+        font-size: 36px !important;
+      }
+
+      .ant-typography-title-4 {
+        font-size: 16px;
+        margin: 12px 0 8px;
+      }
+    }
+
+    // Statistics row
+    .ant-row {
+      margin-bottom: 16px !important;
+
+      .ant-col {
+        margin-bottom: 12px;
+      }
+    }
+  }
+
+  @media (max-width: 576px) {
+    .hero-card {
+      .hero-title {
+        font-size: 24px;
+      }
+
+      .hero-description {
+        font-size: 13px;
+      }
+    }
+
+    .hero-stats {
+      .stat-item {
+        .ant-typography {
+          font-size: 18px !important;
+        }
+
+        .ant-typography-caption {
+          font-size: 11px;
         }
       }
     }

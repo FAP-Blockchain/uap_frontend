@@ -373,46 +373,73 @@
   }
 
   // Responsive design
+  @media (max-width: 1024px) {
+    .help-content {
+      .help-tabs {
+        .ant-tabs-content {
+          padding: 24px;
+        }
+      }
+    }
+
+    .contact-card,
+    .feature-card {
+      height: auto;
+    }
+  }
+
   @media (max-width: 768px) {
+    padding: 0;
+
     .page-header {
-      padding: 16px;
+      padding: 20px 16px;
       margin: 0 -24px 24px;
       border-radius: 0;
+
+      .ant-typography-title-2 {
+        font-size: 20px;
+        margin-bottom: 8px;
+      }
+
+      .ant-typography-caption {
+        font-size: 14px;
+      }
     }
 
     .help-content {
+      border-radius: 0;
+      margin: 0 -24px;
+
       .help-tabs {
         .ant-tabs-nav {
-          padding: 0 16px;
+          padding: 0 8px;
+
+          .ant-tabs-tab {
+            padding: 12px 8px;
+            font-size: 13px;
+
+            .anticon {
+              font-size: 14px;
+            }
+          }
         }
 
         .ant-tabs-content {
-          padding: 24px 16px;
+          padding: 20px 16px;
         }
       }
     }
 
-    .contact-card {
-      height: auto;
-      margin-bottom: 16px;
-
-      .ant-card-body {
-        padding: 16px;
-      }
-    }
-
-    .feature-card {
-      height: auto;
-      margin-bottom: 16px;
-
-      .ant-card-body {
-        padding: 24px 16px;
-      }
-    }
-
+    // FAQ Section
     .faq-section {
+      .ant-typography-title-3 {
+        font-size: 18px;
+      }
+
       .ant-collapse {
         .ant-collapse-item {
+          margin-bottom: 12px;
+
           .ant-collapse-header {
             padding: 12px 16px;
             font-size: 14px;
@@ -420,7 +447,196 @@
 
           .ant-collapse-content {
             .ant-collapse-content-box {
-              padding: 16px;
+              padding: 16px 12px;
+
+              .ant-typography-paragraph {
+                font-size: 13px;
+                margin-bottom: 12px;
+              }
+
+              ul {
+                font-size: 13px;
+                padding-left: 20px;
+              }
+            }
+          }
+        }
+      }
+
+      .ant-list {
+        .ant-list-item {
+          padding: 12px 0;
+
+          .ant-list-item-meta {
+            .ant-list-item-meta-avatar {
+              .ant-avatar {
+                width: 32px;
+                height: 32px;
+              }
+            }
+
+            .ant-list-item-meta-title {
+              font-size: 14px;
+            }
+
+            .ant-list-item-meta-description {
+              font-size: 12px;
+            }
+          }
+        }
+      }
+    }
+
+    // Contact Section
+    .contact-section {
+      .ant-typography-title-3 {
+        font-size: 18px;
+      }
+
+      .ant-row {
+        .ant-col {
+          margin-bottom: 12px;
+        }
+      }
+
+      .contact-card {
+        height: auto;
+        margin-bottom: 12px;
+
+        .ant-card-body {
+          padding: 16px;
+        }
+
+        .ant-avatar {
+          width: 40px;
+          height: 40px;
+
+          .anticon {
+            font-size: 20px;
+          }
+        }
+
+        .ant-typography-title-5 {
+          font-size: 14px;
+        }
+
+        .ant-typography {
+          font-size: 13px;
+        }
+      }
+
+      .ant-card {
+        .ant-typography-title-4 {
+          font-size: 18px;
+        }
+
+        .ant-typography-paragraph {
+          font-size: 13px;
+        }
+
+        .ant-btn {
+          width: 100%;
+        }
+      }
+    }
+
+    // API Section
+    .api-section {
+      .ant-typography-title-3 {
+        font-size: 18px;
+      }
+
+      .ant-card {
+        margin-bottom: 16px;
+
+        .ant-card-head-title {
+          font-size: 16px;
+        }
+
+        .ant-typography-paragraph {
+          font-size: 13px;
+        }
+      }
+
+      .ant-list {
+        .ant-list-item {
+          padding: 12px;
+
+          .ant-tag {
+            font-size: 11px;
+            padding: 2px 8px;
+          }
+
+          .ant-typography-code {
+            font-size: 11px;
+          }
+
+          .ant-typography {
+            font-size: 12px;
+          }
+        }
+      }
+
+      pre {
+        font-size: 11px;
+        padding: 12px;
+        overflow-x: auto;
+      }
+    }
+
+    // About Section
+    .about-section {
+      .ant-typography-title-3 {
+        font-size: 18px;
+      }
+
+      .ant-row {
+        .ant-col {
+          margin-bottom: 16px;
+        }
+      }
+
+      .feature-card {
+        height: auto;
+        margin-bottom: 16px;
+
+        .ant-card-body {
+          padding: 24px 16px;
+        }
+
+        .anticon {
+          font-size: 36px !important;
+        }
+
+        .ant-typography-title-4 {
+          font-size: 16px;
+          margin: 12px 0 8px;
+        }
+
+        .ant-typography-paragraph {
+          font-size: 13px;
+        }
+      }
+
+      .ant-card {
+        .ant-typography-title-4 {
+          font-size: 16px;
+        }
+
+        .ant-typography-paragraph {
+          font-size: 13px;
+        }
+
+        .ant-row {
+          .ant-col {
+            margin-bottom: 16px;
+
+            .ant-typography-title-2 {
+              font-size: 24px;
+            }
+
+            .ant-typography-caption {
+              font-size: 12px;
             }
           }
         }
@@ -429,9 +645,45 @@
   }
 
   @media (max-width: 576px) {
-    pre {
-      font-size: 11px;
-      padding: 12px;
+    .help-content {
+      .help-tabs {
+        .ant-tabs-nav {
+          .ant-tabs-tab {
+            padding: 10px 6px;
+            font-size: 12px;
+
+            .anticon {
+              display: none;
+            }
+          }
+        }
+      }
+    }
+
+    .faq-section {
+      .ant-collapse {
+        .ant-collapse-item {
+          .ant-collapse-header {
+            padding: 10px 12px;
+            font-size: 13px;
+          }
+        }
+      }
+    }
+
+    .api-section {
+      pre {
+        font-size: 10px;
+        padding: 10px;
+      }
+    }
+
+    .about-section {
+      .feature-card {
+        .anticon {
+          font-size: 32px !important;
+        }
+      }
     }
   }
 }

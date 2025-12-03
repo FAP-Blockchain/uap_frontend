@@ -274,36 +274,185 @@
   }
 
   // Responsive design
-  @media (max-width: 768px) {
-    .page-header {
-      padding: 16px;
-      margin: 0 -24px 24px;
-      border-radius: 0;
-    }
-
+  @media (max-width: 1024px) {
     .ant-table {
       .ant-table-thead > tr > th,
       .ant-table-tbody > tr > td {
-        padding: 8px;
+        padding: 12px 8px;
+        font-size: 13px;
+      }
+    }
+  }
+
+  @media (max-width: 768px) {
+    padding: 0;
+
+    .page-header {
+      padding: 20px 16px;
+      margin: 0 -24px 24px;
+      border-radius: 0;
+
+      .ant-typography-title-2 {
+        font-size: 20px;
+        margin-bottom: 8px;
+      }
+
+      .ant-typography-caption {
+        font-size: 14px;
       }
     }
 
-    .ant-card {
-      margin-bottom: 16px;
+    // Statistics cards
+    .ant-row {
+      margin-bottom: 16px !important;
+
+      .ant-col {
+        margin-bottom: 12px;
+      }
+
+      .ant-card {
+        .ant-card-body {
+          padding: 16px;
+        }
+
+        .ant-statistic {
+          .ant-statistic-title {
+            font-size: 12px;
+          }
+
+          .ant-statistic-content-value {
+            font-size: 20px;
+          }
+        }
+      }
     }
 
-    .ant-col {
-      margin-bottom: 12px;
+    // Filters card
+    .ant-card {
+      margin-bottom: 16px;
+      border-radius: 0;
+      margin-left: -24px;
+      margin-right: -24px;
+      width: calc(100% + 48px);
+
+      .ant-card-body {
+        padding: 16px;
+      }
+
+      .ant-row {
+        .ant-col {
+          margin-bottom: 12px;
+
+          .ant-input-search,
+          .ant-select,
+          .ant-picker {
+            width: 100%;
+          }
+        }
+      }
+
+      .ant-btn {
+        width: 100%;
+        margin-bottom: 8px;
+      }
+    }
+
+    // Table
+    .ant-table {
+      .ant-table-thead > tr > th {
+        padding: 10px 6px;
+        font-size: 12px;
+        white-space: nowrap;
+      }
+
+      .ant-table-tbody > tr > td {
+        padding: 10px 6px;
+        font-size: 12px;
+
+        .ant-typography {
+          font-size: 12px;
+        }
+
+        .ant-tag {
+          font-size: 11px;
+          padding: 2px 8px;
+        }
+
+        .ant-btn {
+          padding: 4px 8px;
+          height: auto;
+
+          .anticon {
+            font-size: 14px;
+          }
+        }
+      }
+
+      .ant-table-pagination {
+        margin: 16px 0 0;
+        padding: 0 8px;
+
+        .ant-pagination-item {
+          min-width: 28px;
+          height: 28px;
+          line-height: 28px;
+          font-size: 12px;
+        }
+
+        .ant-pagination-prev,
+        .ant-pagination-next {
+          min-width: 28px;
+          height: 28px;
+          line-height: 28px;
+        }
+      }
+    }
+
+    // Modal
+    .ant-modal {
+      .ant-modal-content {
+        margin: 0;
+        max-height: 90vh;
+        overflow-y: auto;
+      }
+
+      .ant-modal-body {
+        padding: 16px;
+      }
     }
   }
 
   @media (max-width: 576px) {
+    .page-header {
+      padding: 16px 12px;
+    }
+
     .ant-table {
+      .ant-table-thead > tr > th {
+        padding: 8px 4px;
+        font-size: 11px;
+      }
+
+      .ant-table-tbody > tr > td {
+        padding: 8px 4px;
+        font-size: 11px;
+      }
+
       .ant-table-pagination {
         .ant-pagination-options {
           display: none;
         }
+
+        .ant-pagination-total-text {
+          display: none;
+        }
       }
+    }
+
+    // Hide some columns on very small screens
+    .ant-table-thead > tr > th:nth-child(6),
+    .ant-table-tbody > tr > td:nth-child(6) {
+      display: none;
     }
   }
 }
