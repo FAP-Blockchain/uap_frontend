@@ -6,6 +6,7 @@ import HeaderComponent from "./header";
 import "./index.scss";
 import SiderComponent from "./siderAdmin";
 import { getUserByIdApi } from "../services/admin/users/api";
+import { getSemesterByIdApi } from "../services/admin/semesters/api";
 
 const { Content } = Layout;
 
@@ -25,6 +26,9 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({
   const location = useLocation();
   const pathname = location.pathname;
   const [userNameMap, setUserNameMap] = useState<Record<string, string>>({});
+  const [semesterNameMap, setSemesterNameMap] = useState<
+    Record<string, string>
+  >({});
   const fetchingRef = useRef<Set<string>>(new Set());
 
   // Helper function to check if a string looks like a UUID
@@ -49,9 +53,9 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({
       if (
         isUUID(userId) &&
         !userNameMap[userId] &&
-        !fetchingRef.current.has(userId)
+        !fetchingRef.current.has(`user-${userId}`)
       ) {
-        fetchingRef.current.add(userId);
+        fetchingRef.current.add(`user-${userId}`);
 
         getUserByIdApi(userId)
           .then((user) => {
@@ -59,7 +63,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({
               ...prev,
               [userId]: user.fullName || user.email || userId,
             }));
-            fetchingRef.current.delete(userId);
+            fetchingRef.current.delete(`user-${userId}`);
           })
           .catch((error) => {
             console.error("Failed to fetch user for breadcrumb:", error);
@@ -68,11 +72,43 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({
               ...prev,
               [userId]: userId,
             }));
-            fetchingRef.current.delete(userId);
+            fetchingRef.current.delete(`user-${userId}`);
           });
       }
     }
-  }, [pathname, userNameMap]);
+
+    // Check if path is /admin/semesters/:semesterId
+    if (paths.length >= 3 && paths[0] === "admin" && paths[1] === "semesters") {
+      const semesterId = paths[2];
+
+      // Check if it's a UUID and not already fetched or currently fetching
+      if (
+        isUUID(semesterId) &&
+        !semesterNameMap[semesterId] &&
+        !fetchingRef.current.has(`semester-${semesterId}`)
+      ) {
+        fetchingRef.current.add(`semester-${semesterId}`);
+
+        getSemesterByIdApi(semesterId)
+          .then((semester) => {
+            setSemesterNameMap((prev) => ({
+              ...prev,
+              [semesterId]: semester.name || semesterId,
+            }));
+            fetchingRef.current.delete(`semester-${semesterId}`);
+          })
+          .catch((error) => {
+            console.error("Failed to fetch semester for breadcrumb:", error);
+            // Fallback to semesterId if fetch fails
+            setSemesterNameMap((prev) => ({
+              ...prev,
+              [semesterId]: semesterId,
+            }));
+            fetchingRef.current.delete(`semester-${semesterId}`);
+          });
+      }
+    }
+  }, [pathname, userNameMap, semesterNameMap]);
 
   // Generate default breadcrumb items based on the current path if not provided
   const generateDefaultBreadcrumbs = () => {
@@ -163,10 +199,31 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({
     return paths.map((path, index) => {
       const href = "/" + paths.slice(0, index + 1).join("/");
 
-      // Check if this is a userId (UUID) and we have the user name
+      // Check if this is a UUID and we have the name mapped
       let displayName: string;
-      if (isUUID(path) && userNameMap[path]) {
-        displayName = userNameMap[path];
+      if (isUUID(path)) {
+        // Check context: if previous path is "users", use userNameMap
+        if (index > 0 && paths[index - 1] === "users" && userNameMap[path]) {
+          displayName = userNameMap[path];
+        }
+        // Check context: if previous path is "semesters", use semesterNameMap
+        else if (
+          index > 0 &&
+          paths[index - 1] === "semesters" &&
+          semesterNameMap[path]
+        ) {
+          displayName = semesterNameMap[path];
+        }
+        // Fallback: try both maps (shouldn't happen, but safe)
+        else if (userNameMap[path]) {
+          displayName = userNameMap[path];
+        } else if (semesterNameMap[path]) {
+          displayName = semesterNameMap[path];
+        } else {
+          // UUID but no mapping yet, use default formatting
+          displayName =
+            path.charAt(0).toUpperCase() + path.slice(1).replace(/-/g, " ");
+        }
       } else if (routeNameMap[path]) {
         displayName = routeNameMap[path];
       } else {
