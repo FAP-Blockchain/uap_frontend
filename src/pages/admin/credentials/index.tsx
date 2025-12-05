@@ -72,8 +72,10 @@ const CredentialsManagement: React.FC = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isViewModalVisible, setIsViewModalVisible] = useState(false);
   const [isRevokeModalVisible, setIsRevokeModalVisible] = useState(false);
-  const [viewingCredential, setViewingCredential] = useState<CredentialDetailDto | null>(null);
-  const [revokingCredential, setRevokingCredential] = useState<CredentialDto | null>(null);
+  const [viewingCredential, setViewingCredential] =
+    useState<CredentialDetailDto | null>(null);
+  const [revokingCredential, setRevokingCredential] =
+    useState<CredentialDto | null>(null);
   const [qrCodeData, setQrCodeData] = useState<string>("");
   const [form] = Form.useForm();
   const [revokeForm] = Form.useForm();
@@ -90,17 +92,26 @@ const CredentialsManagement: React.FC = () => {
   // Statistics
   const stats: CredentialStats = {
     total: credentials.length,
-    active: credentials.filter((c) => c.status === "Active" || c.status === "Issued").length,
+    active: credentials.filter(
+      (c) => c.status === "Active" || c.status === "Issued"
+    ).length,
     revoked: credentials.filter((c) => c.status === "Revoked").length,
     pending: credentials.filter((c) => c.status === "Pending").length,
     thisMonth: credentials.filter(
-      (c) => c.issueDate && dayjs(c.issueDate).isValid() && dayjs(c.issueDate).isSame(dayjs(), "month")
+      (c) =>
+        c.issueDate &&
+        dayjs(c.issueDate).isValid() &&
+        dayjs(c.issueDate).isSame(dayjs(), "month")
     ).length,
     byType: {
-      completion: credentials.filter((c) => c.certificateType === "Completion").length,
-      subject: credentials.filter((c) => c.certificateType === "Subject").length,
-      semester: credentials.filter((c) => c.certificateType === "Semester").length,
-      roadmap: credentials.filter((c) => c.certificateType === "Roadmap").length,
+      completion: credentials.filter((c) => c.certificateType === "Completion")
+        .length,
+      subject: credentials.filter((c) => c.certificateType === "Subject")
+        .length,
+      semester: credentials.filter((c) => c.certificateType === "Semester")
+        .length,
+      roadmap: credentials.filter((c) => c.certificateType === "Roadmap")
+        .length,
     },
   };
 
@@ -119,7 +130,8 @@ const CredentialsManagement: React.FC = () => {
       const items = response.items || [];
       const normalizedItems = items.map((item: any) => ({
         ...item,
-        issueDate: item.issueDate || item.issuedDate || item.completionDate || "",
+        issueDate:
+          item.issueDate || item.issuedDate || item.completionDate || "",
       }));
       setCredentials(normalizedItems as CredentialDto[]);
       setPagination({
@@ -128,7 +140,9 @@ const CredentialsManagement: React.FC = () => {
         total: response.totalCount || 0,
       });
     } catch (error: any) {
-      message.error(error?.response?.data?.detail || "Không thể tải danh sách chứng chỉ");
+      message.error(
+        error?.response?.data?.detail || "Không thể tải danh sách chứng chỉ"
+      );
     } finally {
       setLoading(false);
     }
@@ -174,17 +188,23 @@ const CredentialsManagement: React.FC = () => {
       const detail = await getCredentialByIdApi(credential.id);
       const normalizedDetail = {
         ...detail,
-        issueDate: detail.issueDate || (detail as any).issuedDate || detail.completionDate || "",
+        issueDate:
+          detail.issueDate ||
+          (detail as any).issuedDate ||
+          detail.completionDate ||
+          "",
       } as CredentialDetailDto;
       setViewingCredential(normalizedDetail);
-      
+
       // Fetch QR code
       const qrResponse = await getCredentialQRCodeApi(credential.id);
       setQrCodeData(qrResponse.qrCodeData);
-      
+
       setIsViewModalVisible(true);
     } catch (error: any) {
-      message.error(error?.response?.data?.detail || "Không thể tải thông tin chứng chỉ");
+      message.error(
+        error?.response?.data?.detail || "Không thể tải thông tin chứng chỉ"
+      );
     } finally {
       setLoading(false);
     }
@@ -207,7 +227,9 @@ const CredentialsManagement: React.FC = () => {
         subjectId: values.subjectId,
         semesterId: values.semesterId,
         roadmapId: values.roadmapId,
-        completionDate: values.completionDate ? dayjs(values.completionDate).format("YYYY-MM-DD") : dayjs().format("YYYY-MM-DD"),
+        completionDate: values.completionDate
+          ? dayjs(values.completionDate).format("YYYY-MM-DD")
+          : dayjs().format("YYYY-MM-DD"),
         finalGrade: values.finalGrade,
         letterGrade: values.letterGrade,
         classification: values.classification,
@@ -233,12 +255,16 @@ const CredentialsManagement: React.FC = () => {
         await revokeCredentialApi(revokingCredential.id, {
           reason: values.reason,
         });
-        message.success("Thu hồi chứng chỉ thành công! Đã cập nhật trên blockchain.");
+        message.success(
+          "Thu hồi chứng chỉ thành công! Đã cập nhật trên blockchain."
+        );
         setIsRevokeModalVisible(false);
         fetchCredentials(pagination.current, pagination.pageSize);
       }
     } catch (error: any) {
-      message.error(error?.response?.data?.detail || "Không thể thu hồi chứng chỉ");
+      message.error(
+        error?.response?.data?.detail || "Không thể thu hồi chứng chỉ"
+      );
     } finally {
       setLoading(false);
     }
@@ -258,7 +284,9 @@ const CredentialsManagement: React.FC = () => {
       window.URL.revokeObjectURL(url);
       message.success("Đã tải xuống chứng chỉ");
     } catch (error: any) {
-      message.error(error?.response?.data?.detail || "Không thể tải xuống chứng chỉ");
+      message.error(
+        error?.response?.data?.detail || "Không thể tải xuống chứng chỉ"
+      );
     } finally {
       setLoading(false);
     }
@@ -342,7 +370,10 @@ const CredentialsManagement: React.FC = () => {
     message.success("Đã sao chép vào clipboard!");
   };
 
-  const formatDateDisplay = (date?: string | null, fallback: string = "Chưa cập nhật") => {
+  const formatDateDisplay = (
+    date?: string | null,
+    fallback: string = "Chưa cập nhật"
+  ) => {
     if (!date) return fallback;
     const parsed = dayjs(date);
     return parsed.isValid() ? parsed.format("DD/MM/YYYY") : fallback;
@@ -362,7 +393,7 @@ const CredentialsManagement: React.FC = () => {
       key: "credential",
       width: 300,
       render: (_, record) => (
-        <div 
+        <div
           className="credential-info clickable"
           onClick={() => handleNavigateDetail(record)}
           style={{ cursor: "pointer" }}
@@ -371,7 +402,10 @@ const CredentialsManagement: React.FC = () => {
             {getTypeIcon(record.certificateType)}
             <div className="credential-details">
               <div className="credential-title">
-                {record.subjectName || record.semesterName || record.roadmapName || "Chứng chỉ hoàn thành"}
+                {record.subjectName ||
+                  record.semesterName ||
+                  record.roadmapName ||
+                  "Chứng chỉ hoàn thành"}
               </div>
               <div className="credential-description">
                 {record.letterGrade && `Điểm: ${record.letterGrade}`}
@@ -477,7 +511,8 @@ const CredentialsManagement: React.FC = () => {
 
   const perPage = pagination.pageSize || 10;
   const totalPages = Math.max(1, Math.ceil(pagination.total / perPage));
-  const statusSummary = statusFilter === "all" ? "Tất cả" : getStatusText(statusFilter);
+  const statusSummary =
+    statusFilter === "all" ? "Tất cả" : getStatusText(statusFilter);
   const typeSummary = typeFilter === "all" ? "Tất cả" : getTypeText(typeFilter);
 
   return (
@@ -496,7 +531,9 @@ const CredentialsManagement: React.FC = () => {
             <div>
               <div className="eyebrow">Blockchain Credential Vault</div>
               <h2>Giám sát chứng chỉ</h2>
-              <p className="subtitle">Cấp, xác thực và thu hồi chứng chỉ được ghi trên blockchain.</p>
+              <p className="subtitle">
+                Cấp, xác thực và thu hồi chứng chỉ được ghi trên blockchain.
+              </p>
             </div>
           </div>
           <div className="header-actions">
@@ -640,12 +677,14 @@ const CredentialsManagement: React.FC = () => {
             </span>
           </div>
           <div className="filter-meta text-right">
-            {`Trang ${pagination.current} / ${totalPages} • ${pagination.total.toLocaleString()} chứng chỉ`}
+            {`Trang ${
+              pagination.current
+            } / ${totalPages} • ${pagination.total.toLocaleString()} chứng chỉ`}
           </div>
         </div>
 
         <div className="table-section">
-          <div className="credentials-table">
+          <div className="credentials-table custom-table">
             <Spin spinning={loading} tip="Đang tải dữ liệu...">
               <Table
                 columns={columns}
@@ -669,10 +708,16 @@ const CredentialsManagement: React.FC = () => {
                   emptyText: (
                     <div style={{ padding: "40px 0" }}>
                       <TrophyOutlined
-                        style={{ fontSize: 48, color: "#d9d9d9", marginBottom: 16 }}
+                        style={{
+                          fontSize: 48,
+                          color: "#d9d9d9",
+                          marginBottom: 16,
+                        }}
                       />
                       <div style={{ color: "#999" }}>Chưa có chứng chỉ nào</div>
-                      <div style={{ color: "#bfbfbf", fontSize: 12, marginTop: 8 }}>
+                      <div
+                        style={{ color: "#bfbfbf", fontSize: 12, marginTop: 8 }}
+                      >
                         Nhấn "Cấp chứng chỉ" để tạo chứng chỉ mới
                       </div>
                     </div>
@@ -757,7 +802,9 @@ const CredentialsManagement: React.FC = () => {
           <Form.Item
             name="completionDate"
             label="Ngày hoàn thành"
-            rules={[{ required: true, message: "Vui lòng chọn ngày hoàn thành!" }]}
+            rules={[
+              { required: true, message: "Vui lòng chọn ngày hoàn thành!" },
+            ]}
           >
             <DatePicker
               placeholder="Chọn ngày hoàn thành"
@@ -841,7 +888,10 @@ const CredentialsManagement: React.FC = () => {
                     {formatDateDisplay(viewingCredential.issueDate, "Chưa cấp")}
                   </Descriptions.Item>
                   <Descriptions.Item label="Ngày hoàn thành">
-                    {formatDateDisplay(viewingCredential.completionDate, "Chưa hoàn thành")}
+                    {formatDateDisplay(
+                      viewingCredential.completionDate,
+                      "Chưa hoàn thành"
+                    )}
                   </Descriptions.Item>
                   <Descriptions.Item label="Trạng thái" span={2}>
                     <Badge
@@ -856,7 +906,9 @@ const CredentialsManagement: React.FC = () => {
                   </Descriptions.Item>
                   {viewingCredential.blockchainTxHash && (
                     <Descriptions.Item label="Blockchain TX" span={2}>
-                      <Text copyable={{ text: viewingCredential.blockchainTxHash }}>
+                      <Text
+                        copyable={{ text: viewingCredential.blockchainTxHash }}
+                      >
                         {viewingCredential.blockchainTxHash}
                       </Text>
                     </Descriptions.Item>
@@ -874,7 +926,10 @@ const CredentialsManagement: React.FC = () => {
                         {viewingCredential.revocationReason}
                       </Descriptions.Item>
                       <Descriptions.Item label="Ngày thu hồi">
-                        {formatDateDisplay(viewingCredential.revokedAt, "Chưa xác định")}
+                        {formatDateDisplay(
+                          viewingCredential.revokedAt,
+                          "Chưa xác định"
+                        )}
                       </Descriptions.Item>
                       <Descriptions.Item label="Người thu hồi">
                         {viewingCredential.revokedBy}
@@ -883,7 +938,9 @@ const CredentialsManagement: React.FC = () => {
                   )}
                 </Descriptions>
 
-                {(viewingCredential.finalGrade || viewingCredential.letterGrade || viewingCredential.classification) && (
+                {(viewingCredential.finalGrade ||
+                  viewingCredential.letterGrade ||
+                  viewingCredential.classification) && (
                   <Descriptions
                     title="Thông tin học tập"
                     column={2}
@@ -912,9 +969,9 @@ const CredentialsManagement: React.FC = () => {
                 <div className="qr-code-section">
                   <h4>QR Code xác thực</h4>
                   {qrCodeData ? (
-                    <img 
-                      src={qrCodeData} 
-                      alt="QR Code" 
+                    <img
+                      src={qrCodeData}
+                      alt="QR Code"
                       style={{ width: 200, height: 200 }}
                     />
                   ) : (
@@ -923,12 +980,18 @@ const CredentialsManagement: React.FC = () => {
                       size={200}
                     />
                   )}
-                  <p style={{ textAlign: "center", marginTop: 8, fontSize: "12px" }}>
+                  <p
+                    style={{
+                      textAlign: "center",
+                      marginTop: 8,
+                      fontSize: "12px",
+                    }}
+                  >
                     Quét để xác thực chứng chỉ
                   </p>
-                  <Button 
-                    type="primary" 
-                    icon={<DownloadOutlined />} 
+                  <Button
+                    type="primary"
+                    icon={<DownloadOutlined />}
                     block
                     style={{ marginTop: 8 }}
                     onClick={() => handleDownloadPdf(viewingCredential.id)}
