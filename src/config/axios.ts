@@ -92,22 +92,26 @@ api.interceptors.response.use(
       }
     }
 
-    // Global error handler
-    if (error.response) {
-      // Error from backend (4xx, 5xx)
-      const message = 
-        (error.response.data as unknown as { message?: string; error?: string })?.message || 
-        (error.response.data as unknown as { error?: string })?.error ||
-        error.message ||
-        "An error occurred while calling the API";
-      
-      // Import toast and display
-      const { toast } = await import("react-toastify");
-      toast.error(message);
-    } else if (error.request) {
-      // Network error (no response)
-      const { toast } = await import("react-toastify");
-      toast.error("Cannot connect to server. Please check your network connection.");
+    // Global error handler - skip if request has skipGlobalErrorHandler flag
+    const skipGlobalError = (originalRequest as any)?.skipGlobalErrorHandler;
+    
+    if (!skipGlobalError) {
+      if (error.response) {
+        // Error from backend (4xx, 5xx)
+        const message = 
+          (error.response.data as unknown as { message?: string; error?: string })?.message || 
+          (error.response.data as unknown as { error?: string })?.error ||
+          error.message ||
+          "An error occurred while calling the API";
+        
+        // Import toast and display
+        const { toast } = await import("react-toastify");
+        toast.error(message);
+      } else if (error.request) {
+        // Network error (no response)
+        const { toast } = await import("react-toastify");
+        toast.error("Cannot connect to server. Please check your network connection.");
+      }
     }
 
     return Promise.reject(error);

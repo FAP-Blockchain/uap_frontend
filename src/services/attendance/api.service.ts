@@ -102,7 +102,9 @@ class AttendanceServices {
       notes?: string;
     }>
   ): Promise<void> {
-    await api.post(`/slots/${slotId}/attendance`, { students });
+    await api.post(`/slots/${slotId}/attendance`, { students }, {
+      skipGlobalErrorHandler: true,
+    } as any);
   }
 
   /**
@@ -117,7 +119,9 @@ class AttendanceServices {
       notes?: string;
     }>
   ): Promise<void> {
-    await api.put(`/slots/${slotId}/attendance`, { students });
+    await api.put(`/slots/${slotId}/attendance`, { students }, {
+      skipGlobalErrorHandler: true,
+    } as any);
   }
 
   /**

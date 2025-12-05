@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
   Card,
@@ -65,22 +65,35 @@ const TeacherClassStudentList: React.FC = () => {
   const [attendanceData, setAttendanceData] = useState<
     Record<string, { isPresent: boolean; notes?: string }>
   >({});
+  const fetchedSlotIdRef = useRef<string | null>(null);
+  const isFetchingRef = useRef(false);
 
   useEffect(() => {
-    const fetchSlotAttendance = async () => {
-      const slotId = state.slotId;
-      if (!slotId) {
-        api.error({
-          message: "Lỗi",
-          description: "Không tìm thấy thông tin slot",
-          icon: <CloseCircleOutlined style={{ color: "#ff4d4f" }} />,
-          placement: "topRight",
-        });
-        // navigate("/teacher/schedule");
-        return;
-      }
+    const slotId = state.slotId;
+    
+    if (!slotId) {
+      setSlotAttendance(null);
+      setAttendanceData({});
+      fetchedSlotIdRef.current = null;
+      setLoading(false);
+      return;
+    }
 
+    // Reset ref if slotId changed
+    if (fetchedSlotIdRef.current !== slotId) {
+      fetchedSlotIdRef.current = null;
+    }
+
+    // Prevent duplicate calls for the same slotId
+    if (fetchedSlotIdRef.current === slotId || isFetchingRef.current) {
+      return;
+    }
+
+    const fetchSlotAttendance = async () => {
+      isFetchingRef.current = true;
+      fetchedSlotIdRef.current = slotId;
       setLoading(true);
+      
       try {
         const data = await AttendanceServices.getSlotAttendance(slotId);
         setSlotAttendance(data);
@@ -99,6 +112,8 @@ const TeacherClassStudentList: React.FC = () => {
         });
         setAttendanceData(initialData);
       } catch (err) {
+        // Reset ref on error so it can retry
+        fetchedSlotIdRef.current = null;
         // Chỉ hiển thị thông báo FE thuần, không dùng message từ BE
         const errorMessage =
           "Không thể tải dữ liệu điểm danh. Vui lòng thử lại.";
@@ -110,16 +125,15 @@ const TeacherClassStudentList: React.FC = () => {
         });
       } finally {
         setLoading(false);
+        isFetchingRef.current = false;
       }
     };
 
     void fetchSlotAttendance();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state.slotId, navigate]);
+  }, [state.slotId]);
 
-  const handleMarkAllPresent = async () => {
-    const slotId = state.slotId;
-    if (!slotId || !slotAttendance) {
+  const handleMarkAllPresent = () => {
+    if (!slotAttendance) {
       api.error({
         message: "Lỗi",
         description: "Không tìm thấy thông tin slot",
@@ -129,15 +143,8 @@ const TeacherClassStudentList: React.FC = () => {
       return;
     }
 
-    setSavingAttendance(true);
-    try {
-      await AttendanceServices.markAllPresent(slotId);
-
-      // Update local state
-      const updatedData: Record<
-        string,
-        { isPresent: boolean; notes?: string }
-      > = {};
+    const updatedData: Record<string, { isPresent: boolean; notes?: string }> =
+      {};
       slotAttendance.studentAttendances.forEach((attendance) => {
         updatedData[attendance.studentId] = {
           isPresent: true,
@@ -145,32 +152,10 @@ const TeacherClassStudentList: React.FC = () => {
         };
       });
       setAttendanceData(updatedData);
-
-      api.success({
-        message: "Thành công",
-        description: `Đã đánh dấu tất cả ${slotAttendance.totalStudents} sinh viên có mặt`,
-        icon: <CheckCircleOutlined style={{ color: "#52c41a" }} />,
-        placement: "topRight",
-        duration: 3,
-      });
-    } catch (err) {
-      // FE thuần: không hiển thị chi tiết lỗi từ BE
-      const errorMessage =
-        "Không thể đánh dấu tất cả có mặt. Vui lòng thử lại.";
-      api.error({
-        message: "Lỗi",
-        description: errorMessage,
-        icon: <CloseCircleOutlined style={{ color: "#ff4d4f" }} />,
-        placement: "topRight",
-      });
-    } finally {
-      setSavingAttendance(false);
-    }
   };
 
-  const handleMarkAllAbsent = async () => {
-    const slotId = state.slotId;
-    if (!slotId || !slotAttendance) {
+  const handleMarkAllAbsent = () => {
+    if (!slotAttendance) {
       api.error({
         message: "Lỗi",
         description: "Không tìm thấy thông tin slot",
@@ -180,15 +165,8 @@ const TeacherClassStudentList: React.FC = () => {
       return;
     }
 
-    setSavingAttendance(true);
-    try {
-      await AttendanceServices.markAllAbsent(slotId);
-
-      // Update local state
-      const updatedData: Record<
-        string,
-        { isPresent: boolean; notes?: string }
-      > = {};
+    const updatedData: Record<string, { isPresent: boolean; notes?: string }> =
+      {};
       slotAttendance.studentAttendances.forEach((attendance) => {
         updatedData[attendance.studentId] = {
           isPresent: false,
@@ -196,26 +174,6 @@ const TeacherClassStudentList: React.FC = () => {
         };
       });
       setAttendanceData(updatedData);
-
-      api.warning({
-        message: "Đã cập nhật",
-        description: `Đã đánh dấu tất cả ${slotAttendance.totalStudents} sinh viên vắng`,
-        icon: <ExclamationCircleOutlined style={{ color: "#faad14" }} />,
-        placement: "topRight",
-        duration: 3,
-      });
-    } catch (err) {
-      // FE thuần: không hiển thị chi tiết lỗi từ BE
-      const errorMessage = "Không thể đánh dấu tất cả vắng. Vui lòng thử lại.";
-      api.error({
-        message: "Lỗi",
-        description: errorMessage,
-        icon: <CloseCircleOutlined style={{ color: "#ff4d4f" }} />,
-        placement: "topRight",
-      });
-    } finally {
-      setSavingAttendance(false);
-    }
   };
 
   const handleSaveAttendance = async () => {
@@ -271,8 +229,16 @@ const TeacherClassStudentList: React.FC = () => {
       });
 
       // Refresh data after saving
+      // Reset refs to allow fresh fetch
+      fetchedSlotIdRef.current = null;
+      isFetchingRef.current = false;
+      
       try {
         const updatedData = await AttendanceServices.getSlotAttendance(slotId);
+        
+        // Update refs before setting state to prevent useEffect from triggering
+        fetchedSlotIdRef.current = slotId;
+        
         setSlotAttendance(updatedData);
 
         // Update attendance data
@@ -282,27 +248,31 @@ const TeacherClassStudentList: React.FC = () => {
         > = {};
         updatedData.studentAttendances.forEach((attendance) => {
           newAttendanceData[attendance.studentId] = {
-            isPresent: attendance.isPresent,
+            isPresent: attendance.isPresent ?? false,
             notes: attendance.notes || undefined,
           };
         });
         setAttendanceData(newAttendanceData);
       } catch (refreshErr) {
-        // If refresh fails, still navigate
+        // If refresh fails, reset refs so it can retry
+        fetchedSlotIdRef.current = null;
         console.error("Failed to refresh data:", refreshErr);
       }
 
       // Remain on the class list page after saving so user can continue working
-    } catch (err) {
-      // FE thuần: không sử dụng message chi tiết từ BE
-      const errorMessage = slotAttendance?.hasAttendance
-        ? "Chưa đến ngày được phép điểm danh."
-        : "Không thể lưu điểm danh. Vui lòng thử lại.";
+    } catch (err: any) {
+      // Lấy thông báo lỗi từ API response
+      const errorMessage =
+        err?.response?.data?.detail ||
+        err?.response?.data?.message ||
+        err?.message ||
+        "Chưa đến ngày được phép điểm danh.";
       api.error({
         message: "Lỗi",
         description: errorMessage,
         icon: <CloseCircleOutlined style={{ color: "#ff4d4f" }} />,
         placement: "topRight",
+        duration: 5,
       });
     } finally {
       setSavingAttendance(false);
@@ -477,23 +447,23 @@ const TeacherClassStudentList: React.FC = () => {
                 </Title>
                 <Space direction="vertical" size={4}>
                   <Text className="attendance-subtitle-main">
-                  {slotAttendance?.subjectName ||
-                    state.courseName ||
-                    state.className ||
-                    "Class"}
+                    {slotAttendance?.subjectName ||
+                      state.courseName ||
+                      state.className ||
+                      "Class"}
                   </Text>
                   <Text className="attendance-subtitle-secondary">
-                  {slotAttendance?.date && (
+                    {slotAttendance?.date && (
                       <>{dayjs(slotAttendance.date).format("DD/MM/YYYY")}</>
                     )}
                     {slotAttendance?.date && slotAttendance?.timeSlotName && (
                       <> • </>
-                  )}
-                  {slotAttendance?.timeSlotName && (
+                    )}
+                    {slotAttendance?.timeSlotName && (
                       <>{slotAttendance.timeSlotName}</>
-                  )}
-                </Text>
-              </Space>
+                    )}
+                  </Text>
+                </Space>
               </div>
               <div className="attendance-metrics">
                 <Card className="metric-card compact">
@@ -552,32 +522,22 @@ const TeacherClassStudentList: React.FC = () => {
             </Col>
             <Col xs={24} sm={12} md={14}>
               <Space wrap size="middle">
-                  <Button
-                    onClick={handleMarkAllPresent}
-                    loading={savingAttendance}
-                    disabled={
-                      !state.slotId ||
-                      !slotAttendance ||
-                      slotAttendance.hasAttendance
-                    }
+                <Button
+                  onClick={handleMarkAllPresent}
+                  disabled={!state.slotId || !slotAttendance}
                   className="mark-all-present-btn"
                   size="large"
-                  >
-                    Tất cả có mặt
-                  </Button>
-                  <Button
-                    onClick={handleMarkAllAbsent}
-                    loading={savingAttendance}
-                    disabled={
-                      !state.slotId ||
-                      !slotAttendance ||
-                      slotAttendance.hasAttendance
-                    }
+                >
+                  Tất cả có mặt
+                </Button>
+                <Button
+                  onClick={handleMarkAllAbsent}
+                  disabled={!state.slotId || !slotAttendance}
                   className="mark-all-absent-btn"
                   size="large"
-                  >
-                    Tất cả vắng
-                  </Button>
+                >
+                  Tất cả vắng
+                </Button>
                 <Button
                   type="primary"
                   icon={<SaveOutlined />}
@@ -600,7 +560,7 @@ const TeacherClassStudentList: React.FC = () => {
             <Table
               columns={columns}
               dataSource={filtered}
-              rowKey="attendanceId"
+              rowKey="studentId"
               pagination={{
                 total: filtered.length,
                 pageSize: 20,

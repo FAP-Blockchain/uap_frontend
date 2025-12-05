@@ -264,11 +264,6 @@ const TeacherTeachingClasses: React.FC = () => {
                       {selectedClassSummary.status}
                     </span>
                   )}
-                  {classDetail?.subjectOfferingId && (
-                    <span className="pill">
-                      Offering: {classDetail.subjectOfferingId}
-                    </span>
-                  )}
                 </div>
               </Card>
             </Col>
