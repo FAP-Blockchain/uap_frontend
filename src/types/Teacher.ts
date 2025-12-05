@@ -36,10 +36,13 @@ interface TeacherFormData {
   status: 'active' | 'inactive' | 'retired';
 }
 
+import type { SpecializationDto } from "./Specialization";
+
 export interface TeacherOption {
   id: string;
   teacherCode: string;
   fullName: string;
+  specializations?: SpecializationDto[];
 }
 
 export interface TeacherClassSummaryDto {
