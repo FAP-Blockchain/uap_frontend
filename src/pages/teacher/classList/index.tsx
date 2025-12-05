@@ -99,9 +99,9 @@ const TeacherClassStudentList: React.FC = () => {
         });
         setAttendanceData(initialData);
       } catch (err) {
+        // Chỉ hiển thị thông báo FE thuần, không dùng message từ BE
         const errorMessage =
-          (err as { message?: string })?.message ||
-          "Không thể tải dữ liệu điểm danh";
+          "Không thể tải dữ liệu điểm danh. Vui lòng thử lại.";
         api.error({
           message: "Lỗi tải dữ liệu",
           description: errorMessage,
@@ -154,15 +154,9 @@ const TeacherClassStudentList: React.FC = () => {
         duration: 3,
       });
     } catch (err) {
+      // FE thuần: không hiển thị chi tiết lỗi từ BE
       const errorMessage =
-        (
-          err as {
-            response?: { data?: { message?: string } };
-            message?: string;
-          }
-        )?.response?.data?.message ||
-        (err as { message?: string })?.message ||
-        "Không thể đánh dấu tất cả có mặt";
+        "Không thể đánh dấu tất cả có mặt. Vui lòng thử lại.";
       api.error({
         message: "Lỗi",
         description: errorMessage,
@@ -211,15 +205,8 @@ const TeacherClassStudentList: React.FC = () => {
         duration: 3,
       });
     } catch (err) {
-      const errorMessage =
-        (
-          err as {
-            response?: { data?: { message?: string } };
-            message?: string;
-          }
-        )?.response?.data?.message ||
-        (err as { message?: string })?.message ||
-        "Không thể đánh dấu tất cả vắng";
+      // FE thuần: không hiển thị chi tiết lỗi từ BE
+      const errorMessage = "Không thể đánh dấu tất cả vắng. Vui lòng thử lại.";
       api.error({
         message: "Lỗi",
         description: errorMessage,
@@ -307,17 +294,10 @@ const TeacherClassStudentList: React.FC = () => {
 
       // Remain on the class list page after saving so user can continue working
     } catch (err) {
-      const errorMessage =
-        (
-          err as {
-            response?: { data?: { message?: string } };
-            message?: string;
-          }
-        )?.response?.data?.message ||
-        (err as { message?: string })?.message ||
-        slotAttendance?.hasAttendance
-          ? "Không thể cập nhật điểm danh"
-          : "Không thể lưu điểm danh";
+      // FE thuần: không sử dụng message chi tiết từ BE
+      const errorMessage = slotAttendance?.hasAttendance
+        ? "Chưa đến ngày được phép điểm danh."
+        : "Không thể lưu điểm danh. Vui lòng thử lại.";
       api.error({
         message: "Lỗi",
         description: errorMessage,

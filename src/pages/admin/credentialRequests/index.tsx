@@ -33,6 +33,7 @@ import {
   rejectCredentialRequestApi,
 } from "../../../services/admin/credentials/api";
 import dayjs from "dayjs";
+import "./index.scss";
 
 const { Search } = Input;
 const { Option } = Select;
@@ -106,11 +107,15 @@ const CredentialRequestsPage: React.FC = () => {
         return <Tag color="gold">Đang chờ</Tag>;
       case "approved":
         return (
-          <Tag color="green" icon={<CheckCircleOutlined />}>Đã duyệt</Tag>
+          <Tag color="green" icon={<CheckCircleOutlined />}>
+            Đã duyệt
+          </Tag>
         );
       case "rejected":
         return (
-          <Tag color="red" icon={<CloseCircleOutlined />}>Đã từ chối</Tag>
+          <Tag color="red" icon={<CloseCircleOutlined />}>
+            Đã từ chối
+          </Tag>
         );
       default:
         return <Tag>{status}</Tag>;
@@ -183,9 +188,9 @@ const CredentialRequestsPage: React.FC = () => {
           <UserOutlined />
           <div>
             <div>{record.studentName}</div>
-            <div style={{ fontSize: 12, color: "#888" }}>{
-              record.studentCode
-            }</div>
+            <div style={{ fontSize: 12, color: "#888" }}>
+              {record.studentCode}
+            </div>
           </div>
         </div>
       ),
@@ -294,6 +299,7 @@ const CredentialRequestsPage: React.FC = () => {
         </Row>
 
         <Table
+          className="custom-table"
           rowKey="id"
           loading={loading}
           columns={columns}

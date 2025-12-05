@@ -1,0 +1,38 @@
+.credential-requests-page {
+  padding: 16px;
+
+  .ant-card {
+    border-radius: 12px;
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.06);
+  }
+
+  .custom-table {
+    .ant-table-thead > tr > th {
+      background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
+      color: white;
+      font-weight: 600;
+      font-size: 14px;
+      padding: 16px;
+      border: none;
+    }
+
+    .ant-table-tbody > tr {
+      transition: all 0.3s ease;
+
+      &:hover > td {
+        background-color: #e6f7ff;
+      }
+
+      > td {
+        padding: 16px;
+        border-bottom: 1px solid #f0f0f0;
+      }
+    }
+
+    .ant-table-tbody > tr:last-child > td {
+      border-bottom: none;
+    }
+  }
+}
+
+
