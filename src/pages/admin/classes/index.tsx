@@ -32,6 +32,8 @@ import {
   DeleteOutlined,
   ReloadOutlined,
   EditOutlined,
+  CheckCircleOutlined,
+  LinkOutlined,
 } from "@ant-design/icons";
 import "./index.scss";
 import type {
@@ -47,6 +49,7 @@ import {
   deleteClassApi,
   fetchTeachersForFilterApi,
   type TeacherFilterOption,
+  updateOnChainClassIdApi,
 } from "../../../services/admin/classes/api";
 import type { SubjectOffering } from "../../../types/SubjectOffering";
 import { fetchSubjectOfferingsApi } from "../../../services/admin/subjectOfferings/api";
@@ -57,6 +60,7 @@ import { getAllTimeSlots } from "../../../services/admin/timeSlots/api";
 import type { SemesterDto } from "../../../types/Semester";
 import { fetchSemestersApi } from "../../../services/admin/semesters/api";
 import dayjs, { Dayjs } from "dayjs";
+import { getClassManagementContract, createOnChainClass } from "../../../blockchain/class";
 
 const { Text } = Typography;
 
@@ -435,6 +439,48 @@ const ClassesManagement: React.FC = () => {
     navigate(`/admin/classes/${classItem.classCode}?id=${classItem.id}`);
   };
 
+  const handleRegisterClassOnChain = async (classItem: ClassSummary) => {
+    try {
+      if (!classItem.teacherWalletAddress) {
+        toast.error(
+          "Lớp này chưa có ví giảng viên (teacherWalletAddress). Không thể đăng ký on-chain."
+        );
+        return;
+      }
+
+      // TODO: nếu cần thêm detail (semester dates, maxStudents), có thể fetch chi tiết lớp ở đây.
+      const classCode = classItem.classCode;
+      const className = classItem.subjectName || classItem.classCode;
+      const lecturerAddress = classItem.teacherWalletAddress;
+
+      const nowUnix = Math.floor(Date.now() / 1000);
+
+      const onChainClassId = await createOnChainClass({
+        classCode,
+        className,
+        lecturerAddress,
+        startDateUnix: nowUnix,
+        endDateUnix: nowUnix + 60 * 60 * 24 * 180, // tạm thời 6 tháng
+        maxStudents: classItem.maxEnrollment,
+      });
+
+      await updateOnChainClassIdApi(classItem.id, {
+        onChainClassId,
+      });
+
+      toast.success(
+        `Đã đăng ký lớp on-chain với ID = ${onChainClassId} và lưu về backend.`
+      );
+
+      await loadClassList();
+    } catch (error) {
+      const message =
+        (error as { message?: string })?.message ||
+        "Đăng ký lớp on-chain thất bại";
+      toast.error(message);
+    }
+  };
+
   const columns: ColumnsType<ClassSummary> = [
     {
       title: "Lớp học",
@@ -527,30 +573,74 @@ const ClassesManagement: React.FC = () => {
       ),
     },
     {
+      title: "On-chain",
+      key: "onChain",
+      width: 150,
+      align: "center",
+      render: (_, record) => {
+        const hasOnChain =
+          typeof record.onChainClassId === "number" &&
+          record.onChainClassId > 0;
+
+        return hasOnChain ? (
+          <Space direction="vertical" size={0}>
+            <Tag color="green" icon={<CheckCircleOutlined />}>
+              Đã on-chain
+            </Tag>
+            <Text type="secondary" style={{ fontSize: 11 }}>
+              ID: {record.onChainClassId}
+            </Text>
+          </Space>
+        ) : (
+          <Tag color="default">Chưa on-chain</Tag>
+        );
+      },
+    },
+    {
       title: "Thao tác",
       key: "actions",
-      width: 100,
+      width: 210,
       fixed: "right",
-      render: (_, record) => (
-        <Popconfirm
-          title="Xóa lớp học"
-          description="Bạn có chắc chắn muốn xóa lớp học này không?"
-          onConfirm={() => handleDelete(record.id)}
-          okText="Xóa"
-          cancelText="Hủy"
-          okButtonProps={{ danger: true }}
-        >
-          <Button
-            type="primary"
-            danger
-            ghost
-            icon={<DeleteOutlined />}
-            size="small"
-          >
-            Xóa
-          </Button>
-        </Popconfirm>
-      ),
+      render: (_, record) => {
+        const hasOnChain =
+          typeof record.onChainClassId === "number" &&
+          record.onChainClassId > 0;
+
+        return (
+          <Space size="small">
+            {!hasOnChain && (
+              <Tooltip title="Đăng ký lớp này lên blockchain (on-chain)">
+                <Button
+                  type="default"
+                  size="small"
+                  icon={<LinkOutlined />}
+                  onClick={() => handleRegisterClassOnChain(record)}
+                >
+                  On-chain
+                </Button>
+              </Tooltip>
+            )}
+            <Popconfirm
+              title="Xóa lớp học"
+              description="Bạn có chắc chắn muốn xóa lớp học này không?"
+              onConfirm={() => handleDelete(record.id)}
+              okText="Xóa"
+              cancelText="Hủy"
+              okButtonProps={{ danger: true }}
+            >
+              <Button
+                type="primary"
+                danger
+                ghost
+                icon={<DeleteOutlined />}
+                size="small"
+              >
+                Xóa
+              </Button>
+            </Popconfirm>
+          </Space>
+        );
+      },
     },
   ];
 

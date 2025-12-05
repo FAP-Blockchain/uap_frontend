@@ -104,6 +104,7 @@ export interface StudentAttendanceDetailDto {
   notes: string | null;
   isExcused: boolean;
   excuseReason: string | null;
+  walletAddress?: string | null;
 }
 
 export interface SlotAttendanceDto {
@@ -121,6 +122,7 @@ export interface SlotAttendanceDto {
   presentCount: number;
   absentCount: number;
   attendanceRate: number;
+  onChainClassId?: number | string | null;
 }
 
 

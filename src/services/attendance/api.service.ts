@@ -3,6 +3,10 @@ import type {
   AttendanceDto,
   AttendanceFilterRequest,
   AttendanceStatisticsDto,
+  TakeAttendanceRequest,
+  SlotAttendanceDto,
+  UpdateAttendanceRequest,
+  ExcuseAbsenceRequest,
 } from "../../types/Attendance";
 
 interface AttendanceListResponse {
@@ -66,7 +70,7 @@ class AttendanceServices {
    * Endpoint: POST /api/attendance
    */
   static async takeAttendance(
-    request: import("../../types/Attendance").TakeAttendanceRequest
+    request: TakeAttendanceRequest
   ): Promise<void> {
     await api.post("/attendance", request);
   }
@@ -77,7 +81,7 @@ class AttendanceServices {
    */
   static async getSlotAttendance(
     slotId: string
-  ): Promise<import("../../types/Attendance").SlotAttendanceDto> {
+  ): Promise<SlotAttendanceDto> {
     const response = await api.get<{
       success: boolean;
       data: import("../../types/Attendance").SlotAttendanceDto;
@@ -138,6 +142,111 @@ class AttendanceServices {
    */
   static async markAllAbsent(slotId: string): Promise<void> {
     await api.post(`/slots/${slotId}/attendance/mark-all-absent`);
+  }
+
+  /**
+   * Get attendance details by ID
+   * Endpoint: GET /api/attendance/{id}
+   */
+  static async getAttendanceById(
+    id: string
+  ): Promise<import("../../types/Attendance").AttendanceDetailDto> {
+    const response = await api.get<{
+      success: boolean;
+      data: import("../../types/Attendance").AttendanceDetailDto;
+    }>(`/attendance/${id}`);
+
+    if (!response.data.success) {
+      throw new Error("Không thể tải chi tiết điểm danh.");
+    }
+
+    return response.data.data;
+  }
+
+  /**
+   * Update an existing attendance record
+   * Endpoint: PUT /api/attendance/{id}
+   */
+  static async updateAttendance(
+    id: string,
+    request: UpdateAttendanceRequest
+  ): Promise<import("../../types/Attendance").AttendanceDetailDto> {
+    const response = await api.put<{
+      success: boolean;
+      data: import("../../types/Attendance").AttendanceDetailDto;
+    }>(`/attendance/${id}`, request);
+
+    if (!response.data.success) {
+      throw new Error("Không thể cập nhật điểm danh.");
+    }
+
+    return response.data.data;
+  }
+
+  /**
+   * Student requests excuse for absence
+   * Endpoint: POST /api/attendance/{id}/excuse
+   */
+  static async excuseAbsence(
+    id: string,
+    request: ExcuseAbsenceRequest
+  ): Promise<import("../../types/Attendance").AttendanceDetailDto> {
+    const response = await api.post<{
+      success: boolean;
+      data: import("../../types/Attendance").AttendanceDetailDto;
+    }>(`/attendance/${id}/excuse`, request);
+
+    if (!response.data.success) {
+      throw new Error("Không thể gửi đơn xin phép vắng.");
+    }
+
+    return response.data.data;
+  }
+
+  /**
+   * Get filtered attendance records with pagination
+   * Endpoint: GET /api/attendance/filter
+   */
+  static async getAttendancesByFilter(
+    filter: AttendanceFilterRequest
+  ): Promise<AttendanceDto[]> {
+    const response = await api.get<{
+      success: boolean;
+      data: AttendanceDto[];
+    }>("/attendance/filter", { params: filter });
+
+    if (!response.data.success) {
+      throw new Error("Không thể tải danh sách điểm danh.");
+    }
+
+    return response.data.data;
+  }
+
+  /**
+   * Save on-chain info after frontend issues tx
+   * Endpoint: POST /api/attendance/{id}/on-chain
+   */
+  static async saveAttendanceOnChain(
+    id: string,
+    request: {
+      transactionHash: string;
+      onChainRecordId?: string;
+    }
+  ): Promise<boolean> {
+    const response = await api.post<{
+      success: boolean;
+      message?: string;
+      data?: boolean;
+    }>(`/attendance/${id}/on-chain`, request);
+
+    if (!response.data.success) {
+      throw new Error(
+        response.data.message ||
+          "Không thể lưu thông tin on-chain cho bản ghi điểm danh."
+      );
+    }
+
+    return response.data.data ?? true;
   }
 }
 

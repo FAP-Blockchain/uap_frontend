@@ -70,6 +70,8 @@ export interface ClassSummary {
   totalSlots: number;
   currentEnrollment: number;
   subjectOfferingId?: string;
+  onChainClassId?: number | null;
+  teacherWalletAddress?: string | null;
 }
 
 export interface ClassesApiResponse {

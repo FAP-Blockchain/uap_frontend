@@ -34,6 +34,7 @@ import type {
   SlotAttendanceDto,
   StudentAttendanceDetailDto,
 } from "../../../types/Attendance";
+import { getAttendanceManagementContract } from "../../../blockchain/attendance";
 import "./index.scss";
 
 const { Title, Text } = Typography;
@@ -62,6 +63,7 @@ const TeacherClassStudentList: React.FC = () => {
     useState<SlotAttendanceDto | null>(null);
   const [loading, setLoading] = useState(true);
   const [savingAttendance, setSavingAttendance] = useState(false);
+  const [savingOnChainId, setSavingOnChainId] = useState<string | null>(null);
   const [attendanceData, setAttendanceData] = useState<
     Record<string, { isPresent: boolean; notes?: string }>
   >({});
@@ -402,6 +404,117 @@ const TeacherClassStudentList: React.FC = () => {
             }
             size="small"
           />
+        );
+      },
+    },
+    {
+      title: "On-chain",
+      key: "onChain",
+      width: 200,
+      render: (_: unknown, record: StudentAttendanceDetailDto) => {
+        const isPresent =
+          attendanceData[record.studentId]?.isPresent ?? record.isPresent;
+
+        return (
+          <Space direction="vertical" size={4}>
+            <Tag color={isPresent ? "green" : "red"}>
+              {isPresent ? "Sẽ ghi có mặt" : "Sẽ ghi vắng"}
+            </Tag>
+            <Button
+              size="small"
+              loading={savingOnChainId === record.attendanceId}
+              onClick={async () => {
+                if (!slotAttendance) return;
+
+                if (!record.walletAddress) {
+                  api.error({
+                    message: "Thiếu địa chỉ ví",
+                    description:
+                      "Sinh viên này chưa có địa chỉ ví, không thể ghi on-chain.",
+                    icon: (
+                      <CloseCircleOutlined style={{ color: "#ff4d4f" }} />
+                    ),
+                    placement: "topRight",
+                  });
+                  return;
+                }
+
+                try {
+                  setSavingOnChainId(record.attendanceId);
+
+                  const contract = await getAttendanceManagementContract();
+
+                  const statusCode = isPresent ? 1 : 2; // map theo enum AttendanceStatus
+
+                  const sessionDateUnix = Math.floor(
+                    new Date(slotAttendance.date).getTime() / 1000
+                  );
+
+                  const classId = Number(
+                    (slotAttendance as any).onChainClassId ??
+                      slotAttendance.classId
+                  );
+
+                  if (!Number.isFinite(classId)) {
+                    api.error({
+                      message: "Thiếu classId on-chain",
+                      description:
+                        "Không tìm thấy mã lớp on-chain (onChainClassId). Vui lòng cấu hình backend.",
+                      icon: (
+                        <CloseCircleOutlined style={{ color: "#ff4d4f" }} />
+                      ),
+                      placement: "topRight",
+                    });
+                    setSavingOnChainId(null);
+                    return;
+                  }
+
+                  const tx = await contract.markAttendance(
+                    classId,
+                    record.walletAddress,
+                    sessionDateUnix,
+                    statusCode,
+                    attendanceData[record.studentId]?.notes || ""
+                  );
+
+                  const receipt = await tx.wait();
+
+                  await AttendanceServices.saveAttendanceOnChain(
+                    record.attendanceId,
+                    {
+                      transactionHash: receipt.hash,
+                    }
+                  );
+
+                  api.success({
+                    message: "Ghi on-chain thành công",
+                    description: `Tx: ${receipt.hash}`,
+                    icon: (
+                      <CheckCircleOutlined style={{ color: "#52c41a" }} />
+                    ),
+                    placement: "topRight",
+                    duration: 4,
+                  });
+                } catch (err) {
+                  const errorMessage =
+                    (err as { message?: string })?.message ||
+                    "Không thể ghi on-chain cho bản ghi này";
+                  api.error({
+                    message: "Lỗi on-chain",
+                    description: errorMessage,
+                    icon: (
+                      <CloseCircleOutlined style={{ color: "#ff4d4f" }} />
+                    ),
+                    placement: "topRight",
+                  });
+                } finally {
+                  setSavingOnChainId(null);
+                }
+              }}
+            >
+              Ghi on-chain
+            </Button>
+          </Space>
         );
       },
     },

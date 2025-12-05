@@ -228,3 +228,14 @@ export const assignStudentsToClassApi = async (
   await api.post(`/Classes/${classId}/students`, { studentIds });
 };
 
+export interface UpdateOnChainClassIdRequest {
+  onChainClassId: number;
+}
+
+export const updateOnChainClassIdApi = async (
+  classId: string,
+  payload: UpdateOnChainClassIdRequest
+): Promise<void> => {
+  await api.put(`/Classes/${classId}/onchain`, payload);
+};
+
