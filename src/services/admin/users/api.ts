@@ -1,4 +1,5 @@
 import api from "../../../config/axios";
+import type { SpecializationDto } from "../../../types/Specialization";
 
 export interface GetUsersRequest {
   roleName?: string;
@@ -28,6 +29,7 @@ export interface UserDto {
   student?: { id: string; studentCode?: string };
   teacher?: { id: string; teacherCode?: string };
   profileImageUrl?: string;
+  specializations?: SpecializationDto[];
 }
 
 export interface PagedUsersResponse {

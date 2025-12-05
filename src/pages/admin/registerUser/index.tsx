@@ -23,7 +23,6 @@ import {
   EditOutlined,
   CheckCircleOutlined,
   CloseCircleOutlined,
-  FilterOutlined,
   TeamOutlined,
   BookOutlined,
 } from "@ant-design/icons";
@@ -32,18 +31,17 @@ import dayjs from "dayjs";
 import type { Dayjs } from "dayjs";
 import type {
   UserDto,
-  GetUsersRequest,
   UpdateUserRequest,
 } from "../../../services/admin/users/api";
 import {
   fetchUsersApi,
-  getUserByIdApi,
   updateUserApi,
   activateUserApi,
   deactivateUserApi,
 } from "../../../services/admin/users/api";
 import "./index.scss";
 import { useNavigate } from "react-router-dom";
+import type { SpecializationDto } from "../../../types/Specialization";
 
 const { Search } = Input;
 const { Option } = Select;
@@ -104,7 +102,8 @@ const RegisterUser: React.FC = () => {
       try {
         const response = await fetchUsersApi({
           roleName: role,
-          searchTerm: search && search.trim() !== "" ? search.trim() : undefined,
+          searchTerm:
+            search && search.trim() !== "" ? search.trim() : undefined,
           page: pageNumber,
           pageSize,
         });
@@ -146,7 +145,9 @@ const RegisterUser: React.FC = () => {
       email: user.email,
       roleName: user.roleName,
       studentCode: user.studentCode,
-      enrollmentDate: user.enrollmentDate ? dayjs(user.enrollmentDate) : undefined,
+      enrollmentDate: user.enrollmentDate
+        ? dayjs(user.enrollmentDate)
+        : undefined,
       teacherCode: user.teacherCode,
       hireDate: user.hireDate ? dayjs(user.hireDate) : undefined,
       specialization: user.specialization,
@@ -180,8 +181,7 @@ const RegisterUser: React.FC = () => {
         }
         if (values.specialization)
           payload.specialization = values.specialization.trim();
-        if (values.phoneNumber)
-          payload.phoneNumber = values.phoneNumber.trim();
+        if (values.phoneNumber) payload.phoneNumber = values.phoneNumber.trim();
       }
 
       try {
@@ -210,11 +210,6 @@ const RegisterUser: React.FC = () => {
     }
   };
 
-  const formatDate = (dateString?: string) => {
-    if (!dateString) return "-";
-    return dayjs(dateString).format("DD/MM/YYYY");
-  };
-
   const columns: ColumnsType<UserDto> = [
     {
       title: "Người dùng",
@@ -237,18 +232,38 @@ const RegisterUser: React.FC = () => {
         </span>
       ),
     },
-    {
-      title: "Vai trò",
-      dataIndex: "roleName",
-      key: "roleName",
-      width: 120,
-      render: (roleName: string) => (
-        <Tag color={roleName === "Student" ? "blue" : "green"}>
-          {roleName === "Student" ? "Sinh viên" : "Giảng viên"}
-        </Tag>
-      ),
-    },
-    
+    // Chỉ hiển thị cột chuyên ngành khi đang xem giáo viên
+    ...(roleFilter === "Teacher"
+      ? [
+          {
+            title: "Chuyên ngành",
+            dataIndex: "specializations",
+            key: "specializations",
+            width: 200,
+            render: (specializations: SpecializationDto[] | undefined) => {
+              // Kiểm tra và hiển thị specializations
+              if (
+                specializations &&
+                Array.isArray(specializations) &&
+                specializations.length > 0
+              ) {
+                return (
+                  <Space wrap size={[4, 4]}>
+                    {specializations.map((spec) => (
+                      <Tag key={spec.id} color="blue">
+                        {spec.code} - {spec.name}
+                      </Tag>
+                    ))}
+                  </Space>
+                );
+              }
+
+              return <Tag color="default">Chưa có chuyên ngành</Tag>;
+            },
+          },
+        ]
+      : []),
+
     {
       title: "Thông tin thêm",
       key: "additional",
@@ -258,9 +273,7 @@ const RegisterUser: React.FC = () => {
           {record.specialization && (
             <div>Chuyên môn: {record.specialization}</div>
           )}
-          {record.phoneNumber && (
-            <div>Điện thoại: {record.phoneNumber}</div>
-          )}
+          {record.phoneNumber && <div>Điện thoại: {record.phoneNumber}</div>}
           {!record.specialization && !record.phoneNumber && "-"}
         </div>
       ),
@@ -476,7 +489,10 @@ const RegisterUser: React.FC = () => {
             <Input placeholder="Nhập email" />
           </Form.Item>
 
-          <Form.Item noStyle shouldUpdate={(prev, curr) => prev.roleName !== curr.roleName}>
+          <Form.Item
+            noStyle
+            shouldUpdate={(prev, curr) => prev.roleName !== curr.roleName}
+          >
             {({ getFieldValue }) => {
               const role = getFieldValue("roleName");
               if (role === "Student") {
