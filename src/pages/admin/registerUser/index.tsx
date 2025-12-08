@@ -425,12 +425,18 @@ const RegisterUser: React.FC = () => {
               current: pagination.pageNumber,
               pageSize: pagination.pageSize,
               total: pagination.totalCount,
-              showSizeChanger: false,
+              showSizeChanger: true,
+              showQuickJumper: true,
               showTotal: (total, range) =>
-                `${range[0]}-${range[1]} của ${total}`,
-              size: "small",
-              onChange: (page) =>
-                fetchData(page, pagination.pageSize, searchText, roleFilter),
+                `${range[0]}-${range[1]} của ${total} người dùng`,
+              pageSizeOptions: ["10", "20", "50", "100"],
+              size: "default",
+              onChange: (page, pageSize) => {
+                fetchData(page, pageSize || pagination.pageSize, searchText, roleFilter);
+              },
+              onShowSizeChange: (current, size) => {
+                fetchData(1, size, searchText, roleFilter);
+              },
             }}
             onRow={(record) => ({
               onClick: () => navigate(`/admin/user-management/${record.id}`),

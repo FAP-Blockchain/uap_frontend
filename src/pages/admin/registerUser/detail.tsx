@@ -270,43 +270,37 @@ const StudentDetailPage: React.FC = () => {
                       {user.isActive ? "Đang hoạt động" : "Vô hiệu hóa"}
                     </Tag>
                   </Descriptions.Item>
-                </Descriptions>
-              </Card>
-
-              <Card className="info-card">
-                <h4>Thông tin học sinh</h4>
-                {student ? (
-                  <Descriptions column={2} bordered size="small">
-                    <Descriptions.Item label="Mã sinh viên">
-                      {student.studentCode}
-                    </Descriptions.Item>
-                    <Descriptions.Item label="GPA">
-                      {typeof student.gpa === "number"
-                        ? student.gpa.toFixed(2)
-                        : "Chưa có"}
-                    </Descriptions.Item>
-                    <Descriptions.Item label="Ngày nhập học">
-                      {dayjs(student.enrollmentDate).format("DD/MM/YYYY")}
-                    </Descriptions.Item>
-                    <Descriptions.Item label="Trạng thái">
-                      <Tag color={student.isActive ? "success" : "default"}>
-                        {student.isActive ? "Đang học" : "Tạm ngưng"}
-                      </Tag>
-                    </Descriptions.Item>
-                    <Descriptions.Item label="Tốt nghiệp">
-                      {student.isGraduated ? (
-                        <Tag color="blue">Đã tốt nghiệp</Tag>
+                  {user.roleName === "Teacher" && (
+                    <Descriptions.Item label="Chuyên ngành">
+                      {user.specializations && user.specializations.length > 0 ? (
+                        <Space wrap>
+                          {user.specializations.map((spec) => (
+                            <Tag key={spec.id} color="blue">
+                              {spec.code} - {spec.name}
+                            </Tag>
+                          ))}
+                        </Space>
                       ) : (
-                        <Tag>Chưa tốt nghiệp</Tag>
+                        <span style={{ color: "#999" }}>Chưa có chuyên ngành</span>
                       )}
                     </Descriptions.Item>
-                    <Descriptions.Item label="Địa chỉ ví Blockchain">
-                      {student.walletAddress || "Chưa cập nhật"}
+                  )}
+                  {user.teacherCode && (
+                    <Descriptions.Item label="Mã giảng viên">
+                      {user.teacherCode}
                     </Descriptions.Item>
-                  </Descriptions>
-                ) : (
-                  <Empty description="Chỉ áp dụng cho vai trò Sinh viên" />
-                )}
+                  )}
+                  {user.hireDate && (
+                    <Descriptions.Item label="Ngày vào trường">
+                      {dayjs(user.hireDate).format("DD/MM/YYYY")}
+                    </Descriptions.Item>
+                  )}
+                  {user.phoneNumber && (
+                    <Descriptions.Item label="Số điện thoại">
+                      {user.phoneNumber}
+                    </Descriptions.Item>
+                  )}
+                </Descriptions>
               </Card>
             </div>
 

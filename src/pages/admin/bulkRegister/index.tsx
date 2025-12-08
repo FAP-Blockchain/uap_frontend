@@ -21,6 +21,7 @@ import {
   Upload,
 } from "antd";
 import type { UploadFile } from "antd";
+import type { ColumnsType } from "antd/es/table";
 import dayjs from "dayjs";
 import * as XLSX from "xlsx";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
@@ -214,7 +215,7 @@ const BulkRegister: React.FC = () => {
     () =>
       specializations.map((spec) => ({
         label: `${spec.code} - ${spec.name}`,
-        value: spec.code || spec.name,
+        value: spec.id, // Use ID instead of code/name for backend
       })),
     [specializations]
   );
@@ -315,7 +316,13 @@ const BulkRegister: React.FC = () => {
       if (values.hireDate) {
         newUser.hireDate = dayjs(values.hireDate).toISOString();
       }
-      if (values.specialization) newUser.specialization = values.specialization;
+      if (values.specializationIds && Array.isArray(values.specializationIds)) {
+        newUser.specializationIds = values.specializationIds;
+      }
+      // Keep backward compatibility with old specialization field
+      if (values.specialization && !values.specializationIds) {
+        newUser.specialization = values.specialization;
+      }
       if (values.phoneNumber) newUser.phoneNumber = values.phoneNumber;
     }
 
@@ -376,6 +383,7 @@ const BulkRegister: React.FC = () => {
                 hireDate: originalUser?.hireDate || result.hireDate,
                 specialization:
                   originalUser?.specialization || result.specialization,
+                specializationIds: originalUser?.specializationIds,
                 curriculumId: originalUser?.curriculumId ?? result.curriculumId,
               };
             }
@@ -459,6 +467,7 @@ const BulkRegister: React.FC = () => {
               hireDate: originalUser?.hireDate || result.hireDate,
               specialization:
                 originalUser?.specialization || result.specialization,
+              specializationIds: originalUser?.specializationIds,
               curriculumId: originalUser?.curriculumId ?? result.curriculumId,
             };
           }
@@ -560,49 +569,61 @@ const BulkRegister: React.FC = () => {
     }
   };
 
-  const userColumns = [
-    {
-      title: "Email",
-      dataIndex: "email",
-      key: "email",
-      width: 200,
-    },
-    {
-      title: "Họ và tên",
-      dataIndex: "fullName",
-      key: "fullName",
-      width: 150,
-    },
-    {
-      title: "Vai trò",
-      dataIndex: "roleName",
-      key: "roleName",
-      width: 100,
-      render: (role: string) => (
-        <Tag color={role === "Student" ? "blue" : "green"}>
-          {role === "Student" ? "Sinh viên" : "Giảng viên"}
-        </Tag>
-      ),
-    },
-    {
-      title: "Khung chương trình",
-      dataIndex: "curriculumId",
-      key: "curriculumId",
-      width: 200,
-      render: (_: any, record: UserFormData) =>
-        record.roleName === "Student"
-          ? getCurriculumLabel(record.curriculumId)
-          : "-",
-    },
-    {
+  // Determine if we should show curriculum or specialization column
+  const hasStudents = useMemo(() => users.some((u) => u.roleName === "Student"), [users]);
+  const hasTeachers = useMemo(() => users.some((u) => u.roleName === "Teacher"), [users]);
+
+  const userColumns = useMemo(() => {
+    const baseColumns: ColumnsType<UserFormData> = [
+      {
+        title: "Email",
+        dataIndex: "email",
+        key: "email",
+        width: 200,
+      },
+      {
+        title: "Họ và tên",
+        dataIndex: "fullName",
+        key: "fullName",
+        width: 150,
+      },
+      {
+        title: "Vai trò",
+        dataIndex: "roleName",
+        key: "roleName",
+        width: 100,
+        render: (role: string) => (
+          <Tag color={role === "Student" ? "blue" : "green"}>
+            {role === "Student" ? "Sinh viên" : "Giảng viên"}
+          </Tag>
+        ),
+      },
+    ];
+
+    // Chỉ hiển thị "Khung chương trình" nếu có Student
+    if (hasStudents) {
+      baseColumns.push({
+        title: "Khung chương trình",
+        dataIndex: "curriculumId",
+        key: "curriculumId",
+        width: 200,
+        render: (_: any, record: UserFormData) =>
+          record.roleName === "Student"
+            ? getCurriculumLabel(record.curriculumId)
+            : "-",
+      });
+    }
+
+    baseColumns.push({
       title: "Mã",
       key: "code",
       width: 100,
       render: (_: any, record: UserFormData) => (
         <span>{record.studentCode || record.teacherCode || "-"}</span>
       ),
-    },
-    {
+    });
+
+    baseColumns.push({
       title: "Ngày",
       key: "date",
       width: 120,
@@ -610,85 +631,125 @@ const BulkRegister: React.FC = () => {
         const date = record.enrollmentDate || record.hireDate;
         return date ? dayjs(date).format("YYYY-MM-DD") : "-";
       },
-    },
-    {
-      title: "Chuyên ngành",
-      dataIndex: "specialization",
-      key: "specialization",
-      width: 150,
-      render: (text: string) => text || "-",
-    },
-    {
-      title: "Số điện thoại",
-      dataIndex: "phoneNumber",
-      key: "phoneNumber",
-      width: 120,
-      render: (text: string) => text || "-",
-    },
-    {
-      title: "Wallet Address",
-      dataIndex: "walletAddress",
-      key: "walletAddress",
-      width: 260,
-      render: (text: string) => text || "-",
-    },
-    {
-      title: "Thao tác",
-      key: "action",
-      width: 100,
-      fixed: "right" as const,
-      render: (_: any, record: UserFormData) => (
-        <Button
-          type="link"
-          danger
-          icon={<DeleteOutlined />}
-          onClick={() => handleRemoveUser(record.key!)}
-        >
-          Remove
-        </Button>
-      ),
-    },
-  ];
+    });
 
-  const resultColumns = [
-    {
-      title: "Email",
-      dataIndex: "email",
-      key: "email",
-      width: 200,
-    },
-    {
-      title: "Họ và tên",
-      dataIndex: "fullName",
-      key: "fullName",
-      width: 150,
-      render: (text: string) => text || "-",
-    },
-    {
-      title: "Vai trò",
-      dataIndex: "roleName",
-      key: "roleName",
-      width: 100,
-    },
-    {
-      title: "Khung chương trình",
-      dataIndex: "curriculumId",
-      key: "curriculumId",
-      width: 200,
-      render: (_: any, record: RegisterUserResponse) =>
-        record.roleName === "Student"
-          ? getCurriculumLabel(record.curriculumId)
-          : "-",
-    },
-    {
+    // Chỉ hiển thị "Chuyên ngành" nếu có Teacher
+    if (hasTeachers) {
+      baseColumns.push({
+        title: "Chuyên ngành",
+        dataIndex: "specialization",
+        key: "specialization",
+        width: 200,
+        render: (_: string, record: UserFormData) => {
+          // Nếu có specializationIds, hiển thị từ array
+          if (record.specializationIds && Array.isArray(record.specializationIds) && record.specializationIds.length > 0) {
+            const specNames = record.specializationIds
+              .map((id) => {
+                const spec = specializations.find((s) => s.id === id);
+                return spec ? `${spec.code} - ${spec.name}` : null;
+              })
+              .filter((name) => name !== null);
+            return specNames.length > 0 ? specNames.join(", ") : "-";
+          }
+          // Fallback về specialization string cũ
+          return record.specialization || "-";
+        },
+      });
+    }
+
+    baseColumns.push(
+      {
+        title: "Số điện thoại",
+        dataIndex: "phoneNumber",
+        key: "phoneNumber",
+        width: 120,
+        render: (text: string) => text || "-",
+      },
+      {
+        title: "Wallet Address",
+        dataIndex: "walletAddress",
+        key: "walletAddress",
+        width: 260,
+        render: (text: string) => text || "-",
+      },
+      {
+        title: "Thao tác",
+        key: "action",
+        width: 100,
+        fixed: "right" as const,
+        render: (_: any, record: UserFormData) => (
+          <Button
+            type="link"
+            danger
+            icon={<DeleteOutlined />}
+            onClick={() => handleRemoveUser(record.key!)}
+          >
+            Remove
+          </Button>
+        ),
+      }
+    );
+
+    return baseColumns;
+  }, [users, hasStudents, hasTeachers, specializations, getCurriculumLabel]);
+
+  // Determine if result has students or teachers
+  const resultHasStudents = useMemo(() => 
+    result?.results?.some((r) => r.roleName === "Student") || false,
+    [result]
+  );
+  const resultHasTeachers = useMemo(() => 
+    result?.results?.some((r) => r.roleName === "Teacher") || false,
+    [result]
+  );
+
+  const resultColumns = useMemo(() => {
+    const baseColumns: ColumnsType<RegisterUserResponse> = [
+      {
+        title: "Email",
+        dataIndex: "email",
+        key: "email",
+        width: 200,
+      },
+      {
+        title: "Họ và tên",
+        dataIndex: "fullName",
+        key: "fullName",
+        width: 150,
+        render: (text: string) => text || "-",
+      },
+      {
+        title: "Vai trò",
+        dataIndex: "roleName",
+        key: "roleName",
+        width: 100,
+      },
+    ];
+
+    // Chỉ hiển thị "Khung chương trình" nếu có Student trong kết quả
+    if (resultHasStudents) {
+      baseColumns.push({
+        title: "Khung chương trình",
+        dataIndex: "curriculumId",
+        key: "curriculumId",
+        width: 200,
+        render: (_: any, record: RegisterUserResponse) =>
+          record.roleName === "Student"
+            ? getCurriculumLabel(record.curriculumId)
+            : "-",
+      });
+    }
+
+    baseColumns.push({
       title: "Mã",
       key: "code",
       width: 100,
       render: (_: any, record: RegisterUserResponse) => (
         <span>{record.studentCode || record.teacherCode || "-"}</span>
       ),
-    },
-    {
+    });
+
+    baseColumns.push({
       title: "Ngày",
       key: "date",
       width: 120,
@@ -696,127 +757,151 @@ const BulkRegister: React.FC = () => {
         const date = record.enrollmentDate || record.hireDate;
         return date ? dayjs(date).format("YYYY-MM-DD") : "-";
       },
-    },
-    {
+    });
+
+    baseColumns.push({
       title: "Số điện thoại",
       dataIndex: "phoneNumber",
       key: "phoneNumber",
       width: 120,
       render: (text: string) => text || "-",
-    },
-    {
-      title: "Chuyên ngành",
-      dataIndex: "specialization",
-      key: "specialization",
-      width: 150,
-      render: (text: string) => text || "-",
-    },
-    {
-      title: "Wallet Address",
-      dataIndex: "walletAddress",
-      key: "walletAddress",
-      width: 260,
-      render: (text: string) => text || "-",
-    },
-    {
-      title: "Trạng thái",
-      key: "status",
-      width: 100,
-      render: (_: any, record: RegisterUserResponse) => (
-        <Tag color={record.success ? "success" : "error"}>
-          {record.success ? "Thành công" : "Thất bại"}
-        </Tag>
-      ),
-    },
-    {
-      title: "On-chain?",
-      key: "onchain",
-      width: 120,
-      render: (_: any, record: RegisterUserResponse) => (
-        <Tag color={record.isOnBlockchain ? "green" : "default"}>
-          {record.isOnBlockchain ? "On-chain" : "Off-chain"}
-        </Tag>
-      ),
-    },
-    {
-      title: "Thông báo",
-      key: "message",
-      width: 250,
-      render: (_: any, record: RegisterUserResponse) => {
-        // Combine message and errors array
-        const messages: string[] = [];
+    });
 
-        if (record.message) {
-          messages.push(record.message);
-        }
-
-        if (
-          record.errors &&
-          Array.isArray(record.errors) &&
-          record.errors.length > 0
-        ) {
-          messages.push(...record.errors);
-        }
-
-        return (
-          <div>
-            {messages.map((msg, index) => (
-              <div
-                key={index}
-                style={{ marginBottom: index < messages.length - 1 ? 4 : 0 }}
-              >
-                {record.success ? (
-                  <Text>{msg}</Text>
-                ) : (
-                  <Text type="danger">{msg}</Text>
-                )}
-              </div>
-            ))}
-          </div>
-        );
-      },
-    },
-    {
-      title: "Hành động on-chain",
-      key: "onchain_action",
-      width: 200,
-      render: (_: any, record: RegisterUserResponse) => {
-        if (!record.success) {
-          return <Text type="secondary">Đăng ký off-chain thất bại</Text>;
-        }
-
-        if (record.isOnBlockchain) {
-          if (record.blockchainTxHash) {
-            return (
-              <div>
-                <Text type="success">Đã on-chain</Text>
-                <br />
-                <Text type="secondary">Tx: {record.blockchainTxHash}</Text>
-              </div>
-            );
+    // Chỉ hiển thị "Chuyên ngành" nếu có Teacher trong kết quả
+    if (resultHasTeachers) {
+      baseColumns.push({
+        title: "Chuyên ngành",
+        dataIndex: "specialization",
+        key: "specialization",
+        width: 200,
+        render: (_: string, record: RegisterUserResponse) => {
+          // Nếu có specializationIds trong original user, hiển thị từ array
+          const originalUser = users.find((u) => u.email === record.email);
+          if (originalUser?.specializationIds && Array.isArray(originalUser.specializationIds) && originalUser.specializationIds.length > 0) {
+            const specNames = originalUser.specializationIds
+              .map((id) => {
+                const spec = specializations.find((s) => s.id === id);
+                return spec ? `${spec.code} - ${spec.name}` : null;
+              })
+              .filter((name) => name !== null);
+            return specNames.length > 0 ? specNames.join(", ") : "-";
           }
-          return <Text type="success">Đã on-chain</Text>;
-        }
+          // Fallback về specialization string cũ
+          return record.specialization || "-";
+        },
+      });
+    }
 
-        if (!record.userId || !record.walletAddress) {
-          return <Text type="warning">Thiếu userId hoặc ví</Text>;
-        }
-
-        const loading = onChainLoadingMap[record.userId] === true;
-
-        return (
-          <Button
-            type="primary"
-            size="small"
-            loading={loading}
-            onClick={() => handleRegisterUserOnChain(record)}
-          >
-            Đăng ký on-chain
-          </Button>
-        );
+    baseColumns.push(
+      {
+        title: "Wallet Address",
+        dataIndex: "walletAddress",
+        key: "walletAddress",
+        width: 260,
+        render: (text: string) => text || "-",
       },
-    },
-  ];
+      {
+        title: "Trạng thái",
+        key: "status",
+        width: 100,
+        render: (_: any, record: RegisterUserResponse) => (
+          <Tag color={record.success ? "success" : "error"}>
+            {record.success ? "Thành công" : "Thất bại"}
+          </Tag>
+        ),
+      },
+      {
+        title: "On-chain?",
+        key: "onchain",
+        width: 120,
+        render: (_: any, record: RegisterUserResponse) => (
+          <Tag color={record.isOnBlockchain ? "green" : "default"}>
+            {record.isOnBlockchain ? "On-chain" : "Off-chain"}
+          </Tag>
+        ),
+      },
+      {
+        title: "Thông báo",
+        key: "message",
+        width: 250,
+        render: (_: any, record: RegisterUserResponse) => {
+          // Combine message and errors array
+          const messages: string[] = [];
+
+          if (record.message) {
+            messages.push(record.message);
+          }
+
+          if (
+            record.errors &&
+            Array.isArray(record.errors) &&
+            record.errors.length > 0
+          ) {
+            messages.push(...record.errors);
+          }
+
+          return (
+            <div>
+              {messages.map((msg, index) => (
+                <div
+                  key={index}
+                  style={{ marginBottom: index < messages.length - 1 ? 4 : 0 }}
+                >
+                  {record.success ? (
+                    <Text>{msg}</Text>
+                  ) : (
+                    <Text type="danger">{msg}</Text>
+                  )}
+                </div>
+              ))}
+            </div>
+          );
+        },
+      },
+      {
+        title: "Hành động on-chain",
+        key: "onchain_action",
+        width: 200,
+        render: (_: any, record: RegisterUserResponse) => {
+          if (!record.success) {
+            return <Text type="secondary">Đăng ký off-chain thất bại</Text>;
+          }
+
+          if (record.isOnBlockchain) {
+            if (record.blockchainTxHash) {
+              return (
+                <div>
+                  <Text type="success">Đã on-chain</Text>
+                  <br />
+                  <Text type="secondary">Tx: {record.blockchainTxHash}</Text>
+                </div>
+              );
+            }
+            return <Text type="success">Đã on-chain</Text>;
+          }
+
+          if (!record.userId || !record.walletAddress) {
+            return <Text type="warning">Thiếu userId hoặc ví</Text>;
+          }
+
+          const loading = onChainLoadingMap[record.userId] === true;
+
+          return (
+            <Button
+              type="primary"
+              size="small"
+              loading={loading}
+              onClick={() => handleRegisterUserOnChain(record)}
+            >
+              Đăng ký on-chain
+            </Button>
+          );
+        },
+      }
+    );
+
+    return baseColumns;
+  }, [result, resultHasStudents, resultHasTeachers, users, specializations, getCurriculumLabel, onChainLoadingMap, handleRegisterUserOnChain]);
 
   // Show error if not authenticated
   if (!isAuthenticated || !accessToken) {
@@ -1036,14 +1121,15 @@ const BulkRegister: React.FC = () => {
                               </Form.Item>
                               <Form.Item
                                 label="Chuyên ngành"
-                                name="specialization"
+                                name="specializationIds"
                                 extra={specializationsError || undefined}
                               >
                                 <Select
+                                  mode="multiple"
                                   placeholder={
                                     specializationsLoading
                                       ? "Đang tải chuyên ngành..."
-                                      : "Chọn chuyên ngành"
+                                      : "Chọn chuyên ngành (có thể chọn nhiều)"
                                   }
                                   loading={specializationsLoading}
                                   options={specializationOptions}

@@ -53,7 +53,8 @@ export interface RegisterUserRequest {
   // Teacher fields (optional)
   teacherCode?: string;
   hireDate?: string; // ISO date string
-  specialization?: string;
+  specialization?: string; // Deprecated: use specializationIds instead
+  specializationIds?: string[]; // Array of specialization GUIDs
   phoneNumber?: string;
 }
 
