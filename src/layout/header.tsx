@@ -177,19 +177,12 @@ const HeaderComponent: React.FC<HeaderProps> = ({
           />
         </Tooltip>
         <Link to={homePath} className="logo-container">
-          <svg
-            width="32"
-            height="32"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
+          <img
+            src="/image/z7310396057810_d32c375c6ada6e3edcb4bff25b5461b2.jpg"
+            alt="FAP Blockchain Logo"
             className="logo-icon"
-          >
-            <path
-              d="M12 2L2 7V10C2 16.37 6.4 22.16 12 23C17.6 22.16 22 16.37 22 10V7L12 2ZM12 9C13.1 9 14 9.9 14 11S13.1 13 12 13S10 12.1 10 11S10.9 9 12 9ZM18 17H6V16C6 14 10 12.9 12 12.9S18 14 18 16V17Z"
-              fill="currentColor"
-            />
-          </svg>
+            style={{ width: "32px", height: "32px", objectFit: "contain" }}
+          />
           <span className="logo-text">FAP Blockchain</span>
         </Link>
       </div>
