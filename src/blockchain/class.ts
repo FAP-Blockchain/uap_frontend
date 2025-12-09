@@ -3,7 +3,7 @@ import { getSigner } from "./index";
 
 export const CLASS_MANAGEMENT_ADDRESS =
   import.meta.env.VITE_CLASS_MANAGEMENT_ADDRESS ||
-  "0x82e01223d51Eb87e16A03E24687EDF0F294da6f1";
+  "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9";
 
 export const CLASS_MANAGEMENT_ABI = [
   {
