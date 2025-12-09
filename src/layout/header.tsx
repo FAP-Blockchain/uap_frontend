@@ -14,7 +14,7 @@ import {
   Typography,
 } from "antd";
 import type { MenuProps } from "antd";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import type { RootState } from "../redux/store";
@@ -80,6 +80,15 @@ const HeaderComponent: React.FC<HeaderProps> = ({
     const index = name.charCodeAt(0) % colors.length;
     return colors[index];
   };
+
+  // Determine home path based on role
+  const homePath = useMemo(() => {
+    const role = userProfile?.role;
+    if (role === "Admin") return "/admin/dashboard";
+    if (role === "Teacher") return "/teacher/classes";
+    if (role === "Student") return "/student-portal/";
+    return "/";
+  }, [userProfile?.role]);
 
   // Dropdown menu items
   const menuItems: MenuProps["items"] = [
@@ -167,7 +176,7 @@ const HeaderComponent: React.FC<HeaderProps> = ({
             aria-label={collapsed ? "Mở rộng menu" : "Thu gọn menu"}
           />
         </Tooltip>
-        <Link to="/admin/dashboard" className="logo-container">
+        <Link to={homePath} className="logo-container">
           <svg
             width="32"
             height="32"
