@@ -6,12 +6,36 @@ export interface AttendanceValidationStatus {
   message?: string;
 }
 
+export interface CredentialInfo {
+  id: string;
+  studentId: string;
+  studentName: string;
+  studentCode: string;
+  certificateName: string;
+  fileUrl: string;
+  ipfsHash: string;
+  issuedDate: string;
+  isOnBlockchain: boolean;
+}
+
 interface AttendanceValidationApiResponse {
   success: boolean;
   message?: string;
   data: {
     enabled: boolean;
   };
+}
+
+interface CredentialApiResponse {
+  success: boolean;
+  message?: string;
+  data: CredentialInfo;
+}
+
+interface CredentialListApiResponse {
+  success: boolean;
+  message?: string;
+  data: CredentialInfo[];
 }
 
 export class AttendanceValidationAdminService {
@@ -46,6 +70,44 @@ export class AttendanceValidationAdminService {
       enabled: body.data.enabled,
       message: body.message,
     };
+  }
+
+  /**
+   * Lấy danh sách chứng chỉ (Top 50)
+   * Backend: GET /api/validation/credentials
+   */
+  static async getCredentials(): Promise<CredentialInfo[]> {
+    const response = await api.get<CredentialListApiResponse>(
+      "/validation/credentials"
+    );
+    return response.data.data;
+  }
+
+  /**
+   * Lấy thông tin chứng chỉ mới nhất
+   * Backend: GET /api/validation/latest_credential
+   */
+  static async getLatestCredential(): Promise<CredentialInfo> {
+    const response = await api.get<CredentialApiResponse>(
+      "/validation/latest_credential"
+    );
+    return response.data.data;
+  }
+
+  /**
+   * Giả mạo chứng chỉ theo ID
+   * Backend: PUT /api/validation/tamper_credential/{id}
+   */
+  static async tamperCredential(
+    id: string,
+    fileUrl: string,
+    ipfsHash?: string
+  ): Promise<CredentialInfo> {
+    const response = await api.put<CredentialApiResponse>(
+      `/validation/tamper_credential/${id}`,
+      { fileUrl, ipfsHash }
+    );
+    return response.data.data;
   }
 }
 

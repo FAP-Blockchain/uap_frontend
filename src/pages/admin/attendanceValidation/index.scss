@@ -84,6 +84,67 @@
       border-bottom: none;
     }
   }
+
+  .tamper-table {
+    margin-top: 8px;
+
+    .ant-table-thead > tr > th {
+      background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
+      color: white;
+      font-weight: 600;
+      font-size: 14px;
+      padding: 14px 16px;
+      border: none;
+    }
+
+    .ant-table-tbody > tr {
+      transition: all 0.3s ease;
+
+      &:hover > td {
+        background-color: #f5faff;
+      }
+
+      > td {
+        padding: 14px 16px;
+        border-bottom: 1px solid #f0f0f0;
+        font-size: 13px;
+      }
+    }
+
+    .ant-table-tbody > tr:last-child > td {
+      border-bottom: none;
+    }
+
+    .ant-btn-dangerous.ant-btn-primary {
+      box-shadow: 0 4px 10px rgba(255, 77, 79, 0.35);
+    }
+  }
+
+  .tamper-modal {
+    .ant-modal-content {
+      border-radius: 12px;
+    }
+
+    .ant-alert {
+      border-radius: 10px;
+    }
+
+    .ant-descriptions-bordered .ant-descriptions-item-label {
+      font-weight: 600;
+      background: #f4f7ff;
+      color: #2563eb;
+      border-right: 1px solid #dbeafe;
+    }
+
+    .ant-descriptions-bordered .ant-descriptions-item-content {
+      background: #ffffff;
+      color: #0f172a;
+    }
+
+    .ant-input {
+      border-radius: 8px;
+    }
+  }
 }
 
 
