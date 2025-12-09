@@ -53,7 +53,6 @@ const TeacherTeachingClasses: React.FC = () => {
         setSelectedClassId("");
       }
     } catch (error) {
-      // eslint-disable-next-line no-console
       console.error("Failed to load teacher classes:", error);
       message.error("Không thể tải danh sách lớp giảng dạy");
     } finally {
@@ -67,7 +66,6 @@ const TeacherTeachingClasses: React.FC = () => {
       const detail = await getClassByIdApi(classId);
       setClassDetail(detail);
     } catch (error) {
-      // eslint-disable-next-line no-console
       console.error("Failed to load class detail:", error);
       message.error("Không thể tải thông tin lớp");
       setClassDetail(null);
@@ -111,7 +109,7 @@ const TeacherTeachingClasses: React.FC = () => {
       title: "STT",
       key: "index",
       width: 80,
-      align: "center",
+      align: "center" as const,
       render: (_: unknown, __: ClassStudent, index: number) => (
         <span className="student-index-pill">{index + 1}</span>
       ),
@@ -153,9 +151,7 @@ const TeacherTeachingClasses: React.FC = () => {
           </Text>
         </div>
         <Space size={12} className="page-header__right">
-          <Tag color="blue" className="header-tag">
-            {classes.length} lớp
-          </Tag>
+          <Tag className="header-tag">{classes.length} lớp</Tag>
           {selectedClassSummary && (
             <Tag icon={<CalendarOutlined />} className="header-tag secondary">
               {selectedClassSummary.semesterName}
@@ -165,7 +161,7 @@ const TeacherTeachingClasses: React.FC = () => {
       </div>
 
       <Card className="class-selector-card">
-        <Space direction="vertical" size={8} style={{ width: "100%" }}>
+        <Space direction="vertical" size={8} className="selector-space">
           <Text strong>Chọn lớp giảng dạy</Text>
           <Select
             placeholder="Chọn lớp"
