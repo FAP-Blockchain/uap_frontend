@@ -14,6 +14,7 @@ export const fetchSemestersApi = async (
 ): Promise<PagedSemestersResponse> => {
   const response = await api.get<PagedSemestersResponse>(SEMESTER_ENDPOINT, {
     params,
+    skipGlobalErrorHandler: true,
   });
   return response.data;
 };
@@ -21,7 +22,9 @@ export const fetchSemestersApi = async (
 export const getSemesterByIdApi = async (
   id: string
 ): Promise<SemesterDto> => {
-  const response = await api.get<SemesterDto>(`${SEMESTER_ENDPOINT}/${id}`);
+  const response = await api.get<SemesterDto>(`${SEMESTER_ENDPOINT}/${id}`, {
+    skipGlobalErrorHandler: true,
+  } as any);
   return response.data;
 };
 
@@ -53,6 +56,7 @@ export const activeSemesterApi = async (id: string): Promise<void> => {
     `${SEMESTER_ENDPOINT}/${id}/active`,
     { isActive: true },
     {
+      skipGlobalErrorHandler: true,
       headers: {
         "Content-Type": "application/json",
       },
@@ -65,6 +69,7 @@ export const closeSemesterApi = async (id: string): Promise<void> => {
     `${SEMESTER_ENDPOINT}/${id}/close`,
     { isClosed: true },
     {
+      skipGlobalErrorHandler: true,
       headers: {
         "Content-Type": "application/json",
       },
@@ -73,7 +78,9 @@ export const closeSemesterApi = async (id: string): Promise<void> => {
 };
 
 export const deleteSemesterApi = async (id: string): Promise<void> => {
-  await api.delete(`${SEMESTER_ENDPOINT}/${id}`);
+  await api.delete(`${SEMESTER_ENDPOINT}/${id}`, {
+    skipGlobalErrorHandler: true,
+  } as any);
 };
 
 // Re-export SemesterDto type for admin modules that need it

@@ -30,7 +30,10 @@ export const fetchGradeComponentTreeApi = async (
   subjectId: string
 ): Promise<GradeComponentDto[]> => {
   const response = await api.get<GradeComponentDto[]>(
-    `${BASE_ENDPOINT}/subject/${subjectId}/tree`
+    `${BASE_ENDPOINT}/subject/${subjectId}/tree`,
+    {
+      skipGlobalErrorHandler: true,
+    } as any
   );
   return response.data;
 };
@@ -95,7 +98,10 @@ export const createSubjectGradeComponentsApi = async (
 ): Promise<GradeComponentDto[]> => {
   const response = await api.post<GradeComponentDto[]>(
     `${BASE_ENDPOINT}/bulk`,
-    payload
+    payload,
+    {
+      skipGlobalErrorHandler: true,
+    } as any
   );
   return response.data;
 };
