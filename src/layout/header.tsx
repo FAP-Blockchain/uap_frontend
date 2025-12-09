@@ -1,11 +1,8 @@
 import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
-  SearchOutlined,
-  UserOutlined,
   LogoutOutlined,
   RightOutlined,
-  LockOutlined,
 } from "@ant-design/icons";
 import {
   Button,
@@ -39,7 +36,6 @@ const HeaderComponent: React.FC<HeaderProps> = ({
 }) => {
   const { token } = theme.useToken();
   const [mounted, setMounted] = useState(false);
-  const [searchFocused, setSearchFocused] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -125,7 +121,6 @@ const HeaderComponent: React.FC<HeaderProps> = ({
     {
       type: "divider",
     },
-   
   ];
 
   // Prevent SSR/Client mismatch by returning simplified header during server render
@@ -188,23 +183,6 @@ const HeaderComponent: React.FC<HeaderProps> = ({
           </svg>
           <span className="logo-text">FAP Blockchain</span>
         </Link>
-      </div>
-
-      <div className="header-center">
-        <div className={`search-container ${searchFocused ? "focused" : ""}`}>
-          <input
-            type="text"
-            placeholder="Tìm kiếm sinh viên, giảng viên, lớp học..."
-            className="search-input"
-            onFocus={() => setSearchFocused(true)}
-            onBlur={() => setSearchFocused(false)}
-          />
-          <Button
-            type="primary"
-            className="search-button"
-            icon={<SearchOutlined />}
-          />
-        </div>
       </div>
 
       <div className="header-right">
