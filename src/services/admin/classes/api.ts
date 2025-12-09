@@ -40,6 +40,7 @@ export const fetchClassesApi = async (
       sortBy: params?.sortBy,
       sortOrder: params?.sortOrder,
     },
+    skipGlobalErrorHandler: true,
   });
 
   const items =

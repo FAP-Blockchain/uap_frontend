@@ -50,6 +50,8 @@ export const fetchSubjectsApi = async (
       sortBy: params?.sortBy,
       isDescending: params?.isDescending,
     },
+    // Tránh interceptor hiển thị thông báo trùng
+    skipGlobalErrorHandler: true,
   });
   const apiData = response.data;
   const items = normalizeItems<SubjectDto>(apiData);
@@ -65,7 +67,9 @@ export const fetchSubjectsApi = async (
 };
 
 export const getSubjectByIdApi = async (id: string): Promise<SubjectDto> => {
-  const response = await api.get<SubjectDto>(`/Subjects/${id}`);
+  const response = await api.get<SubjectDto>(`/Subjects/${id}`, {
+    skipGlobalErrorHandler: true,
+  } as any);
   return response.data;
 };
 
@@ -89,7 +93,9 @@ export const updateSubjectApi = async (
 };
 
 export const deleteSubjectApi = async (id: string): Promise<void> => {
-  await api.delete(`/Subjects/${id}`);
+  await api.delete(`/Subjects/${id}`, {
+    skipGlobalErrorHandler: true,
+  } as any);
 };
 
 // Re-export SubjectDto type for admin modules that need it

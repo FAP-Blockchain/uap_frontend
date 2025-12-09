@@ -28,6 +28,7 @@ export const fetchSpecializationsApi = async (
         searchTerm: params?.searchTerm,
         isActive: params?.isActive,
       },
+      skipGlobalErrorHandler: true,
     }
   );
   const apiData = response.data || {};
@@ -49,7 +50,9 @@ export const fetchSpecializationsApi = async (
 export const getSpecializationByIdApi = async (
   id: string
 ): Promise<SpecializationDto> => {
-  const response = await api.get<SpecializationDto>(`/specializations/${id}`);
+  const response = await api.get<SpecializationDto>(`/specializations/${id}`, {
+    skipGlobalErrorHandler: true,
+  } as any);
   return response.data;
 };
 
@@ -81,6 +84,8 @@ export const updateSpecializationApi = async (
 };
 
 export const deleteSpecializationApi = async (id: string): Promise<void> => {
-  await api.delete(`/specializations/${id}`);
+  await api.delete(`/specializations/${id}`, {
+    skipGlobalErrorHandler: true,
+  } as any);
 };
 
