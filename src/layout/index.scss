@@ -72,97 +72,10 @@
     }
   }
 
-  .header-center {
-    flex-grow: 1;
-    max-width: 640px;
-    margin: 0 24px;
-
-    .search-container {
-      display: flex;
-      align-items: center;
-      height: 42px;
-      position: relative;
-      transition: all 0.3s ease;
-      border-radius: 40px;
-      border: 1px solid rgba(0, 0, 0, 0.1);
-      background-color: var(--background-color);
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.03);
-
-      &.focused {
-        // border-color: vars.$primary-color;
-        box-shadow: 0 3px 8px rgba(24, 144, 255, 0.15);
-        transform: translateY(-1px);
-      }
-
-      .search-input {
-        flex-grow: 1;
-        height: 100%;
-        padding: 0 20px;
-        border: none;
-        border-radius: 40px;
-        font-size: 15px;
-        outline: none;
-        background-color: transparent;
-        color: var(--text-color);
-        width: calc(100% - 50px);
-      }
-
-      .search-button {
-        position: absolute;
-        right: 3px;
-        height: 36px;
-        width: 36px;
-        padding: 0;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: all 0.3s ease;
-        box-shadow: 0 2px 6px rgba(24, 144, 255, 0.2);
-
-        &:hover {
-          transform: scale(1.05);
-          box-shadow: 0 3px 8px rgba(24, 144, 255, 0.3);
-        }
-
-        &:active {
-          transform: scale(0.95);
-        }
-
-        .anticon {
-          font-size: 16px;
-        }
-      }
-    }
-  }
-
   .header-right {
     display: flex;
     align-items: center;
     gap: 16px;
-
-    .icon-button {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.3s ease;
-
-      &:hover {
-        background-color: rgba(0, 0, 0, 0.06);
-        transform: scale(1.05);
-      }
-
-      &:active {
-        transform: scale(0.95);
-      }
-
-      .anticon {
-        font-size: 20px;
-      }
-    }
 
     .user-profile-trigger {
       display: flex;
@@ -196,23 +109,6 @@
 
       &:hover .user-profile-chevron {
         color: rgba(0, 0, 0, 0.65);
-      }
-    }
-
-    .help-button {
-      color: #52c41a;
-
-      &:hover {
-        color: #73d13d;
-      }
-    }
-
-    .notification-button {
-      color: var(--primary-color);
-
-      &:hover {
-        scale: 1.2;
-        color: var(--primary-color);
       }
     }
 
@@ -1051,18 +947,6 @@ html.dark {
       -webkit-background-clip: text;
     }
 
-    .search-container {
-      background-color: rgba(255, 255, 255, 0.05);
-      border-color: rgba(255, 255, 255, 0.1);
-
-      .search-input {
-        color: rgba(255, 255, 255, 0.85);
-
-        &::placeholder {
-          color: rgba(255, 255, 255, 0.45);
-        }
-      }
-    }
 
     .header-right {
       .divider {
