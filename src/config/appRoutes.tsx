@@ -68,9 +68,6 @@ const SemesterDetail = lazy(
 const TimeSlotsManagement = lazy(() => import("../pages/admin/slots"));
 const AboutHelp = lazy(() => import("../pages/PublicPortal/AboutHelp"));
 const PublicHome = lazy(() => import("../pages/PublicPortal/Home"));
-const VerificationHistory = lazy(
-  () => import("../pages/PublicPortal/VerificationHistory")
-);
 const VerificationPortal = lazy(
   () => import("../pages/PublicPortal/VerificationPortal")
 );
@@ -562,10 +559,6 @@ export const publicPortalRoutes: RouteConfig = {
     {
       path: "certificates/verify/:credentialId",
       element: <VerificationResults />,
-    },
-    {
-      path: "history",
-      element: <VerificationHistory />,
     },
     {
       path: "help",
