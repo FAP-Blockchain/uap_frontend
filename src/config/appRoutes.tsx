@@ -21,6 +21,7 @@ import {
   TeamOutlined,
   TrophyOutlined,
   UserOutlined,
+  HistoryOutlined,
 } from "@ant-design/icons";
 import { lazy } from "react";
 import { Navigate, Outlet } from "react-router-dom";
@@ -66,6 +67,7 @@ const SemesterDetail = lazy(
   () => import("../pages/admin/semesters/SemesterDetail")
 );
 const TimeSlotsManagement = lazy(() => import("../pages/admin/slots"));
+const ActionLogsPage = lazy(() => import("../pages/admin/actionLogs"));
 const AboutHelp = lazy(() => import("../pages/PublicPortal/AboutHelp"));
 const PublicHome = lazy(() => import("../pages/PublicPortal/Home"));
 const VerificationPortal = lazy(
@@ -278,6 +280,16 @@ export const adminRoutes: RouteConfig = {
       showInMenu: false,
       allowedRoles: [ROLE_CODES.ADMIN],
       requiredPermissions: [PERMISSIONS.MANAGE_CREDENTIALS],
+    },
+    {
+      path: "/admin/action-logs",
+      element: <ActionLogsPage />,
+      menuLabel: "Nhật ký hoạt động",
+      menuIcon: <HistoryOutlined />,
+      showInMenu: true,
+      allowedRoles: [ROLE_CODES.ADMIN],
+      menuIndex: 1,
+      menuSection: "tools",
     },
     // {
     //   path: "/admin/blockchain",
