@@ -256,18 +256,23 @@
     .ant-modal-content {
       border-radius: 8px;
     }
+  }
+}
 
-    .ant-descriptions {
-      .ant-descriptions-item-label {
-        font-weight: 600;
-        color: #4b5563;
-        background-color: #f8fafc;
-        width: 200px;
-      }
+// Action log detail modal style - outside page scope for proper specificity
+.action-log-detail-modal {
+  .action-log-detail-descriptions {
+    .ant-descriptions-item-label {
+      font-weight: 600 !important;
+      color: #2563eb !important;
+      background: #f4f7ff !important;
+      border-right: 1px solid #dbeafe !important;
+      width: 200px;
+    }
 
-      .ant-descriptions-item-content {
-        color: #111827;
-      }
+    .ant-descriptions-item-content {
+      color: #111827 !important;
+      background: #ffffff !important;
     }
   }
 }
