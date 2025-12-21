@@ -14,6 +14,8 @@ import {
   notification,
 } from "antd";
 import { EditOutlined, DownloadOutlined } from "@ant-design/icons";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 import type { ColumnsType } from "antd/es/table";
 import {
   getTeacherClassesApi,
@@ -390,7 +392,7 @@ const TeacherGrading: React.FC = () => {
       title: (
         <div>
           <div>{component.name}</div>
-          <div style={{ fontSize: 11, color: "#8c8c8c" }}>
+          <div style={{ fontSize: 11, color: "#ffffff", fontWeight: 500 }}>
             {component.weightPercent}%
           </div>
         </div>
@@ -465,6 +467,228 @@ const TeacherGrading: React.FC = () => {
 
   const columns = buildColumns();
 
+  const handleExportPDF = async () => {
+    if (!selectedClass || students.length === 0) {
+      message.warning("Vui lòng chọn lớp học và đảm bảo có dữ liệu để xuất");
+      return;
+    }
+
+    try {
+      message.loading({ content: "Đang tạo PDF...", key: "export-pdf" });
+
+      // Create a temporary container for the PDF table
+      const container = document.createElement("div");
+      container.style.position = "absolute";
+      container.style.left = "-9999px";
+      container.style.top = "0";
+      container.style.width = "1200px"; // Landscape A4 width in pixels
+      container.style.backgroundColor = "#ffffff";
+      container.style.padding = "20px";
+      container.style.fontFamily = "Arial, sans-serif";
+      document.body.appendChild(container);
+
+      // Create header
+      const header = document.createElement("div");
+      header.style.textAlign = "center";
+      header.style.marginBottom = "20px";
+      
+      const title = document.createElement("h1");
+      title.textContent = "BẢNG ĐIỂM";
+      title.style.fontSize = "24px";
+      title.style.fontWeight = "bold";
+      title.style.margin = "0 0 15px 0";
+      title.style.color = "#000000";
+      header.appendChild(title);
+
+      const infoDiv = document.createElement("div");
+      infoDiv.style.textAlign = "left";
+      infoDiv.style.fontSize = "14px";
+      infoDiv.style.lineHeight = "1.8";
+      infoDiv.style.marginBottom = "10px";
+      infoDiv.innerHTML = `
+        <div><strong>Lớp:</strong> ${selectedClass.classCode}</div>
+        <div><strong>Môn học:</strong> ${selectedClass.subjectName}</div>
+        <div><strong>Học kỳ:</strong> ${selectedClass.semesterName || "N/A"}</div>
+        <div><strong>Giảng viên:</strong> ${selectedClass.teacherName || "N/A"}</div>
+      `;
+      header.appendChild(infoDiv);
+      container.appendChild(header);
+
+      // Create table
+      const table = document.createElement("table");
+      table.style.width = "100%";
+      table.style.borderCollapse = "collapse";
+      table.style.fontSize = "12px";
+      table.style.border = "1px solid #ddd";
+
+      // Create header row
+      const thead = document.createElement("thead");
+      const headerRow = document.createElement("tr");
+      headerRow.style.backgroundColor = "#1890ff";
+      headerRow.style.color = "#ffffff";
+      headerRow.style.fontWeight = "bold";
+
+      const headers = ["STT", "Mã SV", "Họ và tên"];
+      gradeComponents.forEach((component) => {
+        headers.push(`${component.name} (${component.weightPercent}%)`);
+      });
+      headers.push("Tổng điểm");
+
+      headers.forEach((headerText) => {
+        const th = document.createElement("th");
+        // Check if header contains percentage (e.g., "Assignment 1 (10%)")
+        if (headerText.includes("(") && headerText.includes("%")) {
+          // Split to separate the name and percentage
+          const parts = headerText.split("(");
+          const name = parts[0].trim();
+          const percentage = "(" + parts[1];
+          
+          th.innerHTML = `${name} <span style="color: #ffffff; font-weight: bold;">${percentage}</span>`;
+        } else {
+          th.textContent = headerText;
+        }
+        th.style.padding = "10px 8px";
+        th.style.border = "1px solid #ddd";
+        th.style.textAlign = "center";
+        th.style.color = "#ffffff";
+        headerRow.appendChild(th);
+      });
+      thead.appendChild(headerRow);
+      table.appendChild(thead);
+
+      // Create body
+      const tbody = document.createElement("tbody");
+      students.forEach((student, index) => {
+        const row = document.createElement("tr");
+        if (index % 2 === 1) {
+          row.style.backgroundColor = "#f5f7fa";
+        }
+
+        // Calculate grades
+        let totalScore = 0;
+        let totalWeight = 0;
+        const gradeCells: string[] = [];
+
+        gradeComponents.forEach((component) => {
+          const studentGrade = studentGrades[student.studentId] || {};
+          const score = Number(studentGrade[component.id]) || 0;
+          const maxScore = component.maxScore || 10;
+          const weight = component.weightPercent || 0;
+
+          const weightedScore = (score / maxScore) * weight;
+          totalScore += weightedScore;
+          totalWeight += weight;
+
+          gradeCells.push(`${score}/${maxScore}`);
+        });
+
+        const finalGrade = totalWeight > 0 ? (totalScore / totalWeight) * 10 : 0;
+
+        // STT
+        const cell1 = document.createElement("td");
+        cell1.textContent = String(index + 1);
+        cell1.style.padding = "8px";
+        cell1.style.border = "1px solid #ddd";
+        cell1.style.textAlign = "center";
+        row.appendChild(cell1);
+
+        // Mã SV
+        const cell2 = document.createElement("td");
+        cell2.textContent = student.studentCode;
+        cell2.style.padding = "8px";
+        cell2.style.border = "1px solid #ddd";
+        cell2.style.textAlign = "center";
+        row.appendChild(cell2);
+
+        // Họ và tên
+        const cell3 = document.createElement("td");
+        cell3.textContent = student.fullName;
+        cell3.style.padding = "8px";
+        cell3.style.border = "1px solid #ddd";
+        cell3.style.textAlign = "left";
+        row.appendChild(cell3);
+
+        // Grade components
+        gradeCells.forEach((gradeText) => {
+          const cell = document.createElement("td");
+          cell.textContent = gradeText;
+          cell.style.padding = "8px";
+          cell.style.border = "1px solid #ddd";
+          cell.style.textAlign = "center";
+          row.appendChild(cell);
+        });
+
+        // Tổng điểm
+        const totalCell = document.createElement("td");
+        totalCell.textContent = finalGrade.toFixed(2);
+        totalCell.style.padding = "8px";
+        totalCell.style.border = "1px solid #ddd";
+        totalCell.style.textAlign = "center";
+        totalCell.style.fontWeight = "bold";
+        row.appendChild(totalCell);
+
+        tbody.appendChild(row);
+      });
+      table.appendChild(tbody);
+      container.appendChild(table);
+
+      // Footer
+      const footer = document.createElement("div");
+      footer.style.textAlign = "right";
+      footer.style.marginTop = "20px";
+      footer.style.fontSize = "11px";
+      footer.style.color = "#666666";
+      footer.style.fontStyle = "italic";
+      footer.textContent = `Xuất ngày: ${new Date().toLocaleDateString("vi-VN")}`;
+      container.appendChild(footer);
+
+      // Wait for rendering
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      // Capture as image
+      const canvas = await html2canvas(container, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: "#ffffff",
+      });
+
+      // Remove temporary container
+      document.body.removeChild(container);
+
+      // Create PDF
+      const imgWidth = 297; // A4 landscape width in mm
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      const doc = new jsPDF("landscape", "mm", "a4");
+      const pageHeight = doc.internal.pageSize.getHeight();
+      let heightLeft = imgHeight;
+      let position = 0;
+
+      // Add first page
+      doc.addImage(canvas.toDataURL("image/png"), "PNG", 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+
+      // Add additional pages if needed
+      while (heightLeft > 0) {
+        position = heightLeft - imgHeight;
+        doc.addPage();
+        doc.addImage(canvas.toDataURL("image/png"), "PNG", 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+
+      // Save PDF
+      const fileName = `BangDiem_${selectedClass.classCode}_${new Date()
+        .toISOString()
+        .split("T")[0]}.pdf`;
+      doc.save(fileName);
+
+      message.success({ content: "Xuất bảng điểm thành công!", key: "export-pdf" });
+    } catch (error) {
+      console.error("Error exporting PDF:", error);
+      message.error({ content: "Có lỗi xảy ra khi xuất PDF. Vui lòng thử lại.", key: "export-pdf" });
+    }
+  };
+
   return (
     <>
       {contextHolder}
@@ -488,7 +712,12 @@ const TeacherGrading: React.FC = () => {
                   ))}
                 </Select>
               </Spin>
-              <Button icon={<DownloadOutlined />} disabled={!selectedClassId}>
+              <Button
+                icon={<DownloadOutlined />}
+                onClick={handleExportPDF}
+                disabled={!selectedClassId || students.length === 0}
+                type="primary"
+              >
                 Xuất bảng điểm
               </Button>
             </Space>

@@ -429,9 +429,14 @@ const ActionLogsPage: React.FC = () => {
         onCancel={() => setIsDetailModalVisible(false)}
         footer={null}
         width={800}
+        wrapClassName="action-log-detail-modal"
       >
         {viewingLog && (
-          <Descriptions bordered column={1}>
+          <Descriptions
+            bordered
+            column={1}
+            className="action-log-detail-descriptions"
+          >
             <Descriptions.Item label="ID">{viewingLog.id}</Descriptions.Item>
             <Descriptions.Item label="Thời gian">
               {dayjs(viewingLog.createdAt).format("DD/MM/YYYY HH:mm:ss")}

@@ -179,7 +179,7 @@ const HeaderComponent: React.FC<HeaderProps> = ({
         <Link to={homePath} className="logo-container">
           <img
             src="/image/z7310396057810_d32c375c6ada6e3edcb4bff25b5461b2.jpg"
-            alt="FAP Blockchain Logo"
+            alt="UAP Blockchain Logo"
             className="logo-icon"
           />
           <span className="logo-text">UAP Blockchain</span>
