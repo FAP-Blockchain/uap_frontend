@@ -453,7 +453,11 @@ const TeacherClassStudentList: React.FC = () => {
 
                   const contract = await getAttendanceManagementContract();
 
-                  const statusCode = isPresent ? 1 : 2; // map theo enum AttendanceStatus
+                  // Solidity DataTypes.AttendanceStatus:
+                  // 0=PRESENT, 1=ABSENT, 2=LATE, 3=EXCUSED
+                  // Our DB uses boolean isPresent, so map:
+                  // true -> PRESENT(0), false -> ABSENT(1)
+                  const statusCode = isPresent ? 0 : 1;
 
                   const sessionDateUnix = Math.floor(
                     new Date(slotAttendance.date).getTime() / 1000

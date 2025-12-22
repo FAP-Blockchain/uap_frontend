@@ -129,8 +129,8 @@ const CredentialRequestDetailAdmin: React.FC = () => {
       } as any);
       setApprovedCredential(approved);
       notificationApi.success({
-        message: "Phê duyệt thành công",
-        description: "Đã phê duyệt đơn yêu cầu nội bộ. Bây giờ hãy ký on-chain.",
+        message: "Phê duyệt nội bộ thành công (1/2)",
+        description: "Đã phê duyệt đơn yêu cầu nội bộ. Tiếp theo, bấm “Ký & lưu on-chain” để hoàn tất.",
         placement: "topRight",
         duration: 4,
       });
@@ -259,7 +259,18 @@ const CredentialRequestDetailAdmin: React.FC = () => {
         contractAddress: (contract.target as any)?.toString?.(),
       });
 
-      message.success(`Đã phát hành chứng chỉ on-chain. Tx: ${tx.hash}`);
+      const txHash = receipt.hash || tx.hash;
+      const shortTxHash = txHash
+        ? `${txHash.slice(0, 10)}...${txHash.slice(-8)}`
+        : "-";
+
+      notificationApi.success({
+        message: "Hoàn tất ký & lưu on-chain (2/2)",
+        description: `Đã phát hành chứng chỉ on-chain và lưu trạng thái vào hệ thống. Tx: ${shortTxHash}${blockchainCredentialId ? ` | CredentialId: ${blockchainCredentialId}` : ""}`,
+        placement: "topRight",
+        duration: 5,
+      });
+
       setApprovedCredential(null);
       loadRequest();
     } catch (error: any) {
