@@ -14,7 +14,6 @@ import {
   Table,
   Tag,
   Popconfirm,
-  Spin,
 } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import {
@@ -41,9 +40,6 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import type { SpecializationDto } from "../../../types/Specialization";
 import { fetchSpecializationsApi } from "../../../services/admin/specializations/api";
 import "./index.scss";
-
-const { Search } = Input;
-const { Option } = Select;
 
 const DEFAULT_PAGE_SIZE = 10;
 
@@ -74,8 +70,12 @@ const SubjectsManagement: React.FC = () => {
   >(null);
   const [allSubjects, setAllSubjects] = useState<SubjectDto[]>([]);
   const [loadingAllSubjects, setLoadingAllSubjects] = useState(false);
-  const [specializationFilter, setSpecializationFilter] = useState<string | undefined>();
-  const [prerequisiteFilter, setPrerequisiteFilter] = useState<string | undefined>();
+  const [specializationFilter, setSpecializationFilter] = useState<
+    string | undefined
+  >();
+  const [prerequisiteFilter, setPrerequisiteFilter] = useState<
+    string | undefined
+  >();
   const [creditsFilter, setCreditsFilter] = useState<number | undefined>();
   const [sortBy, setSortBy] = useState<string | undefined>();
   const [isDescending, setIsDescending] = useState(false);
@@ -143,10 +143,12 @@ const SubjectsManagement: React.FC = () => {
         prereqList.forEach((p) => prerequisites.add(p));
       }
     });
-    return Array.from(prerequisites).sort().map((prereq) => ({
-      label: prereq,
-      value: prereq,
-    }));
+    return Array.from(prerequisites)
+      .sort()
+      .map((prereq) => ({
+        label: prereq,
+        value: prereq,
+      }));
   }, [allSubjects]);
 
   const creditsOptions = useMemo(() => {
@@ -170,37 +172,48 @@ const SubjectsManagement: React.FC = () => {
       setLoading(true);
       try {
         // Use passed filter values or current state
-        const currentSpecialization = specialization !== undefined ? specialization : specializationFilter;
-        const currentPrerequisite = prerequisite !== undefined ? prerequisite : prerequisiteFilter;
+        const currentSpecialization =
+          specialization !== undefined ? specialization : specializationFilter;
+        const currentPrerequisite =
+          prerequisite !== undefined ? prerequisite : prerequisiteFilter;
         const currentCredits = credits !== undefined ? credits : creditsFilter;
         // Always prefer passed sortField/descending over state to avoid stale closure issues
         // If sortField is explicitly provided (not undefined), use it; otherwise fallback to state
         const currentSortBy = sortField !== undefined ? sortField : sortBy;
         // For isDescending: if sortField is provided, use the passed descending value (default to false if undefined)
         // If sortField is not provided, use state values
-        const currentIsDescending = sortField !== undefined 
-          ? (descending !== undefined ? descending : false)
-          : (sortBy ? isDescending : false);
-        
+        const currentIsDescending =
+          sortField !== undefined
+            ? descending !== undefined
+              ? descending
+              : false
+            : sortBy
+            ? isDescending
+            : false;
+
         // If there are filters, load all data and filter + paginate on frontend
-        const hasFilters = currentSpecialization || currentPrerequisite || currentCredits;
-        
+        const hasFilters =
+          currentSpecialization || currentPrerequisite || currentCredits;
+
         if (hasFilters) {
           // Load all data for filtering
           const allResponse = await fetchSubjectsApi({
             pageNumber: 1,
             pageSize: 10000,
-            searchTerm: search && search.trim() !== "" ? search.trim() : undefined,
+            searchTerm:
+              search && search.trim() !== "" ? search.trim() : undefined,
             sortBy: currentSortBy,
             isDescending: currentIsDescending,
           });
 
           let filteredData = allResponse.data || [];
-          
+
           // Apply filters
           if (currentSpecialization) {
             filteredData = filteredData.filter((s) =>
-              s.specializations?.some((spec) => spec.id === currentSpecialization)
+              s.specializations?.some(
+                (spec) => spec.id === currentSpecialization
+              )
             );
           }
           if (currentPrerequisite) {
@@ -214,7 +227,9 @@ const SubjectsManagement: React.FC = () => {
             });
           }
           if (currentCredits) {
-            filteredData = filteredData.filter((s) => s.credits === currentCredits);
+            filteredData = filteredData.filter(
+              (s) => s.credits === currentCredits
+            );
           }
 
           // Paginate filtered data
@@ -231,22 +246,23 @@ const SubjectsManagement: React.FC = () => {
           });
         } else {
           // No filters, use API pagination
-        const response = await fetchSubjectsApi({
-          pageNumber,
-          pageSize,
-            searchTerm: search && search.trim() !== "" ? search.trim() : undefined,
+          const response = await fetchSubjectsApi({
+            pageNumber,
+            pageSize,
+            searchTerm:
+              search && search.trim() !== "" ? search.trim() : undefined,
             sortBy: currentSortBy,
             isDescending: currentIsDescending,
-        });
+          });
 
           const data = response.data || [];
-        setSubjects(data);
+          setSubjects(data);
 
-        setPagination({
-          pageNumber: response.pageNumber || pageNumber,
-          pageSize: response.pageSize || pageSize,
+          setPagination({
+            pageNumber: response.pageNumber || pageNumber,
+            pageSize: response.pageSize || pageSize,
             totalCount: response.totalCount ?? data.length,
-        });
+          });
         }
       } catch {
         toast.error("Không thể tải danh sách môn học");
@@ -254,7 +270,14 @@ const SubjectsManagement: React.FC = () => {
         setLoading(false);
       }
     },
-    [pagination.pageSize, specializationFilter, prerequisiteFilter, creditsFilter, sortBy, isDescending]
+    [
+      pagination.pageSize,
+      specializationFilter,
+      prerequisiteFilter,
+      creditsFilter,
+      sortBy,
+      isDescending,
+    ]
   );
 
   useEffect(() => {
@@ -263,7 +286,16 @@ const SubjectsManagement: React.FC = () => {
       Number(searchParams.get("pageSize")) || DEFAULT_PAGE_SIZE;
     const initialSearch = searchParams.get("search") || "";
     setSearchText(initialSearch);
-    fetchData(initialPage, initialPageSize, initialSearch, undefined, undefined, undefined, sortBy, isDescending);
+    fetchData(
+      initialPage,
+      initialPageSize,
+      initialSearch,
+      undefined,
+      undefined,
+      undefined,
+      sortBy,
+      isDescending
+    );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
@@ -303,17 +335,26 @@ const SubjectsManagement: React.FC = () => {
 
   const handleSearch = () => {
     updateUrlParams(1, pagination.pageSize, searchText);
-    fetchData(1, pagination.pageSize, searchText, specializationFilter, prerequisiteFilter, creditsFilter, sortBy, isDescending);
+    fetchData(
+      1,
+      pagination.pageSize,
+      searchText,
+      specializationFilter,
+      prerequisiteFilter,
+      creditsFilter,
+      sortBy,
+      isDescending
+    );
   };
 
   const handleSort = (field: string) => {
     // Determine new sort state based on current state
     let newSortBy: string;
     let newIsDescending: boolean;
-    
+
     // Check if this is the same field being sorted
     const isSameField = sortBy === field;
-    
+
     if (isSameField) {
       // Same field: toggle direction (ascending <-> descending)
       newSortBy = field;
@@ -323,22 +364,22 @@ const SubjectsManagement: React.FC = () => {
       newSortBy = field;
       newIsDescending = false;
     }
-    
+
     // Update state
     setSortBy(newSortBy);
     setIsDescending(newIsDescending);
-    
+
     // Immediately call fetchData with the new sort values
     // Pass explicit values to avoid any closure issues
     fetchData(
-      1, 
-      pagination.pageSize, 
-      searchText, 
-      specializationFilter, 
-      prerequisiteFilter, 
-      creditsFilter, 
-      newSortBy,  // Always pass the new value explicitly
-      newIsDescending  // Always pass the new value explicitly
+      1,
+      pagination.pageSize,
+      searchText,
+      specializationFilter,
+      prerequisiteFilter,
+      creditsFilter,
+      newSortBy, // Always pass the new value explicitly
+      newIsDescending // Always pass the new value explicitly
     );
   };
 
@@ -364,13 +405,25 @@ const SubjectsManagement: React.FC = () => {
     setSortBy(undefined);
     setIsDescending(false);
     updateUrlParams(1, pagination.pageSize, "");
-    fetchData(1, pagination.pageSize, "", undefined, undefined, undefined, undefined, false);
+    fetchData(
+      1,
+      pagination.pageSize,
+      "",
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      false
+    );
   };
 
   const mapErrorMessage = (message?: string) => {
     if (!message) return "Không thể lưu môn học. Vui lòng thử lại.";
     const lower = message.toLowerCase();
-    if (lower.includes("already exists") || lower.includes("subject with code")) {
+    if (
+      lower.includes("already exists") ||
+      lower.includes("subject with code")
+    ) {
       return "Mã môn học đã tồn tại, vui lòng chọn mã khác.";
     }
     return message;
@@ -424,7 +477,6 @@ const SubjectsManagement: React.FC = () => {
           department: subjectDetail.department,
           specializationIds:
             subjectDetail.specializations?.map((s) => s.id) || [],
-          prerequisites: subjectDetail.prerequisites,
         });
       } catch {
         toast.error("Không thể tải thông tin môn học");
@@ -451,7 +503,7 @@ const SubjectsManagement: React.FC = () => {
           description: values.description?.trim() || undefined,
           category: values.category?.trim() || undefined,
           department: values.department?.trim() || undefined,
-          prerequisites: values.prerequisites || undefined,
+          prerequisites: undefined,
           specializationIds: values.specializationIds || [],
         };
 
@@ -464,11 +516,23 @@ const SubjectsManagement: React.FC = () => {
         }
         setIsModalVisible(false);
         form.resetFields();
-        fetchData(pagination.pageNumber, pagination.pageSize, searchText, specializationFilter, prerequisiteFilter, creditsFilter, sortBy, isDescending);
+        fetchData(
+          pagination.pageNumber,
+          pagination.pageSize,
+          searchText,
+          specializationFilter,
+          prerequisiteFilter,
+          creditsFilter,
+          sortBy,
+          isDescending
+        );
       } catch (error) {
         let errorMessage = "Không thể lưu môn học. Vui lòng thử lại.";
         if (axios.isAxiosError(error) && error.response?.data) {
-          const data = error.response.data as { message?: string; detail?: string };
+          const data = error.response.data as {
+            message?: string;
+            detail?: string;
+          };
           errorMessage = data.message || data.detail || errorMessage;
         }
         toast.error(mapErrorMessage(errorMessage));
@@ -480,7 +544,16 @@ const SubjectsManagement: React.FC = () => {
     try {
       await deleteSubjectApi(id);
       toast.success("Xóa môn học thành công");
-      fetchData(pagination.pageNumber, pagination.pageSize, searchText, specializationFilter, prerequisiteFilter, creditsFilter, sortBy, isDescending);
+      fetchData(
+        pagination.pageNumber,
+        pagination.pageSize,
+        searchText,
+        specializationFilter,
+        prerequisiteFilter,
+        creditsFilter,
+        sortBy,
+        isDescending
+      );
     } catch {
       toast.error("Không thể xóa môn học");
     }
@@ -489,12 +562,29 @@ const SubjectsManagement: React.FC = () => {
   const renderSortableTitle = (title: string, sortField: string) => {
     const isActive = sortBy === sortField;
     return (
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 8,
+        }}
+      >
         <span>{title}</span>
         <Button
           type="text"
           size="small"
-          icon={isActive ? (isDescending ? <ArrowDownOutlined /> : <ArrowUpOutlined />) : <ArrowUpOutlined />}
+          icon={
+            isActive ? (
+              isDescending ? (
+                <ArrowDownOutlined />
+              ) : (
+                <ArrowUpOutlined />
+              )
+            ) : (
+              <ArrowUpOutlined />
+            )
+          }
           onClick={(e) => {
             e.stopPropagation();
             handleSort(sortField);
@@ -532,18 +622,6 @@ const SubjectsManagement: React.FC = () => {
           )}
         </div>
       ),
-    },
-    {
-      title: "Tiên quyết",
-      dataIndex: "prerequisites",
-      key: "prerequisites",
-      width: 160,
-      render: (prerequisites?: string) =>
-        prerequisites ? (
-          <Tag color="orange">{prerequisites}</Tag>
-        ) : (
-          <Tag color="default">Không có</Tag>
-        ),
     },
     {
       title: "Chuyên ngành",
@@ -715,7 +793,9 @@ const SubjectsManagement: React.FC = () => {
                   placeholder="Tất cả chuyên ngành"
                   allowClear
                   value={specializationFilter}
-                  onChange={(value) => handleFilterChange("specialization", value)}
+                  onChange={(value) =>
+                    handleFilterChange("specialization", value)
+                  }
                   options={specializationOptions}
                   showSearch
                   optionFilterProp="label"
@@ -732,7 +812,9 @@ const SubjectsManagement: React.FC = () => {
                   placeholder="Tất cả tiên quyết"
                   allowClear
                   value={prerequisiteFilter}
-                  onChange={(value) => handleFilterChange("prerequisite", value)}
+                  onChange={(value) =>
+                    handleFilterChange("prerequisite", value)
+                  }
                   options={prerequisiteFilterOptions}
                   showSearch
                   optionFilterProp="label"
@@ -760,10 +842,7 @@ const SubjectsManagement: React.FC = () => {
           <Row gutter={[8, 8]} align="middle" style={{ marginTop: 8 }}>
             <Col xs={24} style={{ textAlign: "right" }}>
               <Space>
-                <Button
-                  onClick={handleClearFilters}
-                  size="large"
-                >
+                <Button onClick={handleClearFilters} size="large">
                   Xóa hết
                 </Button>
                 <Button
@@ -800,11 +879,29 @@ const SubjectsManagement: React.FC = () => {
                 (() => {
                   const size = pageSize || pagination.pageSize;
                   updateUrlParams(page, size, searchText);
-                  fetchData(page, size, searchText, specializationFilter, prerequisiteFilter, creditsFilter, sortBy, isDescending);
+                  fetchData(
+                    page,
+                    size,
+                    searchText,
+                    specializationFilter,
+                    prerequisiteFilter,
+                    creditsFilter,
+                    sortBy,
+                    isDescending
+                  );
                 })(),
               onShowSizeChange: (current, size) => {
                 updateUrlParams(1, size, searchText);
-                fetchData(1, size, searchText, specializationFilter, prerequisiteFilter, creditsFilter, sortBy, isDescending);
+                fetchData(
+                  1,
+                  size,
+                  searchText,
+                  specializationFilter,
+                  prerequisiteFilter,
+                  creditsFilter,
+                  sortBy,
+                  isDescending
+                );
               },
             }}
             scroll={{ x: 800 }}
@@ -909,51 +1006,6 @@ const SubjectsManagement: React.FC = () => {
               placeholder="Nhập mô tả ngắn về môn học"
               autoSize={{ minRows: 3, maxRows: 4 }}
             />
-          </Form.Item>
-
-          <Form.Item
-            name="prerequisites"
-            label="Môn tiên quyết"
-            extra="Chọn mã môn học phải hoàn thành trước (ví dụ: CS101). Bỏ trống nếu không có."
-          >
-            <Select
-              placeholder="Chọn môn tiên quyết"
-              allowClear
-              showSearch
-              optionFilterProp="label"
-              size="large"
-              onDropdownVisibleChange={(open) => {
-                if (open && !prerequisiteOptions.length) {
-                  loadPrerequisiteOptions();
-                }
-              }}
-              notFoundContent={
-                loadingPrerequisites ? (
-                  <Spin size="small" />
-                ) : (
-                  "Không có dữ liệu"
-                )
-              }
-              className="subject-modal__select"
-            >
-              {prerequisiteOptions
-                .filter(
-                  (subject) =>
-                    !editingSubject || subject.id !== editingSubject.id
-                )
-                .map((subject) => (
-                  <Option
-                    key={subject.id}
-                    value={subject.subjectCode}
-                    label={`${subject.subjectCode} - ${subject.subjectName}`}
-                  >
-                    <div className="subject-modal__option">
-                      <span className="code">{subject.subjectCode}</span>
-                      <span className="name">{subject.subjectName}</span>
-                    </div>
-                  </Option>
-                ))}
-            </Select>
           </Form.Item>
         </Form>
       </Modal>

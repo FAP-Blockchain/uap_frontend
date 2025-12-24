@@ -184,8 +184,9 @@ const SubjectDetail: React.FC = () => {
   }, [relatedClasses]);
 
   const loadSubjectDetail = useCallback(
-    async (id: string, options?: { showLoading?: boolean }) => {
+    async (id: string, options?: { showLoading?: boolean; navigateOnError?: boolean }) => {
       const shouldShowPageLoading = options?.showLoading ?? true;
+      const shouldNavigateOnError = options?.navigateOnError ?? true;
 
       if (shouldShowPageLoading) {
         setLoading(true);
@@ -210,9 +211,15 @@ const SubjectDetail: React.FC = () => {
         );
 
         setRelatedClasses(filteredClasses);
-      } catch {
-        toast.error("Không thể tải thông tin môn học");
-        navigate("/admin/subjects");
+      } catch (error) {
+        // Chỉ hiển thị lỗi, không navigate nếu đang ở trang chi tiết và đang reload sau khi edit
+        if (shouldNavigateOnError) {
+          toast.error("Không thể tải thông tin môn học");
+          navigate("/admin/subjects");
+        } else {
+          // Chỉ log lỗi, không hiển thị toast vì có thể đã có toast từ API call trước đó
+          console.error("Failed to reload subject detail:", error);
+        }
       } finally {
         if (shouldShowPageLoading) {
           setLoading(false);
@@ -325,7 +332,6 @@ const SubjectDetail: React.FC = () => {
       subjectName: subject.subjectName,
       credits: subject.credits,
       description: subject.description,
-      prerequisites: subject.prerequisites,
       department: subject.department,
       specializationIds: subject.specializations?.map((s) => s.id) || [],
       category: subject.category,
@@ -345,7 +351,6 @@ const SubjectDetail: React.FC = () => {
         subjectName: subject.subjectName,
         credits: subject.credits,
         description: subject.description,
-        prerequisites: subject.prerequisites,
         department: subject.department,
         category: subject.category,
       });
@@ -370,7 +375,7 @@ const SubjectDetail: React.FC = () => {
       specializationIds: values.specializationIds || [],
       department: values.department?.trim() || undefined,
       category: values.category?.trim() || undefined,
-      prerequisites: values.prerequisites || undefined,
+      prerequisites: undefined,
     };
 
     setIsSaving(true);
@@ -378,19 +383,29 @@ const SubjectDetail: React.FC = () => {
       const updated = await updateSubjectApi(subject.id, payload);
       toast.success("Cập nhật môn học thành công");
       setIsEditing(false);
-      await loadSubjectDetail(updated.id, { showLoading: false });
+      
+      // Reload dữ liệu nhưng không navigate khi lỗi (vì đang ở trang chi tiết)
+      try {
+        await loadSubjectDetail(updated.id, { 
+          showLoading: false, 
+          navigateOnError: false 
+        });
+      } catch (reloadError) {
+        // Nếu reload lỗi, vẫn cập nhật form với dữ liệu từ response của update
+        console.error("Failed to reload subject detail:", reloadError);
+      }
 
       form.setFieldsValue({
         subjectCode: updated.subjectCode,
         subjectName: updated.subjectName,
         credits: updated.credits,
         description: updated.description,
-        prerequisites: updated.prerequisites,
         specializationIds: updated.specializations?.map((s) => s.id) || [],
         department: updated.department,
         category: updated.category,
       });
 
+      // Chỉ navigate nếu mã môn học thay đổi
       if (updated.subjectCode && updated.subjectCode !== previousCode) {
         navigate(`/admin/subjects/${updated.subjectCode}?id=${updated.id}`, {
           replace: true,
@@ -428,8 +443,8 @@ const SubjectDetail: React.FC = () => {
       // Gợi ý mặc định khi chưa có cấu hình
       gradeConfigForm.setFieldsValue({
         components: [
-          { name: "Giữa kỳ", weightPercent: 40 },
-          { name: "Cuối kỳ", weightPercent: 60 },
+          { name: "Practice exam", weightPercent: 40 },
+          { name: "Theory exam", weightPercent: 60 },
         ],
       });
     }
@@ -820,48 +835,6 @@ const SubjectDetail: React.FC = () => {
               <Form.Item name="category" label="Phân loại">
                 <Input placeholder="Nhập phân loại (nếu có)" size="large" />
               </Form.Item>
-              <Form.Item
-                name="prerequisites"
-                label="Môn tiên quyết"
-                extra="Chọn mã môn học phải hoàn thành trước (ví dụ: CS101). Bỏ trống nếu không có."
-                className="full-width"
-              >
-                <Select
-                  placeholder="Chọn môn tiên quyết"
-                  allowClear
-                  showSearch
-                  optionFilterProp="label"
-                  size="large"
-                  onDropdownVisibleChange={(open) => {
-                    if (open && !prerequisiteOptions.length) {
-                      loadPrerequisiteOptions();
-                    }
-                  }}
-                  notFoundContent={
-                    loadingPrerequisites ? (
-                      <Spin size="small" />
-                    ) : (
-                      "Không có dữ liệu"
-                    )
-                  }
-                  className="subject-form-select"
-                >
-                  {prerequisiteOptions
-                    .filter((item) => !subject || item.id !== subject.id)
-                    .map((item) => (
-                      <Option
-                        key={item.id}
-                        value={item.subjectCode}
-                        label={`${item.subjectCode} - ${item.subjectName}`}
-                      >
-                        <div className="subject-form-option">
-                          <span className="code">{item.subjectCode}</span>
-                          <span className="name">{item.subjectName}</span>
-                        </div>
-                      </Option>
-                    ))}
-                </Select>
-              </Form.Item>
             </div>
 
             <Form.Item name="description" label="Mô tả">
@@ -902,19 +875,6 @@ const SubjectDetail: React.FC = () => {
             </Descriptions.Item>
             <Descriptions.Item label="Tín chỉ">
               {subject.credits}
-            </Descriptions.Item>
-            <Descriptions.Item label="Môn tiên quyết" span={2}>
-              {prerequisiteList.length ? (
-                <Space wrap>
-                  {prerequisiteList.map((item) => (
-                    <Tag key={item} color="orange">
-                      {item}
-                    </Tag>
-                  ))}
-                </Space>
-              ) : (
-                <Tag color="default">Không có</Tag>
-              )}
             </Descriptions.Item>
             {subject.description && (
               <Descriptions.Item label="Mô tả" span={2}>
@@ -1006,6 +966,7 @@ const SubjectDetail: React.FC = () => {
         confirmLoading={savingGradeConfig}
         width={800}
         destroyOnClose
+        className="grade-config-modal"
       >
         <Form
           form={gradeConfigForm}
@@ -1033,6 +994,7 @@ const SubjectDetail: React.FC = () => {
                           danger
                           type="link"
                           onClick={() => remove(field.name)}
+                          className="grade-config-delete-btn"
                         >
                           Xóa
                         </Button>
