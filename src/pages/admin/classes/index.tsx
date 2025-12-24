@@ -167,6 +167,9 @@ const ClassesManagement: React.FC = () => {
   const [pendingEnrollments, setPendingEnrollments] = useState<
     Record<string, number>
   >({});
+  const [onChainLoadingByClassId, setOnChainLoadingByClassId] = useState<
+    Record<string, boolean>
+  >({});
   // Form type includes semesterId for filtering, but it's not part of CreateClassRequest
   interface ClassFormValues extends CreateClassRequest {
     semesterId?: string;
@@ -481,6 +484,8 @@ const ClassesManagement: React.FC = () => {
   };
 
   const handleRegisterClassOnChain = async (classItem: ClassSummary) => {
+    if (onChainLoadingByClassId[classItem.id]) return;
+    setOnChainLoadingByClassId((prev) => ({ ...prev, [classItem.id]: true }));
     try {
       if (!classItem.teacherWalletAddress) {
         toast.error(
@@ -519,6 +524,11 @@ const ClassesManagement: React.FC = () => {
         (error as { message?: string })?.message ||
         "Đăng ký lớp on-chain thất bại";
       toast.error(message);
+    } finally {
+      setOnChainLoadingByClassId((prev) => ({
+        ...prev,
+        [classItem.id]: false,
+      }));
     }
   };
 
@@ -647,6 +657,8 @@ const ClassesManagement: React.FC = () => {
           typeof record.onChainClassId === "number" &&
           record.onChainClassId > 0;
 
+        const isOnChainLoading = !!onChainLoadingByClassId[record.id];
+
         return (
           <Space size="small">
             {!hasOnChain && (
@@ -655,6 +667,8 @@ const ClassesManagement: React.FC = () => {
                   type="default"
                   size="small"
                   icon={<LinkOutlined />}
+                  loading={isOnChainLoading}
+                  disabled={isOnChainLoading}
                   onClick={() => handleRegisterClassOnChain(record)}
                 >
                   On-chain

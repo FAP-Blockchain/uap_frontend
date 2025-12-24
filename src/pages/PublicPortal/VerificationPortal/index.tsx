@@ -248,20 +248,29 @@ const VerificationPortal: React.FC = () => {
       return;
     }
 
-    // Đoán đây là mã chứng chỉ (SUB-YYYY-XXXXXX, GRAD-YYYY-XXXXXX, ...)
-    const isCredentialNumber =
-      /^([A-Z]{3,4})-\d{4}-\d{6}$/.test(trimmed) ||
+    // Đoán đây là mã chứng chỉ (SUB-YYYY-XXXXXX..., GRAD-YYYY-XXXXXX..., ...)
+    // Lưu ý: suffix số có thể không cố định 6 chữ số (tuỳ data seed / bug cũ), nên cho phép >= 1.
+    const looksLikeCredentialNumber =
+      /^([A-Z]{3,10})-\d{4}-\d+$/.test(trimmed) ||
       /^deg_\d+$/i.test(trimmed) ||
       /^cert_\d+$/i.test(trimmed) ||
       /^trans_\d+$/i.test(trimmed);
 
-    const payload = isCredentialNumber
+    // Try best-guess first, then fallback to the other field if backend says not found.
+    const primaryPayload = looksLikeCredentialNumber
       ? { credentialNumber: trimmed, verificationHash: undefined }
       : { credentialNumber: undefined, verificationHash: trimmed };
+    const fallbackPayload = looksLikeCredentialNumber
+      ? { credentialNumber: undefined, verificationHash: trimmed }
+      : { credentialNumber: trimmed, verificationHash: undefined };
 
     try {
       setIsVerifying(true);
-      const verifyResult = await CredentialServices.verifyCredential(payload as any);
+      const runVerify = async (payload: any) => {
+        return CredentialServices.verifyCredential(payload as any);
+      };
+
+      let verifyResult = await runVerify(primaryPayload);
 
       const { isValid, message: backendMessage, credential } =
         (verifyResult || {}) as {
@@ -270,17 +279,28 @@ const VerificationPortal: React.FC = () => {
           credential?: { credentialId?: string; id?: string };
         };
 
-      if (isValid === false || !credential) {
+      // Fallback: if we guessed wrong (credentialNumber vs verificationHash)
+      if ((isValid === false || !credential) && backendMessage === "Certificate not found") {
+        verifyResult = await runVerify(fallbackPayload);
+      }
+
+      const final = (verifyResult || {}) as {
+        isValid?: boolean;
+        message?: string;
+        credential?: { credentialId?: string; id?: string };
+      };
+
+      if (final.isValid === false || !final.credential) {
         notificationApi.error({
           message: "Không thể xác thực chứng chỉ",
           description:
-            backendMessage || "Chứng chỉ không hợp lệ hoặc đã bị thu hồi.",
+            final.message || "Chứng chỉ không hợp lệ hoặc đã bị thu hồi.",
         });
         return;
       }
 
       const credentialNumberFromResult =
-        credential.credentialId || credential.id || trimmed;
+        final.credential.credentialId || final.credential.id || trimmed;
 
       notificationApi.success({
         message: "Xác thực thành công",

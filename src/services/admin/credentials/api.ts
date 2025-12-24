@@ -157,8 +157,8 @@ export interface RevokeCredentialRequest {
 }
 
 export interface VerifyCredentialRequest {
-  credentialHash?: string;
-  credentialId?: string;
+  credentialNumber?: string;
+  verificationHash?: string;
 }
 
 export interface CredentialVerificationDto {

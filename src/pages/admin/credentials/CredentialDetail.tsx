@@ -33,6 +33,8 @@ import {
   downloadCredentialPdfApi,
   getCredentialByIdApi,
   getCredentialQRCodeApi,
+  type CredentialVerificationDto,
+  verifyCredentialApi,
 } from "../../../services/admin/credentials/api";
 import "./CredentialDetail.scss";
 
@@ -71,6 +73,9 @@ const CredentialDetail: React.FC = () => {
   const [actionLoading, setActionLoading] = useState(false);
   const [qrCodeData, setQrCodeData] = useState<string>("");
   const [qrLoading, setQrLoading] = useState(true);
+  const [verifyLoading, setVerifyLoading] = useState(false);
+  const [verifyResult, setVerifyResult] = useState<CredentialVerificationDto | null>(null);
+  const [verifyError, setVerifyError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const qrRef = useRef<HTMLDivElement | null>(null);
 
@@ -129,6 +134,49 @@ const CredentialDetail: React.FC = () => {
       .finally(() => {
         if (active) {
           setQrLoading(false);
+        }
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [credential]);
+
+  useEffect(() => {
+    if (!credential) {
+      return;
+    }
+
+    let active = true;
+    setVerifyLoading(true);
+    setVerifyError(null);
+
+    const credentialNumber = ((credential as any).credentialId || "") as string;
+    const verificationHash = ((credential as any).verificationHash || "") as string;
+
+    void verifyCredentialApi({
+      credentialNumber: credentialNumber || undefined,
+      verificationHash: verificationHash || undefined,
+    })
+      .then((res) => {
+        if (!active) return;
+        setVerifyResult(res);
+      })
+      .catch((err) => {
+        if (!active) return;
+        const messageText =
+          (err as { response?: { data?: { detail?: string; message?: string } } })
+            ?.response?.data?.detail ||
+          (err as { response?: { data?: { message?: string } } })?.response?.data
+            ?.message ||
+          (err as { message?: string })?.message ||
+          "Không thể xác thực chứng chỉ";
+        setVerifyError(messageText);
+        setVerifyResult(null);
+      })
+      .finally(() => {
+        if (active) {
+          setVerifyLoading(false);
         }
       });
 
@@ -350,6 +398,28 @@ const CredentialDetail: React.FC = () => {
                   </Tag>
                 )}
               </Space>
+
+              {verifyLoading ? (
+                <Spin size="small" />
+              ) : verifyResult ? (
+                <Alert
+                  type={verifyResult.isValid ? "success" : "error"}
+                  showIcon
+                  message={
+                    verifyResult.isValid
+                      ? "Xác thực: Hợp lệ"
+                      : "Xác thực: Không hợp lệ"
+                  }
+                  description={verifyResult.message}
+                />
+              ) : verifyError ? (
+                <Alert
+                  type="warning"
+                  showIcon
+                  message="Không thể xác thực"
+                  description={verifyError}
+                />
+              ) : null}
             </Space>
           </Card>
         </Col>

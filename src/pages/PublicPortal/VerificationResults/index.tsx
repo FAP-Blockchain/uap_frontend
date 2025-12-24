@@ -41,6 +41,11 @@ const VerificationResults: React.FC = () => {
 	const [certificate, setCertificate] =
 		useState<CertificatePublicDto | null>(null);
 	const [isLoading, setIsLoading] = useState(true);
+	const [verifyLoading, setVerifyLoading] = useState(false);
+	const [verifyResult, setVerifyResult] = useState<
+		{ isValid: boolean; message: string } | null
+	>(null);
+	const [verifyError, setVerifyError] = useState<string | null>(null);
 	const [error, setError] = useState<string | null>(null);
 
 	useEffect(() => {
@@ -53,15 +58,49 @@ const VerificationResults: React.FC = () => {
 
 			setIsLoading(true);
 			setError(null);
+			setVerifyError(null);
+			setVerifyResult(null);
 			try {
 				const data = await CredentialServices.getPublicCertificateById(
 					credentialId
 				);
 				setCertificate(data as CertificatePublicDto);
-				// Nếu cần có thể gọi thêm verifyCredential với query param ở đây
-				// const credentialNumber = searchParams.get("credentialNumber") || credentialId;
-				// const verificationHash = searchParams.get("verificationHash") || undefined;
-				// void CredentialServices.verifyCredential({ credentialNumber, verificationHash });
+
+				// Verify authenticity against blockchain
+				const credentialNumber =
+					searchParams.get("credentialNumber") ||
+					(data as any).credentialId ||
+					credentialId;
+				const verificationHash =
+					searchParams.get("verificationHash") ||
+					(data as any).verificationHash ||
+					undefined;
+
+				setVerifyLoading(true);
+				try {
+					const verified = await CredentialServices.verifyCredential({
+						credentialNumber: credentialNumber || undefined,
+						verificationHash,
+					});
+					setVerifyResult({
+						isValid: !!verified?.isValid,
+						message: verified?.message || "",
+					});
+				} catch (verifyErr) {
+					const messageText =
+						((verifyErr as {
+							response?: { data?: { message?: string; detail?: string } };
+							message?: string;
+						})?.response?.data?.message ||
+							(verifyErr as { response?: { data?: { detail?: string } } })
+								?.response?.data?.detail ||
+							(verifyErr as { message?: string }).message ||
+							"Không thể xác thực dữ liệu on-chain");
+					setVerifyError(messageText);
+					setVerifyResult(null);
+				} finally {
+					setVerifyLoading(false);
+				}
 			} catch (err) {
 				const messageText =
 					((err as {
@@ -166,6 +205,34 @@ const VerificationResults: React.FC = () => {
 					
 				</div>
 			</div>
+
+			{verifyLoading ? (
+				<div style={{ marginBottom: 16 }}>
+					<Spin />
+				</div>
+			) : verifyResult ? (
+				<div style={{ marginBottom: 16 }}>
+					<Alert
+						showIcon
+						type={verifyResult.isValid ? "success" : "error"}
+						message={
+							verifyResult.isValid
+								? "Xác thực: Hợp lệ"
+								: "Xác thực: Không hợp lệ"
+						}
+						description={verifyResult.message}
+					/>
+				</div>
+			) : verifyError ? (
+				<div style={{ marginBottom: 16 }}>
+					<Alert
+						showIcon
+						type="warning"
+						message="Không thể xác thực on-chain"
+						description={verifyError}
+					/>
+				</div>
+			) : null}
 
 			<Row gutter={[24, 24]}>
 				<Col xs={24} lg={12}>
