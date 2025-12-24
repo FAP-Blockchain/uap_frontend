@@ -313,7 +313,7 @@ const AttendanceValidationAdminPage: React.FC = () => {
     },
     {
       key: "tamper-credential",
-      label: "Giả mạo chứng chỉ",
+      label: "Giả mạo dữ liệu",
       children: (
         <Card
           title={
