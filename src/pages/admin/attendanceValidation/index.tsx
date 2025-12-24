@@ -24,6 +24,7 @@ import AttendanceValidationAdminService, {
   type AttendanceValidationStatus,
   type CredentialInfo,
   type GradeInfo,
+  type AttendanceInfo,
 } from "../../../services/admin/attendanceValidation/api";
 import "./index.scss";
 
@@ -37,9 +38,9 @@ const AttendanceValidationAdminPage: React.FC = () => {
   const [initialized, setInitialized] = useState(false);
 
   // Tampering Type Selection
-  const [tamperType, setTamperType] = useState<"credential" | "grade">(
-    "credential"
-  );
+  const [tamperType, setTamperType] = useState<
+    "credential" | "grade" | "attendance"
+  >("credential");
 
   // Credential Tampering State
   const [credentials, setCredentials] = useState<CredentialInfo[]>([]);
@@ -57,6 +58,14 @@ const AttendanceValidationAdminPage: React.FC = () => {
   const [tamperingGrade, setTamperingGrade] = useState(false);
   const [tamperScoreValue, setTamperScoreValue] = useState<number>(0);
   const [isGradeModalOpen, setIsGradeModalOpen] = useState(false);
+
+  // Attendance Tampering State
+  const [attendances, setAttendances] = useState<AttendanceInfo[]>([]);
+  const [loadingAttendances, setLoadingAttendances] = useState(false);
+  const [selectedAttendance, setSelectedAttendance] =
+    useState<AttendanceInfo | null>(null);
+  const [tamperingAttendance, setTamperingAttendance] = useState(false);
+  const [isAttendanceModalOpen, setIsAttendanceModalOpen] = useState(false);
 
   const hasFetchedRef = useRef(false);
 
@@ -102,6 +111,19 @@ const AttendanceValidationAdminPage: React.FC = () => {
     }
   };
 
+  const loadAttendances = async () => {
+    setLoadingAttendances(true);
+    try {
+      const data = await AttendanceValidationAdminService.getAttendances();
+      setAttendances(data);
+    } catch (err) {
+      console.error("Không thể tải danh sách điểm danh:", err);
+      toast.error("Không thể tải danh sách điểm danh.");
+    } finally {
+      setLoadingAttendances(false);
+    }
+  };
+
   useEffect(() => {
     if (hasFetchedRef.current) {
       return;
@@ -115,10 +137,12 @@ const AttendanceValidationAdminPage: React.FC = () => {
     void loadAll();
   }, []);
 
-  // Load grades when tamper type changes to "grade"
+  // Load data when tamper type changes
   useEffect(() => {
     if (tamperType === "grade" && grades.length === 0) {
       void loadGrades();
+    } else if (tamperType === "attendance" && attendances.length === 0) {
+      void loadAttendances();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tamperType]);
@@ -229,6 +253,44 @@ const AttendanceValidationAdminPage: React.FC = () => {
     }
   };
 
+  const handleOpenAttendanceTamperModal = (record: AttendanceInfo) => {
+    setSelectedAttendance(record);
+    setIsAttendanceModalOpen(true);
+  };
+
+  const handleCloseAttendanceTamperModal = () => {
+    setIsAttendanceModalOpen(false);
+    setSelectedAttendance(null);
+  };
+
+  const handleTamperAttendance = async (isPresent: boolean) => {
+    if (!selectedAttendance) {
+      toast.warning("Vui lòng chọn điểm danh cần giả mạo.");
+      return;
+    }
+
+    setTamperingAttendance(true);
+    try {
+      await AttendanceValidationAdminService.tamperAttendance(
+        selectedAttendance.id,
+        isPresent
+      );
+      // Reload lại danh sách để đảm bảo dữ liệu đầy đủ và cập nhật
+      await loadAttendances();
+      toast.success(
+        `Đã giả mạo điểm danh thành công! (${
+          isPresent ? "Có mặt" : "Vắng mặt"
+        })`
+      );
+      handleCloseAttendanceTamperModal();
+    } catch (err) {
+      console.error("Lỗi khi giả mạo điểm danh:", err);
+      toast.error("Không thể giả mạo điểm danh.");
+    } finally {
+      setTamperingAttendance(false);
+    }
+  };
+
   const configurationColumns = [
     {
       title: "Trạng thái",
@@ -313,7 +375,7 @@ const AttendanceValidationAdminPage: React.FC = () => {
     },
     {
       key: "tamper-credential",
-      label: "Giả mạo chứng chỉ",
+      label: "Giả mạo dữ liệu",
       children: (
         <Card
           title={
@@ -335,6 +397,7 @@ const AttendanceValidationAdminPage: React.FC = () => {
                 options={[
                   { label: "Giả mạo chứng chỉ", value: "credential" },
                   { label: "Giả mạo điểm số", value: "grade" },
+                  { label: "Giả mạo điểm danh", value: "attendance" },
                 ]}
               />
             </div>
@@ -679,6 +742,262 @@ const AttendanceValidationAdminPage: React.FC = () => {
                         <Text type="secondary" style={{ fontSize: 12 }}>
                           Nhập điểm số mới (ví dụ: 9.5). Chỉ có điểm số sẽ được
                           cập nhật vào Database.
+                        </Text>
+                      </div>
+                    </Space>
+                  )}
+                </Modal>
+              </>
+            )}
+
+            {tamperType === "attendance" && (
+              <>
+                <Alert
+                  message="Cảnh báo"
+                  description="Chức năng này dùng để thay đổi trạng thái điểm danh trong Database NHƯNG KHÔNG cập nhật Blockchain. Điều này sẽ khiến quá trình xác thực điểm danh thất bại (do hash điểm danh không khớp với hash trên blockchain)."
+                  type="warning"
+                  showIcon
+                  icon={<WarningOutlined />}
+                />
+
+                <Table
+                  dataSource={attendances}
+                  rowKey="id"
+                  loading={loadingAttendances}
+                  pagination={{ pageSize: 10 }}
+                  className="tamper-table"
+                  scroll={{ x: 1200 }}
+                  columns={[
+                    {
+                      title: "Sinh viên",
+                      key: "student",
+                      width: 180,
+                      render: (_, record) => (
+                        <Space direction="vertical" size={0}>
+                          <Text strong>{record.studentName}</Text>
+                          <Text type="secondary" style={{ fontSize: 12 }}>
+                            {record.studentCode}
+                          </Text>
+                        </Space>
+                      ),
+                    },
+                    {
+                      title: "Môn học",
+                      key: "subject",
+                      width: 220,
+                      render: (_, record) => (
+                        <Space direction="vertical" size={0}>
+                          <Text strong>{record.subjectName}</Text>
+                          <Text type="secondary" style={{ fontSize: 12 }}>
+                            {record.subjectCode}
+                          </Text>
+                        </Space>
+                      ),
+                    },
+                    {
+                      title: "Lớp",
+                      dataIndex: "classCode",
+                      key: "classCode",
+                      width: 150,
+                    },
+                    {
+                      title: "Ngày",
+                      key: "date",
+                      width: 120,
+                      render: (_, record) =>
+                        new Date(record.date).toLocaleDateString("vi-VN"),
+                    },
+                    {
+                      title: "Ca học",
+                      dataIndex: "timeSlotName",
+                      key: "timeSlotName",
+                      width: 100,
+                    },
+                    {
+                      title: "Trạng thái",
+                      key: "status",
+                      width: 150,
+                      align: "center" as const,
+                      render: (_, record) => (
+                        <Space direction="vertical" size={0} align="center">
+                          {record.isPresent ? (
+                            <Tag color="green">Có mặt</Tag>
+                          ) : record.isExcused ? (
+                            <Tag color="orange">Có phép</Tag>
+                          ) : (
+                            <Tag color="red">Vắng mặt</Tag>
+                          )}
+                          {record.notes && (
+                            <Text
+                              type="secondary"
+                              style={{ fontSize: 11 }}
+                              ellipsis
+                            >
+                              {record.notes}
+                            </Text>
+                          )}
+                        </Space>
+                      ),
+                    },
+                    {
+                      title: "Ghi chú",
+                      dataIndex: "notes",
+                      key: "notes",
+                      width: 200,
+                      ellipsis: true,
+                      render: (text: string) => text || "—",
+                    },
+                    {
+                      title: "Blockchain",
+                      key: "blockchain",
+                      width: 100,
+                      align: "center" as const,
+                      render: (_, record) => (
+                        <Tag
+                          color={record.isOnBlockchain ? "green" : "default"}
+                        >
+                          {record.isOnBlockchain ? "Đã lưu" : "Chưa lưu"}
+                        </Tag>
+                      ),
+                    },
+                    {
+                      title: "Thao tác",
+                      key: "action",
+                      width: 100,
+                      align: "center" as const,
+                      fixed: "right" as const,
+                      render: (_, record) => (
+                        <Button
+                          size="small"
+                          type="primary"
+                          danger
+                          onClick={() =>
+                            handleOpenAttendanceTamperModal(record)
+                          }
+                        >
+                          Giả mạo
+                        </Button>
+                      ),
+                    },
+                  ]}
+                />
+
+                <Modal
+                  title="Giả mạo dữ liệu điểm danh"
+                  open={isAttendanceModalOpen}
+                  onCancel={handleCloseAttendanceTamperModal}
+                  className="tamper-modal"
+                  footer={null}
+                >
+                  {selectedAttendance && (
+                    <Space
+                      direction="vertical"
+                      style={{ width: "100%" }}
+                      size="middle"
+                    >
+                      <Alert
+                        message="Hành động này sẽ làm sai lệch dữ liệu giữa Database và Blockchain."
+                        type="error"
+                        showIcon
+                      />
+
+                      <Descriptions bordered size="small" column={1}>
+                        <Descriptions.Item label="Sinh viên">
+                          {selectedAttendance.studentName} (
+                          {selectedAttendance.studentCode})
+                        </Descriptions.Item>
+                        <Descriptions.Item label="Môn học">
+                          {selectedAttendance.subjectName} (
+                          {selectedAttendance.subjectCode})
+                        </Descriptions.Item>
+                        <Descriptions.Item label="Lớp">
+                          {selectedAttendance.classCode}
+                        </Descriptions.Item>
+                        <Descriptions.Item label="Ngày">
+                          {new Date(selectedAttendance.date).toLocaleDateString(
+                            "vi-VN"
+                          )}
+                        </Descriptions.Item>
+                        <Descriptions.Item label="Ca học">
+                          {selectedAttendance.timeSlotName}
+                        </Descriptions.Item>
+                        <Descriptions.Item label="Trạng thái hiện tại">
+                          <Space>
+                            {selectedAttendance.isPresent ? (
+                              <Tag color="green">Có mặt</Tag>
+                            ) : selectedAttendance.isExcused ? (
+                              <Tag color="orange">Có phép</Tag>
+                            ) : (
+                              <Tag color="red">Vắng mặt</Tag>
+                            )}
+                            {selectedAttendance.notes && (
+                              <Text type="secondary" style={{ fontSize: 12 }}>
+                                ({selectedAttendance.notes})
+                              </Text>
+                            )}
+                          </Space>
+                        </Descriptions.Item>
+                        <Descriptions.Item label="Ghi chú">
+                          {selectedAttendance.notes || "—"}
+                        </Descriptions.Item>
+                        <Descriptions.Item label="Trạng thái Blockchain">
+                          <Tag
+                            color={
+                              selectedAttendance.isOnBlockchain
+                                ? "green"
+                                : "default"
+                            }
+                          >
+                            {selectedAttendance.isOnBlockchain
+                              ? "Đã lưu trên Blockchain"
+                              : "Chưa lưu trên Blockchain"}
+                          </Tag>
+                        </Descriptions.Item>
+                      </Descriptions>
+
+                      <div>
+                        <Text
+                          strong
+                          style={{ marginBottom: 12, display: "block" }}
+                        >
+                          {selectedAttendance.isPresent
+                            ? "Đổi trạng thái thành Vắng mặt:"
+                            : "Đổi trạng thái thành Có mặt:"}
+                        </Text>
+                        {selectedAttendance.isPresent ? (
+                          <Button
+                            danger
+                            size="large"
+                            block
+                            loading={tamperingAttendance}
+                            onClick={() => handleTamperAttendance(false)}
+                            icon={<WarningOutlined />}
+                          >
+                            Vắng mặt (False)
+                          </Button>
+                        ) : (
+                          <Button
+                            type="primary"
+                            size="large"
+                            block
+                            loading={tamperingAttendance}
+                            onClick={() => handleTamperAttendance(true)}
+                            icon={<CheckCircleOutlined />}
+                          >
+                            Có mặt (True)
+                          </Button>
+                        )}
+                        <Text
+                          type="secondary"
+                          style={{
+                            fontSize: 12,
+                            marginTop: 8,
+                            display: "block",
+                          }}
+                        >
+                          {selectedAttendance.isPresent
+                            ? "Bấm nút để đổi trạng thái từ Có mặt sang Vắng mặt. Chỉ có trạng thái isPresent sẽ được cập nhật vào Database."
+                            : "Bấm nút để đổi trạng thái từ Vắng mặt sang Có mặt. Chỉ có trạng thái isPresent sẽ được cập nhật vào Database."}
                         </Text>
                       </div>
                     </Space>

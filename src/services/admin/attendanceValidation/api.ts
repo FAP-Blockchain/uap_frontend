@@ -38,6 +38,29 @@ export interface GradeInfo {
   onChainContractAddress?: string | null;
 }
 
+export interface AttendanceInfo {
+  id: string;
+  studentId: string;
+  studentName: string;
+  studentCode: string;
+  subjectId: string;
+  subjectCode: string;
+  subjectName: string;
+  slotId: string;
+  classId: string;
+  classCode: string;
+  date: string;
+  timeSlotName: string;
+  isPresent: boolean;
+  isExcused: boolean;
+  notes?: string | null;
+  excuseReason?: string | null;
+  recordedAt: string;
+  onChainRecordId?: string | null;
+  onChainTransactionHash?: string | null;
+  isOnBlockchain: boolean;
+}
+
 interface AttendanceValidationApiResponse {
   success: boolean;
   message?: string;
@@ -68,6 +91,18 @@ interface GradeApiResponse {
   success: boolean;
   message?: string;
   data: GradeInfo;
+}
+
+interface AttendanceListApiResponse {
+  success: boolean;
+  message?: string;
+  data: AttendanceInfo[];
+}
+
+interface AttendanceApiResponse {
+  success: boolean;
+  message?: string;
+  data: AttendanceInfo;
 }
 
 export class AttendanceValidationAdminService {
@@ -164,6 +199,32 @@ export class AttendanceValidationAdminService {
     const response = await api.put<GradeApiResponse>(
       `/validation/tamper_grade/${id}`,
       { score }
+    );
+    return response.data.data;
+  }
+
+  /**
+   * Lấy danh sách điểm danh
+   * Backend: GET /api/validation/attendances
+   */
+  static async getAttendances(): Promise<AttendanceInfo[]> {
+    const response = await api.get<AttendanceListApiResponse>(
+      "/validation/attendances"
+    );
+    return response.data.data;
+  }
+
+  /**
+   * Giả mạo điểm danh theo ID
+   * Backend: PUT /api/validation/tamper_attendance/{id}
+   */
+  static async tamperAttendance(
+    id: string,
+    isPresent: boolean
+  ): Promise<AttendanceInfo> {
+    const response = await api.put<AttendanceApiResponse>(
+      `/validation/tamper_attendance/${id}`,
+      { isPresent }
     );
     return response.data.data;
   }
