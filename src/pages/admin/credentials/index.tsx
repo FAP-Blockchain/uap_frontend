@@ -45,12 +45,14 @@ import type {
   CredentialDetailDto,
   CredentialFormData,
   CredentialStats,
+  InvalidOnChainCredentialDto,
 } from "../../../types/Credential";
 import {
   fetchCredentialsApi,
   getCredentialByIdApi,
   createCredentialApi,
   revokeCredentialApi,
+  getInvalidOnChainCredentialsApi,
   getCredentialQRCodeApi,
   downloadCredentialPdfApi,
   approveCredentialApi,
@@ -69,6 +71,10 @@ const { Text } = Typography;
 const CredentialsManagement: React.FC = () => {
   const navigate = useNavigate();
   const [credentials, setCredentials] = useState<CredentialDto[]>([]);
+  const [invalidOnChainCredentials, setInvalidOnChainCredentials] = useState<
+    InvalidOnChainCredentialDto[]
+  >([]);
+  const [invalidOnChainLoading, setInvalidOnChainLoading] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isViewModalVisible, setIsViewModalVisible] = useState(false);
   const [isRevokeModalVisible, setIsRevokeModalVisible] = useState(false);
@@ -148,8 +154,24 @@ const CredentialsManagement: React.FC = () => {
     }
   };
 
+  const fetchInvalidOnChainCredentials = async (limit = 200) => {
+    setInvalidOnChainLoading(true);
+    try {
+      const items = await getInvalidOnChainCredentialsApi(limit);
+      setInvalidOnChainCredentials(items || []);
+    } catch (error: any) {
+      message.error(
+        error?.response?.data?.detail ||
+          "Không thể tải danh sách chứng chỉ on-chain không hợp lệ"
+      );
+    } finally {
+      setInvalidOnChainLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchCredentials(pagination.current, pagination.pageSize);
+    fetchInvalidOnChainCredentials(200);
   }, []);
 
   const handleSearch = (value: string) => {
@@ -260,6 +282,7 @@ const CredentialsManagement: React.FC = () => {
         );
         setIsRevokeModalVisible(false);
         fetchCredentials(pagination.current, pagination.pageSize);
+        fetchInvalidOnChainCredentials(200);
       }
     } catch (error: any) {
       message.error(
@@ -386,6 +409,79 @@ const CredentialsManagement: React.FC = () => {
   const handleNavigateRequests = () => {
     navigate("/admin/credential-requests");
   };
+
+  const invalidColumns: ColumnsType<InvalidOnChainCredentialDto> = [
+    {
+      title: "Mã chứng chỉ",
+      dataIndex: "credentialNumber",
+      key: "credentialNumber",
+      width: 180,
+      render: (value: string) => <Text strong>{value}</Text>,
+    },
+    {
+      title: "Sinh viên",
+      key: "student",
+      width: 220,
+      render: (_, record) => (
+        <div className="student-info">
+          <UserOutlined className="student-icon" />
+          <div>
+            <div className="student-name">{record.studentName}</div>
+            <div className="student-code">{record.studentCode}</div>
+          </div>
+        </div>
+      ),
+    },
+    {
+      title: "Ngày cấp",
+      dataIndex: "issuedDate",
+      key: "issuedDate",
+      width: 140,
+      render: (value: string) => (
+        <div className="issue-date">
+          <CalendarOutlined className="date-icon" />
+          {formatDateDisplay(value, "Chưa cập nhật")}
+        </div>
+      ),
+    },
+    {
+      title: "Loại lỗi",
+      dataIndex: "issueType",
+      key: "issueType",
+      width: 160,
+      render: (value: string) => (
+        <Tag color={value === "HashMismatch" ? "red" : "orange"}>{value}</Tag>
+      ),
+    },
+    {
+      title: "Chi tiết",
+      dataIndex: "detail",
+      key: "detail",
+      render: (value: string) => (
+        <Tooltip title={value}>
+          <span>{value}</span>
+        </Tooltip>
+      ),
+    },
+    {
+      title: "Thao tác",
+      key: "actions",
+      width: 90,
+      fixed: "right",
+      render: (_, record) => (
+        <Space>
+          <Tooltip title="Xem chi tiết">
+            <Button
+              type="text"
+              icon={<EyeOutlined />}
+              size="small"
+              onClick={() => navigate(`/admin/credentials/${record.id}`)}
+            />
+          </Tooltip>
+        </Space>
+      ),
+    },
+  ];
 
   const columns: ColumnsType<CredentialDto> = [
     {
@@ -610,6 +706,35 @@ const CredentialsManagement: React.FC = () => {
               <span className="stat-value">{stats.byType.roadmap}</span>
               <span className="stat-label">Lộ trình</span>
             </div>
+          </div>
+        </div>
+
+        <div className="table-section">
+          <div className="credentials-table custom-table">
+            <div style={{ marginBottom: 12 }}>
+              <Alert
+                type={
+                  invalidOnChainCredentials.length > 0 ? "warning" : "success"
+                }
+                showIcon
+                message={
+                  invalidOnChainCredentials.length > 0
+                    ? `Phát hiện ${invalidOnChainCredentials.length} chứng chỉ on-chain không hợp lệ (nghi gian lận/đã bị revoke trên chain).`
+                    : "Không phát hiện chứng chỉ on-chain không hợp lệ."
+                }
+              />
+            </div>
+
+            <Spin spinning={invalidOnChainLoading} tip="Đang tải dữ liệu...">
+              <Table
+                columns={invalidColumns}
+                dataSource={invalidOnChainCredentials}
+                rowKey="id"
+                pagination={false}
+                size="small"
+                scroll={{ x: 900 }}
+              />
+            </Spin>
           </div>
         </div>
 

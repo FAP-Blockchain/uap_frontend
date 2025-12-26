@@ -133,6 +133,19 @@ interface StudentCredentialDto extends CredentialDetailDto {
   fileUrl?: string;
 }
 
+interface InvalidOnChainCredentialDto {
+  id: string;
+  credentialNumber: string;
+  certificateType: string;
+  studentName: string;
+  studentCode: string;
+  issuedDate: string;
+  blockchainCredentialId?: number | null;
+  blockchainTransactionHash?: string | null;
+  issueType: string;
+  detail: string;
+}
+
 export type {
   Credential,
   CredentialDto,
@@ -144,4 +157,5 @@ export type {
   RequestCredentialFormData,
   CredentialStats,
   StudentCredentialDto,
+  InvalidOnChainCredentialDto,
 };

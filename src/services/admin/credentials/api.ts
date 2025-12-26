@@ -186,6 +186,19 @@ export interface CredentialShareDto {
   qrCodeData: string;
 }
 
+export interface InvalidOnChainCredentialDto {
+  id: string;
+  credentialNumber: string;
+  certificateType: string;
+  studentName: string;
+  studentCode: string;
+  issuedDate: string;
+  blockchainCredentialId?: number | null;
+  blockchainTransactionHash?: string | null;
+  issueType: string;
+  detail: string;
+}
+
 // ==================== PRE-ISSUE VERIFICATION (Admin) ====================
 
 export interface AttendanceDto {
@@ -291,6 +304,20 @@ export const fetchCredentialsApi = async (
     },
     skipGlobalErrorHandler: true,
   });
+  return response.data;
+};
+
+// GET /api/credentials/on-chain/invalid - List invalid on-chain credentials (Admin)
+export const getInvalidOnChainCredentialsApi = async (
+  limit: number = 200
+): Promise<InvalidOnChainCredentialDto[]> => {
+  const response = await api.get<InvalidOnChainCredentialDto[]>(
+    "/credentials/on-chain/invalid",
+    {
+      params: { limit },
+      skipGlobalErrorHandler: true,
+    } as any
+  );
   return response.data;
 };
 
